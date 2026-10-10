@@ -18,10 +18,14 @@ export default function OrdersPage() {
             <li key={o.id}>
               <Card>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-bold">{o.id} · {o.vendor}</p>
+                  <p className="font-bold">
+                    {o.id} · {o.vendor}
+                  </p>
                   <OrderStatusPill code={o.status} />
                 </div>
-                <p className="mt-1 text-muted">{o.mode} · <Money kobo={o.totalKobo} /></p>
+                <p className="mt-1 text-muted">
+                  {o.mode} · <Money kobo={o.totalKobo} />
+                </p>
                 {meaning && <p className="mt-1 text-sm">{meaning}</p>}
               </Card>
             </li>

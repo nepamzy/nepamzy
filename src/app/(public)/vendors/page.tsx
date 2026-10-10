@@ -16,10 +16,16 @@ export default function Vendors() {
           <li key={v.id}>
             <Card>
               <div className="flex items-start justify-between gap-2">
-                <h2 className="text-lg font-bold"><Link className="hover:underline" href={`/vendors/${v.id}`}>{v.name}</Link></h2>
+                <h2 className="text-lg font-bold">
+                  <Link className="hover:underline" href={`/vendors/${v.id}`}>
+                    {v.name}
+                  </Link>
+                </h2>
                 <Badge tone={v.open ? 'success' : 'neutral'}>{v.open ? 'Open' : 'Closed'}</Badge>
               </div>
-              <p className="mt-1 text-muted">{v.category} · {v.eta} · ★ {v.rating}</p>
+              <p className="mt-1 text-muted">
+                {v.category} · {v.eta} · ★ {v.rating}
+              </p>
             </Card>
           </li>
         ))}

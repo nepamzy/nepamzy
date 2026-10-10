@@ -13,7 +13,16 @@ export default function VendorOrders() {
       <SampleDataNote />
       <Table caption="Sample vendor orders" head={['Order', 'Type', 'Total', 'Status']}>
         {MOCK_ORDERS.map((o) => (
-          <tr key={o.id}><Td>{o.id}</Td><Td>{o.mode}</Td><Td><Money kobo={o.totalKobo} /></Td><Td><OrderStatusPill code={o.status} /></Td></tr>
+          <tr key={o.id}>
+            <Td>{o.id}</Td>
+            <Td>{o.mode}</Td>
+            <Td>
+              <Money kobo={o.totalKobo} />
+            </Td>
+            <Td>
+              <OrderStatusPill code={o.status} />
+            </Td>
+          </tr>
         ))}
       </Table>
     </>

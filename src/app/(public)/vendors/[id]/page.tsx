@@ -15,7 +15,11 @@ export default async function VendorPage({ params }: { params: Promise<{ id: str
   if (!vendor) notFound()
   return (
     <>
-      <p className="mb-2"><Link href="/vendors" className="font-semibold text-brand-700 underline">← All vendors</Link></p>
+      <p className="mb-2">
+        <Link href="/vendors" className="font-semibold text-brand-700 underline">
+          ← All vendors
+        </Link>
+      </p>
       <PageHeader title={vendor.name} subtitle={`${vendor.category} · ${vendor.eta}`} />
       <SampleDataNote />
       <ul className="space-y-3">
@@ -26,12 +30,20 @@ export default async function VendorPage({ params }: { params: Promise<{ id: str
                 <p className="font-semibold">{p.name}</p>
                 <Money kobo={p.priceKobo} className="text-muted" />
               </div>
-              {p.available ? <ButtonLink href="/orders" variant="secondary">Order</ButtonLink> : <Badge>Sold out</Badge>}
+              {p.available ? (
+                <ButtonLink href="/orders" variant="secondary">
+                  Order
+                </ButtonLink>
+              ) : (
+                <Badge>Sold out</Badge>
+              )}
             </Card>
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-sm text-muted">Placing orders needs an account with a second sign-in step. Ordering is not open yet.</p>
+      <p className="mt-4 text-sm text-muted">
+        Placing orders needs an account with a second sign-in step. Ordering is not open yet.
+      </p>
     </>
   )
 }

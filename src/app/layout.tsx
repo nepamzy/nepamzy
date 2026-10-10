@@ -20,7 +20,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="en-NG">
       <body>
-        <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-card focus:px-3 focus:py-2">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded focus:bg-card focus:px-3 focus:py-2"
+        >
           Skip to main content
         </a>
         <OfflineBanner />

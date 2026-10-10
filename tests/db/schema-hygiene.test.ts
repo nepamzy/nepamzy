@@ -1,7 +1,9 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import { pool } from './helpers'
 
-afterAll(async () => { await pool.end() })
+afterAll(async () => {
+  await pool.end()
+})
 
 describe('schema hygiene (asserted from the catalog)', () => {
   it('every SECURITY DEFINER function pins search_path', async () => {
@@ -12,7 +14,10 @@ describe('schema hygiene (asserted from the catalog)', () => {
     expect(r.rowCount).toBeGreaterThan(8)
     for (const row of r.rows) {
       const cfg: string[] = row.proconfig ?? []
-      expect(cfg.some((s) => s.startsWith('search_path=')), `search_path on ${row.fn}`).toBe(true)
+      expect(
+        cfg.some((s) => s.startsWith('search_path=')),
+        `search_path on ${row.fn}`,
+      ).toBe(true)
     }
   })
   it('no function in public/app_private is executable by PUBLIC or anon', async () => {
@@ -35,7 +40,10 @@ describe('schema hygiene (asserted from the catalog)', () => {
       'app_private.audit_write(uuid,text,text,text,jsonb)',
       'app_private.handle_new_user()',
     ]) {
-      const r = await pool.query(`select has_function_privilege('authenticated', $1::regprocedure, 'execute') as x`, [fn])
+      const r = await pool.query(
+        `select has_function_privilege('authenticated', $1::regprocedure, 'execute') as x`,
+        [fn],
+      )
       expect(r.rows[0].x, fn).toBe(false)
     }
   })

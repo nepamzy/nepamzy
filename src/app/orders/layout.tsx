@@ -8,8 +8,15 @@ export default async function OrdersLayout({ children }: { children: ReactNode }
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase.auth.getUser()
   return (
-    <AppShell area="Customer" signedInAs={data.user?.email}
-      items={[{ href: '/vendors', label: 'Browse', icon: '🛍' }, { href: '/orders', label: 'Orders', icon: '📦' }, { href: '/account', label: 'Account', icon: '👤' }]}>
+    <AppShell
+      area="Customer"
+      signedInAs={data.user?.email}
+      items={[
+        { href: '/vendors', label: 'Browse', icon: '🛍' },
+        { href: '/orders', label: 'Orders', icon: '📦' },
+        { href: '/account', label: 'Account', icon: '👤' },
+      ]}
+    >
       {children}
     </AppShell>
   )

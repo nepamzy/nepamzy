@@ -6,8 +6,13 @@ export const metadata: Metadata = { title: 'Roles' }
 export default function RolesPage() {
   return (
     <>
-      <PageHeader title="Roles" subtitle="Grant or revoke a role. You cannot change your own roles." />
-      <Card><RoleForm /></Card>
+      <PageHeader
+        title="Roles"
+        subtitle="Grant or revoke a role. You cannot change your own roles."
+      />
+      <Card>
+        <RoleForm />
+      </Card>
     </>
   )
 }

@@ -7,7 +7,9 @@ export default function Jobs() {
   return (
     <>
       <PageHeader title="Jobs" />
-      <EmptyState title="No jobs yet">Delivery offers will appear here once delivery opens and you are active.</EmptyState>
+      <EmptyState title="No jobs yet">
+        Delivery offers will appear here once delivery opens and you are active.
+      </EmptyState>
     </>
   )
 }

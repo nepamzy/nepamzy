@@ -12,7 +12,14 @@ export default function Applications() {
       <SampleDataNote />
       <Table caption="Sample applications" head={['Name', 'Type', 'Submitted', 'Status']}>
         {MOCK_APPLICATIONS.map((a) => (
-          <tr key={a.id}><Td>{a.name}</Td><Td>{a.type}</Td><Td>{a.submitted}</Td><Td><Badge tone="warning">{a.status}</Badge></Td></tr>
+          <tr key={a.id}>
+            <Td>{a.name}</Td>
+            <Td>{a.type}</Td>
+            <Td>{a.submitted}</Td>
+            <Td>
+              <Badge tone="warning">{a.status}</Badge>
+            </Td>
+          </tr>
         ))}
       </Table>
     </>

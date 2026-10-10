@@ -17,9 +17,18 @@ const findings = []
 
 const tracked = execSync('git ls-files', { encoding: 'utf8' }).split('\n').filter(Boolean)
 for (const f of tracked) {
-  if (/\.(png|jpg|jpeg|gif|ico|woff2?|lock)$/.test(f) || f === 'pnpm-lock.yaml' || f === 'scripts/check-secrets.mjs') continue
+  if (
+    /\.(png|jpg|jpeg|gif|ico|woff2?|lock)$/.test(f) ||
+    f === 'pnpm-lock.yaml' ||
+    f === 'scripts/check-secrets.mjs'
+  )
+    continue
   let text
-  try { text = readFileSync(f, 'utf8') } catch { continue }
+  try {
+    text = readFileSync(f, 'utf8')
+  } catch {
+    continue
+  }
   for (const [re, name] of PATTERNS) if (re.test(text)) findings.push(`tracked file ${f}: ${name}`)
 }
 
@@ -48,9 +57,13 @@ if (existsSync('.next/static')) {
     if (!/\.(js|css|html|json|map)$/.test(f)) continue
     scanned++
     const text = readFileSync(f, 'utf8')
-    for (const s of secrets) if (s && text.includes(s)) findings.push(`client bundle ${f}: contains a server-only secret value`)
-    if (text.includes('SUPABASE_SERVICE_ROLE_KEY')) findings.push(`client bundle ${f}: references SUPABASE_SERVICE_ROLE_KEY`)
-    for (const [re, name] of PATTERNS) if (re.test(text)) findings.push(`client bundle ${f}: ${name}`)
+    for (const s of secrets)
+      if (s && text.includes(s))
+        findings.push(`client bundle ${f}: contains a server-only secret value`)
+    if (text.includes('SUPABASE_SERVICE_ROLE_KEY'))
+      findings.push(`client bundle ${f}: references SUPABASE_SERVICE_ROLE_KEY`)
+    for (const [re, name] of PATTERNS)
+      if (re.test(text)) findings.push(`client bundle ${f}: ${name}`)
   }
 } else {
   console.log('note: .next/static not found; run `pnpm build` to also scan the client bundle')
@@ -59,4 +72,6 @@ if (findings.length) {
   console.error('SECRET SCAN FAILED:\n - ' + findings.join('\n - '))
   process.exit(1)
 }
-console.log(`secret scan ok (${tracked.length} tracked files, ${scanned} client bundle files, ${secrets.length} secret values checked)`)
+console.log(
+  `secret scan ok (${tracked.length} tracked files, ${scanned} client bundle files, ${secrets.length} secret values checked)`,
+)

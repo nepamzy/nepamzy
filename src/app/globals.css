@@ -2,7 +2,8 @@
 
 /* AFIT Market design tokens. Contrast ratios checked against WCAG AA (4.5:1 text, 3:1 UI). */
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   --color-ink: #16211f;
   --color-muted: #475653;
@@ -36,7 +37,9 @@
   --text-base: 1rem;
 }
 
-html { color-scheme: light; }
+html {
+  color-scheme: light;
+}
 body {
   background: var(--color-surface);
   color: var(--color-ink);
@@ -45,11 +48,31 @@ body {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
 }
-:focus-visible { outline: 3px solid var(--color-brand-600); outline-offset: 2px; border-radius: 4px; }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+:focus-visible {
+  outline: 3px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
-@keyframes afit-pulse { 50% { opacity: 0.5; } }
-.afit-skeleton { animation: afit-pulse 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+@keyframes afit-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+.afit-skeleton {
+  animation: afit-pulse 1.6s ease-in-out infinite;
+}
 /* Minimum touch target for interactive controls */
-.touch-target { min-height: 44px; min-width: 44px; }
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}

@@ -13,7 +13,13 @@ export type AppRole =
   | 'platform_admin'
 
 export const ALL_ROLES: AppRole[] = [
-  'customer', 'vendor_owner', 'vendor_staff', 'rider', 'support_agent', 'finance_admin', 'platform_admin',
+  'customer',
+  'vendor_owner',
+  'vendor_staff',
+  'rider',
+  'support_agent',
+  'finance_admin',
+  'platform_admin',
 ]
 /** Everything except `customer` must be at aal2 for any protected access (mirrors the DB). */
 export const isPrivilegedRole = (r: AppRole) => r !== 'customer'
@@ -27,7 +33,11 @@ export type Principal = {
   hasVerifiedFactor: boolean
 }
 export const ANONYMOUS: Principal = {
-  authenticated: false, userId: null, roles: [], aal: null, hasVerifiedFactor: false,
+  authenticated: false,
+  userId: null,
+  roles: [],
+  aal: null,
+  hasVerifiedFactor: false,
 }
 
 export type AccessRequirement = {
@@ -39,8 +49,7 @@ export type AccessRequirement = {
 }
 
 export type Decision =
-  | { allow: true }
-  | { allow: false; action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' }
+  { allow: true } | { allow: false; action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' }
 
 export function decideAccess(req: AccessRequirement, who: Principal): Decision {
   if (!who.authenticated) return { allow: false, action: 'login' }
@@ -60,8 +69,14 @@ export type RoutePolicy = { prefix: string; requirement: AccessRequirement }
 /** Longest matching prefix wins. Paths not listed here are public. */
 export const ROUTE_POLICIES: RoutePolicy[] = [
   { prefix: '/admin/roles', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
-  { prefix: '/admin/audit', requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' } },
-  { prefix: '/admin', requirement: { roles: ['platform_admin', 'support_agent', 'finance_admin'], aal: 'aal2' } },
+  {
+    prefix: '/admin/audit',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin',
+    requirement: { roles: ['platform_admin', 'support_agent', 'finance_admin'], aal: 'aal2' },
+  },
   { prefix: '/vendor', requirement: { roles: ['vendor_owner', 'vendor_staff'], aal: 'aal2' } },
   { prefix: '/rider', requirement: { roles: ['rider'], aal: 'aal2' } },
   { prefix: '/orders', requirement: { roles: ['customer'], aal: 'aal2' } },

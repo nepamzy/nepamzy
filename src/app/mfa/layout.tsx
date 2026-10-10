@@ -7,7 +7,9 @@ export default async function MfaLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <PublicHeader />
-      <main id="main" className="mx-auto max-w-md px-4 py-8">{children}</main>
+      <main id="main" className="mx-auto max-w-md px-4 py-8">
+        {children}
+      </main>
     </>
   )
 }

@@ -53,10 +53,15 @@ export async function removeCustomerRole(c: PoolClient, userId: string) {
 export async function as<T>(c: PoolClient, who: Principal, fn: () => Promise<T>): Promise<T> {
   if (who) {
     const claims = JSON.stringify({ sub: who.id, role: 'authenticated', aal: who.aal })
-    await c.query(`select set_config('request.jwt.claims', $1, true), set_config('request.jwt.claim.sub', $2, true)`, [claims, who.id])
+    await c.query(
+      `select set_config('request.jwt.claims', $1, true), set_config('request.jwt.claim.sub', $2, true)`,
+      [claims, who.id],
+    )
     await c.query('set local role authenticated')
   } else {
-    await c.query(`select set_config('request.jwt.claims', '{"role":"anon"}', true), set_config('request.jwt.claim.sub', '', true)`)
+    await c.query(
+      `select set_config('request.jwt.claims', '{"role":"anon"}', true), set_config('request.jwt.claim.sub', '', true)`,
+    )
     await c.query('set local role anon')
   }
   try {

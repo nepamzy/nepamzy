@@ -1,9 +1,28 @@
 import { expect, test } from '@playwright/test'
-import { admin, alertIn, freshCode, MAIL_SINK, PASSWORD, statusIn, submitCode, uiMfaChallenge, uiSignIn, uiSignInAttempt, uiSignOut, uniqueEmail } from './helpers'
+import {
+  admin,
+  alertIn,
+  freshCode,
+  MAIL_SINK,
+  PASSWORD,
+  statusIn,
+  submitCode,
+  uiMfaChallenge,
+  uiSignIn,
+  uiSignInAttempt,
+  uiSignOut,
+  uniqueEmail,
+} from './helpers'
 
-test.use({ extraHTTPHeaders: { 'x-forwarded-for': `10.3.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}` } })
+test.use({
+  extraHTTPHeaders: {
+    'x-forwarded-for': `10.3.${Math.floor(Math.random() * 250)}.${Math.floor(Math.random() * 250)}`,
+  },
+})
 
-test('customer: sign up -> confirm email -> sign in -> MFA required for orders -> backup authenticator', async ({ page }) => {
+test('customer: sign up -> confirm email -> sign in -> MFA required for orders -> backup authenticator', async ({
+  page,
+}) => {
   const email = uniqueEmail('journey')
 
   // 1. Sign up through the UI
@@ -19,7 +38,14 @@ test('customer: sign up -> confirm email -> sign in -> MFA required for orders -
   await expect(alertIn(page)).toContainText(/confirm your email/i)
 
   // 3. Open the real confirmation link delivered to the local mail sink
-  await expect.poll(async () => (await (await fetch(`${MAIL_SINK}/messages?to=${encodeURIComponent(email)}`)).json()).length, { timeout: 15000 }).toBeGreaterThan(0)
+  await expect
+    .poll(
+      async () =>
+        (await (await fetch(`${MAIL_SINK}/messages?to=${encodeURIComponent(email)}`)).json())
+          .length,
+      { timeout: 15000 },
+    )
+    .toBeGreaterThan(0)
   const mails = await (await fetch(`${MAIL_SINK}/messages?to=${encodeURIComponent(email)}`)).json()
   const link = (mails[0].text as string).match(/https?:\/\/\S+/)![0].replace(/[)\]>]+$/, '')
   expect(link).toContain('/auth/confirm?token_hash=')
@@ -82,7 +108,9 @@ test('customer: sign up -> confirm email -> sign in -> MFA required for orders -
   expect(ev!.filter((e) => e.action === 'mfa.enrolled')).toHaveLength(2)
 })
 
-test('customer can remove one authenticator but a privileged role cannot remove its last one', async ({ page }) => {
+test('customer can remove one authenticator but a privileged role cannot remove its last one', async ({
+  page,
+}) => {
   const { createUser, enrolFactorViaApi, uiSignInWithMfa } = await import('./helpers')
   // privileged: last factor protected
   const v = await createUser('vendor-lastfactor', ['vendor_owner'])

@@ -10,6 +10,19 @@ const tones: Record<Tone, string> = {
   danger: 'bg-danger-50 text-danger-700',
   brand: 'bg-brand-50 text-brand-800',
 }
-export function Badge({ tone = 'neutral', className, ...props }: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
-  return <span className={cn('inline-flex items-center rounded-full px-2.5 py-1 text-sm font-semibold', tones[tone], className)} {...props} />
+export function Badge({
+  tone = 'neutral',
+  className,
+  ...props
+}: HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center rounded-full px-2.5 py-1 text-sm font-semibold',
+        tones[tone],
+        className,
+      )}
+      {...props}
+    />
+  )
 }

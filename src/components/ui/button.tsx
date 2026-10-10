@@ -12,16 +12,34 @@ const variants: Record<Variant, string> = {
   ghost: 'text-brand-700 hover:bg-brand-50',
 }
 
-export function Button({ variant = 'primary', className, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
+export function Button({
+  variant = 'primary',
+  className,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
   return <button className={cn(base, variants[variant], className)} {...props} />
 }
-export function IconButton({ label, className, children, ...props }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
+export function IconButton({
+  label,
+  className,
+  children,
+  ...props
+}: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
   return (
-    <button aria-label={label} title={label} className={cn(base, 'px-0 w-11', variants.ghost, className)} {...props}>
+    <button
+      aria-label={label}
+      title={label}
+      className={cn(base, 'px-0 w-11', variants.ghost, className)}
+      {...props}
+    >
       {children}
     </button>
   )
 }
-export function ButtonLink({ variant = 'primary', className, ...props }: ComponentProps<typeof Link> & { variant?: Variant }) {
+export function ButtonLink({
+  variant = 'primary',
+  className,
+  ...props
+}: ComponentProps<typeof Link> & { variant?: Variant }) {
   return <Link className={cn(base, variants[variant], className)} {...props} />
 }

@@ -14,7 +14,17 @@ export default function Catalogue() {
       <SampleDataNote />
       <Table caption="Sample products" head={['Product', 'Price', 'Availability']}>
         {products.map((p) => (
-          <tr key={p.id}><Td>{p.name}</Td><Td><Money kobo={p.priceKobo} /></Td><Td><Badge tone={p.available ? 'success' : 'neutral'}>{p.available ? 'Available' : 'Sold out'}</Badge></Td></tr>
+          <tr key={p.id}>
+            <Td>{p.name}</Td>
+            <Td>
+              <Money kobo={p.priceKobo} />
+            </Td>
+            <Td>
+              <Badge tone={p.available ? 'success' : 'neutral'}>
+                {p.available ? 'Available' : 'Sold out'}
+              </Badge>
+            </Td>
+          </tr>
         ))}
       </Table>
     </>

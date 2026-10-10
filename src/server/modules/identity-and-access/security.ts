@@ -14,14 +14,19 @@ export const sha256Hex = (s: string) => createHash('sha256').update(s).digest('h
  */
 export async function clientIp(): Promise<string> {
   const h = await headers()
-  return (h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'unknown').slice(0, 64)
+  return (h.get('x-forwarded-for')?.split(',')[0]?.trim() || h.get('x-real-ip') || 'unknown').slice(
+    0,
+    64,
+  )
 }
 
 /** Returns true when the action is ALLOWED. Fails closed if the limiter is unavailable. */
 export async function rateLimit(key: string, windowSeconds: number, max: number): Promise<boolean> {
   try {
     const { data, error } = await createSupabaseServiceClient().rpc('rate_limit_hit', {
-      p_key: key, p_window_seconds: windowSeconds, p_max: max,
+      p_key: key,
+      p_window_seconds: windowSeconds,
+      p_max: max,
     })
     if (error) throw error
     return data === true
@@ -33,11 +38,15 @@ export async function rateLimit(key: string, windowSeconds: number, max: number)
 
 /** Append a security event to the audit trail. Never throws. Never include secrets or raw emails. */
 export async function recordSecurityEvent(
-  actor: string | null, action: `auth.${string}` | `mfa.${string}`, details: Record<string, unknown> = {},
+  actor: string | null,
+  action: `auth.${string}` | `mfa.${string}`,
+  details: Record<string, unknown> = {},
 ) {
   try {
     const { error } = await createSupabaseServiceClient().rpc('record_security_event', {
-      p_actor: actor, p_action: action, p_details: details,
+      p_actor: actor,
+      p_action: action,
+      p_details: details,
     })
     if (error) throw error
   } catch (e) {

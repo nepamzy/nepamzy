@@ -8,8 +8,15 @@ export default async function AccountLayout({ children }: { children: ReactNode 
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase.auth.getUser()
   return (
-    <AppShell area="My account" signedInAs={data.user?.email}
-      items={[{ href: '/vendors', label: 'Browse', icon: '🛍' }, { href: '/orders', label: 'Orders', icon: '📦' }, { href: '/account', label: 'Account', icon: '👤' }]}>
+    <AppShell
+      area="My account"
+      signedInAs={data.user?.email}
+      items={[
+        { href: '/vendors', label: 'Browse', icon: '🛍' },
+        { href: '/orders', label: 'Orders', icon: '📦' },
+        { href: '/account', label: 'Account', icon: '👤' },
+      ]}
+    >
       {children}
     </AppShell>
   )

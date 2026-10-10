@@ -18,7 +18,11 @@ describe('every protected route prefix is guarded by its layout', () => {
 describe('server-only boundaries', () => {
   it('the service-role client is never imported from client components', async () => {
     const { execSync } = await import('node:child_process')
-    const files = execSync("grep -rl \"use client\" src --include=*.tsx --include=*.ts || true", { encoding: 'utf8' }).split('\n').filter(Boolean)
+    const files = execSync('grep -rl "use client" src --include=*.tsx --include=*.ts || true', {
+      encoding: 'utf8',
+    })
+      .split('\n')
+      .filter(Boolean)
     expect(files.length).toBeGreaterThan(3)
     for (const f of files) {
       const text = readFileSync(f, 'utf8')
@@ -27,7 +31,7 @@ describe('server-only boundaries', () => {
   })
   it('no NEXT_PUBLIC_ variables are used anywhere in src (browser never gets Supabase config)', async () => {
     const { execSync } = await import('node:child_process')
-    const hits = execSync("grep -rn \"NEXT_PUBLIC_\" src || true", { encoding: 'utf8' }).trim()
+    const hits = execSync('grep -rn "NEXT_PUBLIC_" src || true', { encoding: 'utf8' }).trim()
     expect(hits).toBe('')
   })
 })

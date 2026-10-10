@@ -1,5 +1,6 @@
 /** Minimal structured logger with redaction. Never log passwords, tokens, secrets or TOTP codes. */
-const SENSITIVE = /pass(word)?|secret|token|authorization|cookie|api[-_]?key|otp|code|signature|jwt|key/i
+const SENSITIVE =
+  /pass(word)?|secret|token|authorization|cookie|api[-_]?key|otp|code|signature|jwt|key/i
 
 export function redact(value: unknown, depth = 0): unknown {
   if (value == null || typeof value !== 'object') return value
@@ -14,7 +15,12 @@ export function redact(value: unknown, depth = 0): unknown {
 
 type Level = 'debug' | 'info' | 'warn' | 'error'
 export function log(level: Level, msg: string, ctx: Record<string, unknown> = {}) {
-  const line = JSON.stringify({ t: new Date().toISOString(), level, msg, ...(redact(ctx) as object) })
+  const line = JSON.stringify({
+    t: new Date().toISOString(),
+    level,
+    msg,
+    ...(redact(ctx) as object),
+  })
   if (level === 'error') console.error(line)
   else if (level === 'warn') console.warn(line)
   else console.log(line)

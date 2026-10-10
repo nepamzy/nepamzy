@@ -9,9 +9,20 @@ export default function VendorHome() {
       <PageHeader title="Vendor dashboard" />
       <SampleDataNote />
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card><p className="text-sm text-muted">New orders</p><p className="text-3xl font-bold">3</p></Card>
-        <Card><p className="text-sm text-muted">Being prepared</p><p className="text-3xl font-bold">2</p></Card>
-        <Card><p className="text-sm text-muted">Sales today</p><p className="text-3xl font-bold"><Money kobo={1850000} /></p></Card>
+        <Card>
+          <p className="text-sm text-muted">New orders</p>
+          <p className="text-3xl font-bold">3</p>
+        </Card>
+        <Card>
+          <p className="text-sm text-muted">Being prepared</p>
+          <p className="text-3xl font-bold">2</p>
+        </Card>
+        <Card>
+          <p className="text-sm text-muted">Sales today</p>
+          <p className="text-3xl font-bold">
+            <Money kobo={1850000} />
+          </p>
+        </Card>
       </div>
     </>
   )

@@ -2,22 +2,22 @@
 
 Severity: High = blocks launch or a later batch; Med = fix before pilot; Low = polish.
 
-| ID | Sev | Issue | Status / next step |
-|---|---|---|---|
-| K1 | Med | Local stack needs workarounds in this sandbox (Docker daemon started manually; Supabase images pulled from Docker Hub; custom mail sink + forwarder) | Resolved for dev (`pnpm db:start`); a normal workstation may not need them |
-| K2 | High | PWA background GPS reliability unknown | Real Android tests in Batch 4; if unworkable: stop, report evidence, owner decides (no native app without approval) |
-| K3 | High | **MFA recovery after losing ALL factors is not implemented** (owner decision gate; see `security-privacy.md` §3) | Waiting on owner |
-| K4 | High | Vendor settlement/escrow arrangement unconfirmed | Paystack + Nigerian counsel; settlement code-locked to DISABLED |
-| K5 | Med | Paystack refund/webhook details unverified | Verify in Batch 3 |
-| K6 | Med | Repository rename to `afit-market` is an owner action; session repo scope may need update | Owner |
-| K7 | Med | Retention periods are placeholders | Legal |
-| K8 | Info | CodeRabbit skips draft PRs | None |
-| K9 | Resolved | Session revocation / aal refresh behavior | Verified and pinned by tests (review log) |
-| K10 | Med | DB tests and e2e are not in CI (need Docker/local stack/browsers) | Add a CI job with `supabase start` + Playwright in Batch 2 |
-| K11 | Med | Manual accessibility review (screen reader, zoom, real keyboard flow) and real-device checks not done; only automated axe + viewport checks | Manual verification list in the report |
-| K12 | Low | No dark mode | Later |
-| K13 | Low | `forbidden()` is experimental in Next 16 | Covered by tests |
-| K14 | Med | Security limitations S1–S8 | `security-privacy.md` §4 |
-| K15 | Med | Customers with no factor can browse and sign in; first-factor enrolment at aal1 means a password thief could pre-empt enrolment (S2) | Owner to decide whether to force enrolment at sign-up |
-| K16 | Low | Rate-limit tables grow; no purge job yet | Retention job in Batch 6 |
-| K17 | Low | Sample data pages are static mocks; vendor handover and Go Active screens are non-functional previews, clearly labelled | By design until Batches 3–4 |
+| ID  | Sev      | Issue                                                                                                                                                | Status / next step                                                                                                  |
+| --- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| K1  | Med      | Local stack needs workarounds in this sandbox (Docker daemon started manually; Supabase images pulled from Docker Hub; custom mail sink + forwarder) | Resolved for dev (`pnpm db:start`); a normal workstation may not need them                                          |
+| K2  | High     | PWA background GPS reliability unknown                                                                                                               | Real Android tests in Batch 4; if unworkable: stop, report evidence, owner decides (no native app without approval) |
+| K3  | High     | **MFA recovery after losing ALL factors is not implemented** (owner decision gate; see `security-privacy.md` §3)                                     | Waiting on owner                                                                                                    |
+| K4  | High     | Vendor settlement/escrow arrangement unconfirmed                                                                                                     | Paystack + Nigerian counsel; settlement code-locked to DISABLED                                                     |
+| K5  | Med      | Paystack refund/webhook details unverified                                                                                                           | Verify in Batch 3                                                                                                   |
+| K6  | Med      | Repository rename to `afit-market` is an owner action; session repo scope may need update                                                            | Owner                                                                                                               |
+| K7  | Med      | Retention periods are placeholders                                                                                                                   | Legal                                                                                                               |
+| K8  | Info     | CodeRabbit skips draft PRs                                                                                                                           | None                                                                                                                |
+| K9  | Resolved | Session revocation / aal refresh behavior                                                                                                            | Verified and pinned by tests (review log)                                                                           |
+| K10 | Med      | DB tests and e2e are not in CI (need Docker/local stack/browsers)                                                                                    | Add a CI job with `supabase start` + Playwright in Batch 2                                                          |
+| K11 | Med      | Manual accessibility review (screen reader, zoom, real keyboard flow) and real-device checks not done; only automated axe + viewport checks          | Manual verification list in the report                                                                              |
+| K12 | Low      | No dark mode                                                                                                                                         | Later                                                                                                               |
+| K13 | Low      | `forbidden()` is experimental in Next 16                                                                                                             | Covered by tests                                                                                                    |
+| K14 | Med      | Security limitations S1–S8                                                                                                                           | `security-privacy.md` §4                                                                                            |
+| K15 | Med      | Customers with no factor can browse and sign in; first-factor enrolment at aal1 means a password thief could pre-empt enrolment (S2)                 | Owner to decide whether to force enrolment at sign-up                                                               |
+| K16 | Low      | Rate-limit tables grow; no purge job yet                                                                                                             | Retention job in Batch 6                                                                                            |
+| K17 | Low      | Sample data pages are static mocks; vendor handover and Go Active screens are non-functional previews, clearly labelled                              | By design until Batches 3–4                                                                                         |
