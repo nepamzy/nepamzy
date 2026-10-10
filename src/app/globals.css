@@ -1,0 +1,55 @@
+@import 'tailwindcss';
+
+/* AFIT Market design tokens. Contrast ratios checked against WCAG AA (4.5:1 text, 3:1 UI). */
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-ink: #16211f;
+  --color-muted: #475653;
+  --color-surface: #f5f6f2;
+  --color-card: #ffffff;
+  --color-line: #cfd6d0;
+  --color-line-strong: #8c9a94;
+
+  --color-brand-50: #e8f3f2;
+  --color-brand-100: #cde5e3;
+  --color-brand-600: #0f6b66;
+  --color-brand-700: #0b5551;
+  --color-brand-800: #083f3c;
+
+  --color-accent-50: #fdf1e4;
+  --color-accent-600: #a84a07;
+  --color-accent-700: #8a3b05;
+
+  --color-success-50: #e5f4ea;
+  --color-success-700: #17673a;
+  --color-warning-50: #fff3d6;
+  --color-warning-700: #7a4f00;
+  --color-danger-50: #fdebe9;
+  --color-danger-700: #a3211a;
+  --color-info-50: #e6eefa;
+  --color-info-700: #1a4a8a;
+
+  --radius-card: 0.875rem;
+  --radius-control: 0.625rem;
+  --shadow-card: 0 1px 2px rgb(22 33 31 / 0.06), 0 2px 8px rgb(22 33 31 / 0.05);
+  --text-base: 1rem;
+}
+
+html { color-scheme: light; }
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+:focus-visible { outline: 3px solid var(--color-brand-600); outline-offset: 2px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+@keyframes afit-pulse { 50% { opacity: 0.5; } }
+.afit-skeleton { animation: afit-pulse 1.6s ease-in-out infinite; }
+/* Minimum touch target for interactive controls */
+.touch-target { min-height: 44px; min-width: 44px; }
