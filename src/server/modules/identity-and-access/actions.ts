@@ -9,7 +9,7 @@ import { checkAccess, loadPrincipal } from './guard'
 import { isPrivilegedRole, safeNextPath } from './policy'
 import { clientIp, rateLimit, recordSecurityEvent, sha256Hex } from './security'
 
-export type FormState = { ok?: boolean; error?: string; message?: string }
+export type FormState = { ok?: boolean; error?: string; message?: string; email?: string }
 
 const emailSchema = z.email('Enter a valid email address.').max(254).transform((e) => e.trim().toLowerCase())
 const passwordSchema = z
@@ -53,22 +53,22 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
   const emailParsed = emailSchema.safeParse(formData.get('email'))
   const password = String(formData.get('password') ?? '')
   const next = safeNextPath(String(formData.get('next') ?? ''))
-  if (!emailParsed.success || !password) return { error: 'Enter your email and password.' }
+  if (!emailParsed.success || !password) return { error: 'Enter your email and password.', email: String(formData.get('email') ?? '').slice(0, 254) }
   const email = emailParsed.data
   const emailKey = sha256Hex(email)
   const ip = await clientIp()
   if (!(await rateLimit(`login:ip:${ip}`, 900, 30)) || !(await rateLimit(`login:email:${emailKey}`, 900, 10))) {
     await recordSecurityEvent(null, 'auth.login_rate_limited', { email_hash: emailKey.slice(0, 16) })
-    return { error: TOO_MANY }
+    return { error: TOO_MANY, email }
   }
   const supabase = await createSupabaseServerClient()
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error || !data.user) {
     if (error?.code === 'email_not_confirmed') {
-      return { error: 'Please confirm your email first. Check your inbox for our message.' }
+      return { error: 'Please confirm your email first. Check your inbox for our message.', email }
     }
     await recordSecurityEvent(null, 'auth.login_failed', { email_hash: emailKey.slice(0, 16) })
-    return { error: 'Email or password is incorrect.' }
+    return { error: 'Email or password is incorrect.', email }
   }
   const who = await loadPrincipal()
   const privileged = who.roles.some(isPrivilegedRole)

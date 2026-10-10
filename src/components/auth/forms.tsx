@@ -19,7 +19,7 @@ export function SignInForm({ next }: { next: string }) {
     <form action={action} className="space-y-4" noValidate>
       <Notice state={state} />
       <input type="hidden" name="next" value={next} />
-      <Input label="Email" name="email" type="email" autoComplete="email" inputMode="email" required />
+      <Input label="Email" name="email" type="email" autoComplete="email" inputMode="email" required defaultValue={state.email ?? ''} />
       <Input label="Password" name="password" type="password" autoComplete="current-password" required />
       <Button type="submit" disabled={pending} className="w-full">{pending ? 'Signing in…' : 'Sign in'}</Button>
       <p className="text-center text-sm text-muted">New here? <Link className="font-semibold text-brand-700 underline" href="/signup">Create an account</Link></p>

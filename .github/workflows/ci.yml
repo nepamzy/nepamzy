@@ -1,0 +1,25 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      # Scans tracked files and the client bundle for secrets (no secrets are needed or provided here).
+      - run: pnpm check:secrets
+# Not run in CI yet (need the local Supabase stack + Docker + browsers): pnpm test:db, pnpm test:e2e.
+# They are run locally and reported in docs/reports/batch-1.md. Adding them to CI is tracked in docs/known-issues.md.

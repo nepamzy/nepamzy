@@ -20,7 +20,7 @@
     "test:e2e": "playwright test",
     "check:secrets": "node scripts/check-secrets.mjs",
     "db:start": "bash scripts/dev-db.sh",
-    "db:reset": "supabase db reset",
+    "db:reset": "bash scripts/db-reset.sh",
     "db:lint": "supabase db lint --level warning"
   },
   "dependencies": {

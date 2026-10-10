@@ -26,7 +26,8 @@ for (const f of tracked) {
 function walk(dir, out = []) {
   for (const e of readdirSync(dir)) {
     const p = join(dir, e)
-    statSync(p).isDirectory() ? walk(p, out) : out.push(p)
+    if (statSync(p).isDirectory()) walk(p, out)
+    else out.push(p)
   }
   return out
 }

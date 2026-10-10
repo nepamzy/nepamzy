@@ -1,6 +1,9 @@
+import { existsSync } from 'node:fs'
 import { defineConfig, devices } from '@playwright/test'
 
-const chromiumPath = process.env.PLAYWRIGHT_CHROMIUM_PATH
+// Cloud sandbox ships a pre-installed Chromium; elsewhere Playwright's own browser is used.
+const candidates = [process.env.PLAYWRIGHT_CHROMIUM_PATH, '/opt/pw-browsers/chromium-1194/chrome-linux/chrome']
+const chromiumPath = candidates.find((p): p is string => Boolean(p) && existsSync(p as string))
 
 export default defineConfig({
   testDir: 'tests/e2e',

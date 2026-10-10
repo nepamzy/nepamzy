@@ -25,7 +25,5 @@ if ! pgrep -f "^node scripts/mail-sink" >/dev/null; then
   (nohup node scripts/mail-sink.mjs >/tmp/mail-sink.log 2>&1 &)
 fi
 ${SB} start -x "${EXCLUDE}"
-docker rm -f afit_mail_fwd >/dev/null 2>&1 || true
-docker run -d --name afit_mail_fwd --network container:supabase_auth_nepamzy --entrypoint sh \
-  supabase/gotrue:v2.197.0 -c 'mkfifo /tmp/f; while true; do nc -l -p 2525 </tmp/f | nc host.docker.internal 54325 >/tmp/f; done' >/dev/null
+bash scripts/mail-forwarder.sh
 echo "Local stack ready. Print keys with: ./node_modules/.bin/supabase status -o env"
