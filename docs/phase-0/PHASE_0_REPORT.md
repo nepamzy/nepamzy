@@ -254,3 +254,6 @@ No architecture change. Verification done after review (Supabase docs, via docs 
 | Local Supabase stack | **BLOCKER to confirm in Batch 1:** Docker client and `dockerd` are installed in this environment but the daemon is **not running** (no `/var/run/docker.sock`). Batch 1 may try to start the local daemon (free, local); if it cannot run, Batch 1 stops and reports. It must not silently use a remote project or paid service. |
 
 Other corrections adopted: customer MFA policy (above); SECURITY DEFINER hardening checklist and "don't put every rule in SQL" boundary; rider-PWA evidence rule; handover/proof rules restated as testable acceptance criteria; payments mock/test-mode only with settlement disabled and no "escrow" wording; root README; updated docs set. See `docs/review-log.md`.
+
+### S.2 Follow-up (v3)
+Recovery policy refined: no custom recovery table; backup-factor investigation; do not silently require all customers to enroll a second factor; stop for owner if secure recovery cannot be verified. Session revocation after factor changes added to the verification list. See `docs/review-log.md` and `docs/phase-0/BATCH_1_PROMPT.md` v3.

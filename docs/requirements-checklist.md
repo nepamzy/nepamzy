@@ -1,6 +1,6 @@
 # Requirements checklist
 
-Legend: ☐ not started · ◐ designed (Phase 0) · ✔ implemented and verified. Nothing is ✔ yet.
+Legend (Planned / Implemented / Tested / Unverified): ☐ not started · ◐ Planned (designed in Phase 0; Unverified) · ◑ Implemented (not yet Tested) · ✔ Implemented and Tested. Nothing is ◑ or ✔ yet.
 
 | Area | Requirement | Batch | Status |
 |---|---|---|---|

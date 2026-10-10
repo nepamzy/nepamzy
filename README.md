@@ -4,6 +4,8 @@ A mobile-first campus marketplace and delivery platform for the approved communi
 
 > **Status: planning only.** Phase 0 (discovery and architecture) is complete and has had its first independent review. **No application code has been written yet.** Everything below describes the planned product; items marked 🚧 are not built.
 
+**Status vocabulary:** *Planned* (designed, not built) → *Implemented* (code exists) → *Tested* (automated/manual evidence recorded) ; *Unverified* marks assumptions not yet checked. Everything is currently *Planned*. Details in `docs/requirements-checklist.md`.
+
 ## Purpose
 Make buying and selling easier on campus. Approved vendors (restaurants, shops, printing, souvenirs and similar) list products; community members order for **pickup or delivery**, follow the order, and confirm receipt with a signature.
 
