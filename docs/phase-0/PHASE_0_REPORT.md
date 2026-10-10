@@ -61,7 +61,7 @@ Key design decisions:
 - **D9 [RECOMMENDED]** Hosting is **not** chosen in Phase 0 and nothing is deployed. Candidates (Vercel, Render, Cloudflare) are a Batch 6 / pilot decision.
 
 ### D10 Tech decisions I could not verify (all **[UNVERIFIED]**)
-Exact current package versions; Supabase MFA behavior details (whether the JWT `aal` claim can be used directly in RLS — believed yes via `auth.jwt()->>'aal'`; whether Supabase provides TOTP recovery codes — believed **no**, so recovery is custom, see §J); Supabase Realtime RLS behavior for private channels; Paystack refund/partial-refund API specifics and webhook event names; Paystack marketplace/delayed-settlement support. Batch 1 and Batch 3 must read current docs before coding against them.
+Exact current package versions; Supabase MFA behavior details (whether the JWT `aal` claim can be used directly in RLS — believed yes via `auth.jwt()->>'aal'`; whether Supabase provides TOTP recovery codes); Supabase Realtime RLS behavior for private channels; Paystack refund/partial-refund API specifics and webhook event names; Paystack marketplace/delayed-settlement support. Batch 1 and Batch 3 must read current docs before coding against them.
 
 ## D. Proposed folder structure
 
@@ -104,7 +104,7 @@ Conventions: `uuid` PKs, `timestamptz`, money in `bigint` kobo, `created_at/upda
 
 | Group | Tables | Notes |
 |---|---|---|
-| Identity | `profiles`, `role_assignments` (user, role, status, granted_by, granted_at, revoked_at), `mfa_recovery_codes` (hashed) | One user may hold several roles only after approval. Roles: `customer, vendor_owner, vendor_staff, rider, support_agent, finance_admin, platform_admin` |
+| Identity | `profiles`, `role_assignments` (user, role, status, granted_by, granted_at, revoked_at) (no custom recovery-code table; see §S) | One user may hold several roles only after approval. Roles: `customer, vendor_owner, vendor_staff, rider, support_agent, finance_admin, platform_admin` |
 | Vendors | `vendor_applications`, `vendors`, `vendor_staff`, `stores`, `store_hours`, `categories` | Application stays pending until approved; unapproved vendors can't sell |
 | Catalogue | `products`, `product_variants`, `product_option_groups`, `product_options`, `stock_levels` | Order lines copy name/price at order time |
 | Locations | `delivery_zones`, `approved_delivery_points`, `vendor_pickup_points` | **Synthetic rows only until AFIT approves**; `is_restricted`, `geofence_radius_m`, active flag, `approved_by/at` |
@@ -125,7 +125,8 @@ Transaction boundaries (each = one SQL function = one transaction): place order;
 
 | Role | Can | Cannot | MFA |
 |---|---|---|---|
-| customer | Browse, order, view **own** orders, own rider location for **own active delivery**, report issues | See others' orders; any admin/vendor function | Required for sensitive actions (change email/phone, add saved destination, refund request, handover signature on high-value orders); not required to browse/order. **Needs owner decision (§Q).** |
+| customer (public visitor) | Browse public vendors/products **without registering** | Anything account-bound | None |
+| customer (registered) | Order, view **own** orders, own rider location for **own active delivery**, report issues | See others' orders; any admin/vendor function | **Required (TOTP, aal2) before placing orders or using protected account features** (owner decision, review round 1) |
 | vendor_owner / vendor_staff | Manage **own** store/catalogue, view/transition **own** orders, pickup handover screen | Other vendors' data; payouts config (owner only) | **Required (aal2)** before any privileged vendor action |
 | rider | Go Active/Inactive, view eligible offers, accept ≤5, send location while active, report problems | Mark delivered; see other riders; see location history | **Required (aal2)** before Go Active/accept |
 | support_agent | Read dispute bundles, add notes, propose resolutions | Move money, change evidence, reset MFA | Required |
@@ -160,7 +161,7 @@ Enforcement layers: (1) RLS on every table using `auth.uid()` and role/ownership
 | 2 | Vendor edits another vendor's products | RLS via `vendor_staff`; tests | B2 |
 | 3 | Privilege escalation via forged role/status in request | No client-writable role columns; functions derive actor from `auth.uid()` | B1 |
 | 4 | Service-role key leak | Server-only env, `import 'server-only'`, CI secret scan, never `NEXT_PUBLIC_` | B1 |
-| 5 | MFA bypass (UI-only check) | aal2 in RLS + server; support cannot reset MFA alone; recovery codes hashed; reset needs two admins + audit | B1 |
+| 5 | MFA bypass (UI-only check) | aal2 enforced in server guards **and** restrictive RLS (pattern verified in Supabase docs); no custom weaker recovery path; recovery per `docs/security-privacy.md` after Batch 1 verification spike | B1 |
 | 6 | Account takeover / credential stuffing | Supabase rate limits + app rate limits, MFA, session revocation on MFA change | B1/B6 |
 | 7 | Payment spoofing / replayed webhook | HMAC-SHA512 signature check on raw body, server-side verify, unique event id, idempotent handler, amount+currency check against order | B3 |
 | 8 | Duplicate / excess refund | Row lock on order refundable balance, idempotency key, DB check constraint | B5 |
@@ -217,9 +218,9 @@ Batch 1 acceptance (detail in `BATCH_1_PROMPT.md`): app builds; responsive shell
 **Owner decisions needed (blocking nothing in Batch 1 unless noted):**
 1. Approve the architecture in §C (or request changes). **Blocks Batch 1.**
 2. Rename repo (you do this in GitHub settings).
-3. Customer MFA policy: my recommendation = optional-but-encouraged for browsing/ordering, **required** for sensitive actions (see §G). Confirm.
+3. ~~Customer MFA policy~~ **Decided in review round 1:** public browsing needs no account; registered customers need TOTP before ordering or protected account features; all staff/vendor/rider roles need MFA for protected features.
 4. Hosting preference (decide by Batch 6).
-5. Rider app form: PWA first, native only if device tests prove need — confirm you accept this.
+5. ~~Rider app form~~ **Decided:** PWA first. If real-device tests show the PWA cannot meet tracking needs I stop and report evidence; starting a native app is the owner's decision only.
 6. Pilot parameters: number of vendors/riders, order caps, commission, delivery fee formula (needed by Batch 2/3; defaults will be placeholders).
 7. Refund approval limits / second-approver threshold (Batch 5).
 
@@ -236,3 +237,20 @@ Every item in your 35-section prompt and the handoff roadmap maps to a batch: au
 
 ## R. INDEPENDENT REVIEW PACKAGE FOR CHATGPT
 Submit: this file, `docs/phase-0/BATCH_1_PROMPT.md`, and `docs/handoff/DECISIONS_AND_OPEN_GATES.md`. Suggested review questions: (1) Is moving business rules into SECURITY DEFINER SQL functions the right trade-off vs. app-layer services (testability, migration discipline)? (2) Is the "recipient-held secret" approach sufficient against a colluding rider? (3) Are the PWA location mitigations realistic? (4) Is the MFA recovery design acceptable? (5) Anything in the 35-section brief that the batch plan drops? No code diffs exist yet; none are provided. I have not claimed any ChatGPT review has occurred.
+
+---
+
+## S. Review round 1 — corrections incorporated (owner decision: APPROVED IN PRINCIPLE WITH CORRECTIONS)
+
+No architecture change. Verification done after review (Supabase docs, via docs search; no code written):
+
+| Item | Result |
+|---|---|
+| JWT `aal` claim usable in RLS | **Verified** in Supabase MFA docs: `auth.jwt()->>'aal'`; documented template uses a `RESTRICTIVE` policy `to authenticated using ((select auth.jwt()->>'aal') = 'aal2')`. JWTs with no `aal` claim are aal1. |
+| Unenrolling a verified factor | **Verified**: requires an `aal2` session. |
+| Enrolling/verifying a factor | **Verified**: verifying logs out all other sessions and promotes the current one to aal2. |
+| TOTP recovery codes | **Verified: not provided as a standard feature.** Docs say Supabase does not return recovery codes and recommend registering a **backup TOTP factor** on a different device/app; Supabase cannot restore access if all factors are lost. The JS reference lists an **experimental** recovery-codes factor (`auth.experimental.recoveryCodes: true`: regenerate/unenroll). Whether it works with the local CLI stack, its stability, and how it interacts with aal levels are **UNVERIFIED** → Batch 1 verification spike before any recovery coding. |
+| My earlier "custom hashed recovery codes" proposal | **Withdrawn.** A separate custom recovery mechanism could create a weaker second authentication system. Batch 1 must not build one. |
+| Local Supabase stack | **BLOCKER to confirm in Batch 1:** Docker client and `dockerd` are installed in this environment but the daemon is **not running** (no `/var/run/docker.sock`). Batch 1 may try to start the local daemon (free, local); if it cannot run, Batch 1 stops and reports. It must not silently use a remote project or paid service. |
+
+Other corrections adopted: customer MFA policy (above); SECURITY DEFINER hardening checklist and "don't put every rule in SQL" boundary; rider-PWA evidence rule; handover/proof rules restated as testable acceptance criteria; payments mock/test-mode only with settlement disabled and no "escrow" wording; root README; updated docs set. See `docs/review-log.md`.
