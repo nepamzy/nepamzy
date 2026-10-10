@@ -1,0 +1,4 @@
+-- Seed data for the LOCAL stack only. Intentionally contains no users or credentials.
+-- Synthetic accounts for manual testing are created by `node scripts/seed-local-users.mjs`
+-- (random passwords printed to the terminal, never stored in the repository).
+-- Reference data such as platform_settings is created by migrations.
