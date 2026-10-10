@@ -1,0 +1,58 @@
+{
+  "name": "afit-market",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AFIT Market - campus marketplace and delivery platform (Batch 1: foundation, auth, roles, MFA)",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --project unit",
+    "test:db": "vitest run --project db",
+    "test:e2e": "playwright test",
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "db:start": "bash scripts/dev-db.sh",
+    "db:reset": "supabase db reset",
+    "db:lint": "supabase db lint --level warning"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.3",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/mailparser": "^3.9.0",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/smtp-server": "^3.5.13",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.4.0",
+    "mailparser": "^3.9.38",
+    "otpauth": "9.5.2",
+    "pg": "^8.23.1",
+    "postcss": "^8.5.29",
+    "prettier": "3.9.10",
+    "smtp-server": "^3.19.21",
+    "supabase": "2.120.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "5.0.3"
+  }
+}

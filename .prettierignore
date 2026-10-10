@@ -1,0 +1,7 @@
+.next
+node_modules
+pnpm-lock.yaml
+docs/handoff
+supabase/.temp
+playwright-report
+test-results
