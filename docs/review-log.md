@@ -27,3 +27,37 @@ Source: owner instruction (Parts A–E). No new defects in the repo; instruction
 | A5–A7 | Rider PWA evidence rule; handover proof; mock payments/no escrow/Docker blocker | Parts 1.5–1.7 |
 | A8 | Docs kept; Planned/Implemented/Tested/Unverified vocabulary | Part 1.8; README/checklist updated |
 | B–E | Part ordering: Phase 0 corrections first, then Phase 1, Phase 2, acceptance/testing, reporting (15 items, next prompt with corrections first), stop conditions | Prompt restructured into Parts 0–7 |
+
+## Batch 1 pre-work (2026-10-10)
+
+### Environment gate — PASSED (with workarounds, all local/free)
+- Docker client + `dockerd` were installed; the daemon was not running. Started locally with `dockerd` (cgroup v1, overlayfs). `docker run hello-world` OK.
+- Pulling Supabase images from the default registry (`public.ecr.aws/supabase/...`) fails here with **"Data limit exceeded"** (registry-side anonymous limit). Workaround: `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io` makes the CLI pull the same images from Docker Hub. No remote database or paid service used.
+- Supabase CLI 2.120.0 (npm). Local stack: Postgres 17, GoTrue v2.197.0, PostgREST, Kong. Optional services (studio, realtime, storage, edge runtime, etc.) excluded for Batch 1 with `supabase start -x ...`; they are not needed yet. Environment note: the daemon must be started manually in each new cloud session.
+
+### Package versions (npm registry, 2026-10-10)
+next 16.4.0, react 19.3.0, tailwindcss 4.3.3, @supabase/supabase-js 2.117.3, @supabase/ssr 0.12.7, zod 4.6.5, vitest 5.0.3, @playwright/test 1.64.0, @axe-core/playwright 4.13.0, eslint 10.12.0, prettier 3.9.10, typescript 7.0.2 (see ADR notes in docs/adr/0001 for the version actually pinned), otpauth 9.5.2.
+
+### MFA verification spike — results on the LOCAL stack (GoTrue v2.197.0)
+| # | Question | Observed |
+|---|---|---|
+| 1 | `aal` claim | JWT has `aal` = `aal1` after password login; `amr` lists methods. Confirmed. |
+| 2 | TOTP enroll | `enroll` returns QR (svg), secret, URI; factor is `unverified` until a code is verified. TOTP **must be enabled in `config.toml`** (`[auth.mfa.totp] enroll_enabled/verify_enabled`); disabled by default locally. |
+| 3 | Wrong code | "Invalid TOTP code entered" (422). |
+| 4 | Session after verify | The verify response returns a new token with `aal2`; `getAuthenticatorAssuranceLevel` → aal2. |
+| 5 | Other sessions on first verify | **Other sessions' refresh tokens are revoked** ("Refresh Token Not Found"). |
+| 6 | Replay of same TOTP code | **Accepted again within the 30 s window** (limitation; no one-time-use). |
+| 7 | Refresh keeps aal | Yes, aal2 persists across refresh of an aal2 session. |
+| 8 | New login on MFA user | aal1; `nextLevel: aal2`. Password alone never gives aal2. |
+| 9 | Unenroll verified factor at aal1 | Rejected: "AAL2 required to unenroll verified factor". |
+| 10 | Enroll an extra factor at aal1 when a verified factor exists | Rejected: "AAL2 required to enroll a new factor". (The *first* factor can be enrolled at aal1, so a password-only account with no factor can be MFA-enrolled by whoever holds the password.) |
+| 11 | Unenroll at aal2 | Allowed. Existing JWT still says aal2 until refresh (≤ JWT expiry); after refresh → aal1. Fresh login afterwards: aal1 and **no MFA required** (account silently drops to password-only). |
+| 12 | Admin API delete factor (service role) | Works, but **does not revoke other sessions** (aal1 sessions stay valid; aal2 session drops to aal1 at refresh). Admin-assisted recovery would leave the account password-only. |
+| 13 | Backup factor | A second TOTP factor can be enrolled and verified **only at aal2**; sign-in with *only* the backup factor reaches aal2. Works. |
+| 14 | Password/email change at aal1 when a verified factor exists | Rejected by GoTrue: "AAL2 session is required to update email or password when MFA is enabled." |
+| 15 | TOTP brute-force limiting | 12 consecutive wrong codes produced no 429 locally. Do not rely on GoTrue alone; our server-side MFA endpoints add rate limiting and audit. |
+| 16 | Experimental recovery codes | JS client exposes `mfa.recoveryCodes`, but the local server answers **422 "MFA enroll is disabled for recovery codes"** and rejects `factor_type=recovery_code` (accepts only totp, phone, webauthn). **Not available; not used; not assumed safe.** |
+
+### Recovery decision gate (owner decision required)
+Verified safe mechanism: **backup TOTP factor enrolled while still aal2** (item 13). Implemented in Batch 1 as an optional-for-customers, offered-to-all enrollment path. Whether to *require* a backup factor for privileged roles is **proposed to the owner, not imposed**.
+**Not implemented — STOP for owner decision:** recovery when *all* factors are lost. The only technically available route is admin-assisted factor deletion via the Admin API (item 12), which leaves the account protected by password alone and does not revoke sessions. A secure version would need at minimum: out-of-band identity verification (undefined, institution-dependent), two distinct aal2 admins, session revocation, holder notification, a cooling-off delay, forced immediate re-enrollment, and full audit. That is a process/policy design that needs the owner's decision (and AFIT's identity-verification rules). Until then: lost all factors = account locked; documented in `docs/security-privacy.md`.
