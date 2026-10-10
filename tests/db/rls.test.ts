@@ -18,6 +18,22 @@ describe('identity bootstrap', () => {
   })
 })
 
+describe('my_roles()', () => {
+  it('returns only the caller’s own active roles, works at aal1, and is closed to anon', async () => {
+    await withTx(async (c) => {
+      const a = await createUser(c); const b = await createUser(c)
+      await giveRole(c, a, 'rider'); await giveRole(c, b, 'platform_admin')
+      const mine = await as(c, { id: a, aal: 'aal1' }, async () => (await c.query('select public.my_roles()::text[] as r')).rows[0].r)
+      expect([...mine].sort()).toEqual(['customer', 'rider'])
+      await c.query(`update public.role_assignments set status='revoked', revoked_at=now() where user_id=$1 and role='rider'`, [a])
+      const after = await as(c, { id: a, aal: 'aal1' }, async () => (await c.query('select public.my_roles()::text[] as r')).rows[0].r)
+      expect(after).toEqual(['customer'])
+      const e = await as(c, null, () => failure(c, 'select public.my_roles()'))
+      expect(e.code).toBe(PRIV_DENIED)
+    })
+  })
+})
+
 describe('profiles RLS', () => {
   it('customer reads own profile but not another customer’s (aal1 and aal2)', async () => {
     await withTx(async (c) => {

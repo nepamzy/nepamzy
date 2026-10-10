@@ -1,13 +1,23 @@
-# Known issues and risks (Phase 0 stage)
+# Known issues and risks (end of Batch 1)
 
-| ID | Severity | Issue | Next step |
+Severity: High = blocks launch or a later batch; Med = fix before pilot; Low = polish.
+
+| ID | Sev | Issue | Status / next step |
 |---|---|---|---|
-| K1 | High | Local Docker daemon not running in the dev environment; Supabase local stack unverified | Batch 1 prompt Part 2 and 1.7: try to start; else BLOCKED, ask owner |
-| K2 | High | PWA background GPS reliability unknown | Real Android tests in Batch 4; owner decides if native needed |
-| K3 | High | MFA recovery not verified; experimental Supabase recovery-codes feature not assumed safe; no custom workaround allowed | Batch 1 spike; stop for owner decision if no secure design |
-| K9 | Med | Session revocation / `aal` refresh behavior after factor changes unverified | Batch 1 local-stack tests |
-| K4 | High | Vendor settlement/escrow arrangement unconfirmed | Paystack + Nigerian counsel; settlement disabled |
-| K5 | Med | Package versions, Paystack refund/webhook details unverified | Verify in Batch 1/3 |
-| K6 | Med | Repository rename to `afit-market` is an owner action; session repo scope may need update | Owner renames; confirm |
-| K7 | Med | Retention periods (GPS, signatures) are placeholders pending legal advice | Legal |
-| K8 | Info | CodeRabbit skips draft PRs (no review run on PR #1) | None |
+| K1 | Med | Local stack needs workarounds in this sandbox (Docker daemon started manually; Supabase images pulled from Docker Hub; custom mail sink + forwarder) | Resolved for dev (`pnpm db:start`); a normal workstation may not need them |
+| K2 | High | PWA background GPS reliability unknown | Real Android tests in Batch 4; if unworkable: stop, report evidence, owner decides (no native app without approval) |
+| K3 | High | **MFA recovery after losing ALL factors is not implemented** (owner decision gate; see `security-privacy.md` §3) | Waiting on owner |
+| K4 | High | Vendor settlement/escrow arrangement unconfirmed | Paystack + Nigerian counsel; settlement code-locked to DISABLED |
+| K5 | Med | Paystack refund/webhook details unverified | Verify in Batch 3 |
+| K6 | Med | Repository rename to `afit-market` is an owner action; session repo scope may need update | Owner |
+| K7 | Med | Retention periods are placeholders | Legal |
+| K8 | Info | CodeRabbit skips draft PRs | None |
+| K9 | Resolved | Session revocation / aal refresh behavior | Verified and pinned by tests (review log) |
+| K10 | Med | DB tests and e2e are not in CI (need Docker/local stack/browsers) | Add a CI job with `supabase start` + Playwright in Batch 2 |
+| K11 | Med | Manual accessibility review (screen reader, zoom, real keyboard flow) and real-device checks not done; only automated axe + viewport checks | Manual verification list in the report |
+| K12 | Low | No dark mode | Later |
+| K13 | Low | `forbidden()` is experimental in Next 16 | Covered by tests |
+| K14 | Med | Security limitations S1–S8 | `security-privacy.md` §4 |
+| K15 | Med | Customers with no factor can browse and sign in; first-factor enrolment at aal1 means a password thief could pre-empt enrolment (S2) | Owner to decide whether to force enrolment at sign-up |
+| K16 | Low | Rate-limit tables grow; no purge job yet | Retention job in Batch 6 |
+| K17 | Low | Sample data pages are static mocks; vendor handover and Go Active screens are non-functional previews, clearly labelled | By design until Batches 3–4 |

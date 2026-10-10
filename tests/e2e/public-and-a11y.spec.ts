@@ -59,6 +59,16 @@ test.describe('platform basics', () => {
     expect((await request.get('/icons/icon.svg')).status()).toBe(200)
     expect((await request.get('/sw.js')).status()).toBe(200)
   })
+  test('service worker serves the offline page when the network is down', async ({ page, context }) => {
+    await page.goto('/')
+    await page.evaluate(() => navigator.serviceWorker.ready)
+    await page.reload()
+    await expect.poll(() => page.evaluate(() => Boolean(navigator.serviceWorker.controller))).toBe(true)
+    await context.setOffline(true)
+    await page.goto('/vendors').catch(() => undefined)
+    await expect(page.getByRole('heading', { name: 'You are offline' })).toBeVisible()
+    await context.setOffline(false)
+  })
   test('skip link jumps to the main content', async ({ page }) => {
     await page.goto('/')
     await page.keyboard.press('Tab')
