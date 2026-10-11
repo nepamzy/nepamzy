@@ -6,18 +6,45 @@ import type { ActionState } from '@/server/modules/shared/action-helpers'
 
 /** A form bound to a server action with an accessible success/error message area. */
 export function ActionForm({
-  action, children, submitLabel, pendingLabel = 'Saving…', className, hideSubmit,
+  action,
+  children,
+  submitLabel,
+  pendingLabel = 'Saving…',
+  className,
+  hideSubmit,
 }: {
   action: (prev: ActionState, fd: FormData) => Promise<ActionState>
-  children: ReactNode; submitLabel: string; pendingLabel?: string; className?: string; hideSubmit?: boolean
+  children: ReactNode
+  submitLabel: string
+  pendingLabel?: string
+  className?: string
+  hideSubmit?: boolean
 }) {
   const [state, formAction, pending] = useActionState(action, {} as ActionState)
   return (
     <form action={formAction} className={cn('space-y-4', className)}>
-      {state.error && <p role="alert" className="rounded-[var(--radius-control)] bg-danger-50 px-3 py-2 font-medium text-danger-700">{state.error}</p>}
-      {state.message && <p role="status" className="rounded-[var(--radius-control)] bg-success-50 px-3 py-2 font-medium text-success-700">{state.message}</p>}
+      {state.error && (
+        <p
+          role="alert"
+          className="rounded-[var(--radius-control)] bg-danger-50 px-3 py-2 font-medium text-danger-700"
+        >
+          {state.error}
+        </p>
+      )}
+      {state.message && (
+        <p
+          role="status"
+          className="rounded-[var(--radius-control)] bg-success-50 px-3 py-2 font-medium text-success-700"
+        >
+          {state.message}
+        </p>
+      )}
       {children}
-      {!hideSubmit && <Button type="submit" disabled={pending}>{pending ? pendingLabel : submitLabel}</Button>}
+      {!hideSubmit && (
+        <Button type="submit" disabled={pending}>
+          {pending ? pendingLabel : submitLabel}
+        </Button>
+      )}
     </form>
   )
 }

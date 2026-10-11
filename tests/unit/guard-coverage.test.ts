@@ -21,10 +21,13 @@ describe('every protected route prefix is guarded by its layout', () => {
 
 describe('shared layout helper', () => {
   it('CustomerLayout enforces the policy for the prefix it is given, before rendering anything', () => {
-    const src = readFileSync(join(process.cwd(), 'src/components/shells/customer-layout.tsx'), 'utf8')
+    const src = readFileSync(
+      join(process.cwd(), 'src/components/shells/customer-layout.tsx'),
+      'utf8',
+    )
     const guard = src.indexOf('await enforceRoutePolicy(prefix)')
     expect(guard).toBeGreaterThan(-1)
-    expect(guard).toBeLessThan(src.indexOf('return <AppShell'))
+    expect(guard).toBeLessThan(src.search(/return\s*\(?\s*<AppShell/))
   })
 })
 

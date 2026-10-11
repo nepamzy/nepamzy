@@ -27,11 +27,17 @@ describe('env validation', () => {
   })
   it('APP_ENV fails closed: unset or unknown values mean production (no mock payments)', () => {
     delete process.env.APP_ENV
-    expect(appEnv()).toBe('production'); expect(mockPaymentsAllowed()).toBe(false)
-    process.env.APP_ENV = 'LOCAL'; expect(mockPaymentsAllowed()).toBe(false)
-    process.env.APP_ENV = 'banana'; expect(appEnv()).toBe('production')
-    process.env.APP_ENV = 'staging'; expect(mockPaymentsAllowed()).toBe(false)
-    process.env.APP_ENV = 'production'; expect(mockPaymentsAllowed()).toBe(false)
-    process.env.APP_ENV = 'local'; expect(mockPaymentsAllowed()).toBe(true)
+    expect(appEnv()).toBe('production')
+    expect(mockPaymentsAllowed()).toBe(false)
+    process.env.APP_ENV = 'LOCAL'
+    expect(mockPaymentsAllowed()).toBe(false)
+    process.env.APP_ENV = 'banana'
+    expect(appEnv()).toBe('production')
+    process.env.APP_ENV = 'staging'
+    expect(mockPaymentsAllowed()).toBe(false)
+    process.env.APP_ENV = 'production'
+    expect(mockPaymentsAllowed()).toBe(false)
+    process.env.APP_ENV = 'local'
+    expect(mockPaymentsAllowed()).toBe(true)
   })
 })

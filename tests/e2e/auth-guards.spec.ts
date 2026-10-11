@@ -63,7 +63,11 @@ test.describe('wrong role -> 403', () => {
       denied: ['/admin/roles', '/vendor', '/rider'],
       allowed: ['/admin', '/admin/audit'],
     },
-    { role: 'finance_admin', denied: ['/admin/roles', '/admin/audit'], allowed: ['/admin'] },
+    {
+      role: 'finance_admin',
+      denied: ['/admin/roles', '/admin/audit', '/admin/applications', '/admin/vendors'],
+      allowed: ['/admin'],
+    },
     {
       role: 'platform_admin',
       denied: ['/vendor', '/rider'],
@@ -98,7 +102,8 @@ test.describe('MFA is enforced for protected areas', () => {
     await expect(page).toHaveURL(/\/mfa\/challenge\?next=%2Fvendor/)
     await uiMfaChallenge(page, secret)
     await expect(page).toHaveURL(/\/vendor$/)
-    await expect(page.getByRole('heading', { name: 'Vendor dashboard' })).toBeVisible()
+    // this test account has the vendor role but no shop yet, so the vendor area explains that
+    await expect(page.getByRole('heading', { name: 'No vendor account yet' })).toBeVisible()
   })
 
   test('vendor with NO factor must enrol before reaching anything protected', async ({ page }) => {

@@ -358,7 +358,7 @@ begin
 end $$;
 
 create function public.admin_list_categories() returns jsonb
-language plpgsql stable security definer set search_path = ''
+language plpgsql security definer set search_path = ''
 as $$
 begin
   perform app_private.require_platform_admin();

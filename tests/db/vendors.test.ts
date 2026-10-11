@@ -79,6 +79,7 @@ describe('vendor application lifecycle', () => {
       await giveRole(c, admin, 'platform_admin')
       const cat = await category(c)
       await as(c, AAL2(a), () => c.query(APPLY, [cat]))
+      const totalApplications = (await c.query('select 1 from public.vendor_applications')).rowCount
       expect(
         await as(
           c,
@@ -99,7 +100,7 @@ describe('vendor application lifecycle', () => {
           AAL2(admin),
           async () => (await c.query('select 1 from public.vendor_applications')).rowCount,
         ),
-      ).toBe(1)
+      ).toBe(totalApplications)
       expect(
         await as(
           c,

@@ -1,5 +1,6 @@
 /** Maps database function errors to short, plain-language messages. Never leaks SQL text. */
-export type DbError = { message?: string; details?: string | null; code?: string } | null | undefined
+export type DbError =
+  { message?: string; details?: string | null; code?: string } | null | undefined
 
 const MESSAGES: Record<string, string> = {
   'authentication required': 'Please sign in to continue.',
@@ -42,10 +43,14 @@ const CHECKOUT_PROBLEMS: Record<string, string> = {
   vendor_mismatch: 'Your cart mixes vendors. Remove items from one of them.',
 }
 
-export function friendlyDbError(error: DbError, fallback = 'Something went wrong. Please try again.'): string {
+export function friendlyDbError(
+  error: DbError,
+  fallback = 'Something went wrong. Please try again.',
+): string {
   if (!error) return fallback
   const msg = (error.message ?? '').trim()
-  if (msg === 'checkout_blocked') return describeProblems(parseProblems(error.details))[0] ?? fallback
+  if (msg === 'checkout_blocked')
+    return describeProblems(parseProblems(error.details))[0] ?? fallback
   for (const [k, v] of Object.entries(MESSAGES)) if (msg === k || msg.startsWith(k)) return v
   if (error.code === '23514') return 'Some details are not valid. Please check the form.'
   if (error.code === '23505') return 'That already exists.'
@@ -57,9 +62,17 @@ export function parseProblems(details: string | null | undefined): CheckoutProbl
   if (!details) return []
   try {
     const v = JSON.parse(details)
-    return Array.isArray(v) ? v.filter((p): p is CheckoutProblem => typeof p?.code === 'string') : []
-  } catch { return [] }
+    return Array.isArray(v)
+      ? v.filter((p): p is CheckoutProblem => typeof p?.code === 'string')
+      : []
+  } catch {
+    return []
+  }
 }
 export function describeProblems(problems: CheckoutProblem[]): string[] {
-  return [...new Set(problems.map((p) => CHECKOUT_PROBLEMS[p.code] ?? 'Something in your order needs attention.'))]
+  return [
+    ...new Set(
+      problems.map((p) => CHECKOUT_PROBLEMS[p.code] ?? 'Something in your order needs attention.'),
+    ),
+  ]
 }

@@ -25,7 +25,18 @@ async function expectNoHorizontalScroll(page: Page, label: string) {
   expect(overflow, `horizontal overflow on ${label}`).toBeLessThanOrEqual(0)
 }
 
-const PUBLIC = ['/', '/vendors', '/vendors/v1', '/login', '/signup', '/design', '/offline']
+const PUBLIC = [
+  '/',
+  '/vendors',
+  '/vendors?q=rice',
+  '/vendors?q=zzzz-nothing-matches',
+  '/vendors/sample-kitchen',
+  '/vendors/sample-souvenirs',
+  '/login',
+  '/signup',
+  '/design',
+  '/offline',
+]
 
 test.describe('public pages', () => {
   for (const path of PUBLIC) {
@@ -38,7 +49,7 @@ test.describe('public pages', () => {
     })
   }
   test('browsing needs no account and shows prices in naira', async ({ page }) => {
-    await page.goto('/vendors/v1')
+    await page.goto('/vendors/sample-kitchen')
     await expect(page.getByText('₦2,500')).toBeVisible()
     await expect(page).not.toHaveURL(/login/)
   })

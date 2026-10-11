@@ -15,15 +15,41 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const { vendor, product } = found
   return (
     <>
-      <p className="mb-2"><Link href={`/vendors/${vendor.slug}`} className="font-semibold text-brand-700 underline">← {vendor.name}</Link></p>
-      <PageHeader title={product.name} subtitle={vendor.name} actions={<Badge tone={vendor.open_now ? 'success' : 'neutral'}>{vendor.open_now ? 'Open now' : 'Closed now'}</Badge>} />
+      <p className="mb-2">
+        <Link href={`/vendors/${vendor.slug}`} className="font-semibold text-brand-700 underline">
+          ← {vendor.name}
+        </Link>
+      </p>
+      <PageHeader
+        title={product.name}
+        subtitle={vendor.name}
+        actions={
+          <Badge tone={vendor.open_now ? 'success' : 'neutral'}>
+            {vendor.open_now ? 'Open now' : 'Closed now'}
+          </Badge>
+        }
+      />
       <Card className="max-w-xl space-y-4">
         {product.description && <p>{product.description}</p>}
-        <p className="text-xl font-bold"><Money kobo={product.price_kobo} /></p>
-        {!product.available && <p role="status" className="font-semibold text-danger-700">Sold out</p>}
-        {!vendor.open_now && <p role="status" className="text-sm text-warning-700">The vendor is closed now. You can add this to your cart, but checkout opens when it reopens.</p>}
+        <p className="text-xl font-bold">
+          <Money kobo={product.price_kobo} />
+        </p>
+        {!product.available && (
+          <p role="status" className="font-semibold text-danger-700">
+            Sold out
+          </p>
+        )}
+        {!vendor.open_now && (
+          <p role="status" className="text-sm text-warning-700">
+            The vendor is closed now. You can add this to your cart, but checkout opens when it
+            reopens.
+          </p>
+        )}
         <AddToCartForm product={product} orderable={product.available} />
-        <p className="text-xs text-muted">Prices are checked again at checkout. You will confirm your authenticator code before paying.</p>
+        <p className="text-xs text-muted">
+          Prices are checked again at checkout. You will confirm your authenticator code before
+          paying.
+        </p>
       </Card>
     </>
   )

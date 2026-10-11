@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import {
+  userIdByEmail,
   admin,
   alertIn,
   freshCode,
@@ -102,8 +103,7 @@ test('customer: sign up -> confirm email -> sign in -> MFA required for orders -
   await page.waitForURL('http://127.0.0.1:3000/')
 
   // 9. Audit trail recorded the enrolment events (and no raw email)
-  const { data: u } = await admin().auth.admin.listUsers({ perPage: 200 })
-  const id = u.users.find((x) => x.email === email)!.id
+  const id = await userIdByEmail(email)
   const { data: ev } = await admin().from('audit_events').select('action').eq('actor_id', id)
   expect(ev!.filter((e) => e.action === 'mfa.enrolled')).toHaveLength(2)
 })

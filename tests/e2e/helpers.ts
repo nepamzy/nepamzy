@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
+import pg from 'pg'
 import * as OTPAuth from 'otpauth'
 import { expect, type Page } from '@playwright/test'
 
@@ -126,4 +127,80 @@ export async function uiSignOut(page: Page) {
 export async function uiSignInWithMfa(page: Page, email: string, secret: string, next?: string) {
   await uiSignIn(page, email, PASSWORD, next)
   await uiMfaChallenge(page, secret)
+}
+
+let _pool: pg.Pool | undefined
+const pool = () => (_pool ??= new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 2 }))
+/** Look a user up by email (local database only; the Auth admin list is paginated and unreliable at scale). */
+export async function userIdByEmail(email: string): Promise<string> {
+  const r = await pool().query('select id from auth.users where email = $1', [email])
+  if (!r.rows[0]) throw new Error(`no user ${email}`)
+  return r.rows[0].id as string
+}
+
+// ---------------------------------------------------------------------------------------------
+// Batch 2 helpers
+// ---------------------------------------------------------------------------------------------
+import type { Browser, BrowserContext, TestInfo } from '@playwright/test'
+
+export const randIp = () =>
+  `10.${100 + Math.floor(Math.random() * 100)}.${Math.floor(Math.random() * 250)}.${1 + Math.floor(Math.random() * 250)}`
+export const tag = () => Math.random().toString(36).slice(2, 8)
+
+/** Known fee configuration so totals are deterministic (N500 delivery, 5.00% service fee). */
+export async function fixPricing(deliveryKobo = 50000, bps = 500) {
+  const { error } = await admin()
+    .from('platform_settings')
+    .upsert([
+      { key: 'delivery_fee_kobo', value: deliveryKobo },
+      { key: 'platform_fee_bps', value: bps },
+    ])
+  if (error) throw error
+}
+
+export type Session = {
+  page: Page
+  context: BrowserContext
+  user: { id: string; email: string }
+  secret: string
+}
+
+/** A user with a verified authenticator, signed in through the UI at aal2, in its own browser context. */
+export async function openSession(
+  browser: Browser,
+  info: TestInfo,
+  label: string,
+  roles: string[] = [],
+): Promise<Session> {
+  const user = await createUser(label, roles)
+  const { secret } = await enrolFactorViaApi(user.email)
+  const use = info.project.use
+  const context = await browser.newContext({
+    viewport: use.viewport ?? undefined,
+    userAgent: use.userAgent,
+    isMobile: use.isMobile,
+    hasTouch: use.hasTouch,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  const page = await context.newPage()
+  await uiSignInWithMfa(page, user.email, secret)
+  return { page, context, user, secret }
+}
+
+/** Anonymous visitor in its own context. */
+export async function openAnonymous(browser: Browser, info: TestInfo) {
+  const use = info.project.use
+  const context = await browser.newContext({
+    viewport: use.viewport ?? undefined,
+    userAgent: use.userAgent,
+    isMobile: use.isMobile,
+    hasTouch: use.hasTouch,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  return { context, page: await context.newPage() }
+}
+
+/** Server-action friendly click: wait for the POST to finish. */
+export async function clickAndWait(page: Page, click: () => Promise<void>) {
+  await Promise.all([page.waitForResponse((r) => r.request().method() === 'POST'), click()])
 }
