@@ -9,7 +9,7 @@ Batch 3 adds Paystack **test-mode** payments (server-side initialize/verify, sig
 ## B. Requirements coverage
 
 - **Implemented and verified (against the fake provider):** initialize with DB amount; verify; HMAC-SHA512 webhook (raw body, constant time, size cap); idempotent events (replay, out-of-order, wrong amount/currency, unknown reference, late payment after expiry, duplicate payment); ledger (receipts only); reconciliation flags + finance page + resolve; refund request primitive (capped); live keys rejected; vendor state machine with history; rejection releases stock and raises a refund flag; pickup code (hashed, single use, 48 h, locks after 5 wrong); mandatory signature + name; evidence immutable and access-scoped; PDF receipt; expiry job route; request id in logs.
-- **Implemented, not verified:** real Paystack API; CI job `db-and-e2e` (never run on GitHub); screen readers/real devices for the signature pad.
+- **Implemented, not verified:** real Paystack API; (the CI job `db-and-e2e` has since run green on GitHub, see §G addendum); screen readers/real devices for the signature pad.
 - **Partial:** refunds are requests only; `VENDOR_REVIEW` state unused (`PAID` is "waiting for vendor").
 - **Not implemented (scope):** riders, location, delivery proof, refund execution, disputes, notifications, MFA recovery (owner gate).
 
@@ -40,6 +40,8 @@ Controls: signature before parsing; 64 KB cap; only `sk_test_` keys; provider UR
 | `pnpm exec supabase db lint --local`       | No schema errors                                                                                                                                    |
 | `pnpm exec playwright test`                | 134 tests: 132 passed in the full run, 2 failures fixed afterwards and re-run green (production-mode test now disables the Paystack key; see below) |
 
+**Addendum (GitHub CI):** after the push, workflow run https://github.com/nepamzy/nepamzy/actions/runs/38139102474 for commit a0dacce completed successfully: job `checks` (lint, typecheck, unit, build, secret scan) and job `db-and-e2e` (local Supabase stack, 123 DB tests, full Playwright suite on Chromium) both passed. This is the first independent execution of the DB and browser suites outside this sandbox.
+
 Failures fixed during the work: redirect to `localhost` instead of the configured site URL after payment (now uses `SITE_URL`); status label expectation; signature lost when React reset the form (signature is now added at submit time); hard-coded provider event ids reused across projects (now unique per run); the Batch 2 "no order actions yet" assertion; production-mode test needed `PAYSTACK_SECRET_KEY` blanked. **Mutation check:** removing the row locks in `complete_pickup` did _not_ fail the concurrency test, because the primary key and conditional update still enforce the invariant (K31).
 
 ## H. What worked
@@ -48,7 +50,7 @@ Full e2e journey: Paystack test payment → ledger entry → vendor accepts/prep
 
 ## I. Failed or incomplete
 
-Real Paystack API untested (K19, K30); CI job unrun (K23); no scheduler for expiry (K18); signature in DB and no keyboard alternative (K26, K27); no unlock/re-issue for pickup codes (K28); refunds not executed (K29); lock-presence not proven by tests (K31).
+Real Paystack API untested (K19, K30); no scheduler for expiry (K18); signature in DB and no keyboard alternative (K26, K27); no unlock/re-issue for pickup codes (K28); refunds not executed (K29); lock-presence not proven by tests (K31).
 
 ## J. Technical debt
 
@@ -73,7 +75,7 @@ With a real Paystack **test** key and a tunnel or deployed URL: run one successf
 
 ## N. Completion assessment
 
-**CONDITIONALLY COMPLETE.** Phase 5/6 exit criteria are met against the local fake provider with executed evidence (replayed/forged webhook tests pass; pickup cannot complete without a valid code and signature). Conditions: real-API verification (§M), CI job proof, and the owner decisions in §L.
+**CONDITIONALLY COMPLETE.** Phase 5/6 exit criteria are met against the local fake provider with executed evidence (replayed/forged webhook tests pass; pickup cannot complete without a valid code and signature). Conditions: real-API verification (§M) and the owner decisions in §L.
 
 ## O. Next phase prompt
 

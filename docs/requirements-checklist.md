@@ -46,13 +46,13 @@ Legend: ☐ Planned (not built) · ◐ Planned, designed (Phase 0) · ◑ Implem
 
 ## Batch 3 additions
 
-| Area     | Requirement                                                                           | Batch | Status                             | Evidence                    |
-| -------- | ------------------------------------------------------------------------------------- | ----- | ---------------------------------- | --------------------------- |
-| Payments | Server-side initialize + verify (test mode), amount from DB                           | 5     | ✔ vs fake provider; ☐ real API     | e2e payments-fulfilment     |
-| Payments | Signed webhook, idempotent event store, replay/out-of-order/mismatch/late handling    | 5     | ✔                                  | DB payments, unit, e2e      |
-| Payments | Ledger (receipts only), reconciliation flags + admin page, refund requests            | 5     | ✔ (no provider refund call)        | DB payments, e2e            |
-| Payments | Live keys rejected, no settlement/payout                                              | 5     | ✔                                  | unit env, settlement locked |
-| Orders   | Vendor accept/reject/prepare/ready; illegal transitions rejected; history append-only | 6     | ✔                                  | DB fulfilment, e2e          |
-| Handover | One-time code (hashed), mandatory signature, evidence, replay/wrong-order tests       | 6     | ✔                                  | DB fulfilment, e2e          |
-| Receipts | PDF receipt for customer and shop                                                     | 6     | ✔                                  | e2e                         |
-| Ops      | Expiry job route; request id in logs; CI job for DB+e2e                               | 5–6   | ✔ route/logs; ◑ CI job not yet run | e2e, unit                   |
+| Area     | Requirement                                                                           | Batch | Status                                  | Evidence                    |
+| -------- | ------------------------------------------------------------------------------------- | ----- | --------------------------------------- | --------------------------- |
+| Payments | Server-side initialize + verify (test mode), amount from DB                           | 5     | ✔ vs fake provider; ☐ real API          | e2e payments-fulfilment     |
+| Payments | Signed webhook, idempotent event store, replay/out-of-order/mismatch/late handling    | 5     | ✔                                       | DB payments, unit, e2e      |
+| Payments | Ledger (receipts only), reconciliation flags + admin page, refund requests            | 5     | ✔ (no provider refund call)             | DB payments, e2e            |
+| Payments | Live keys rejected, no settlement/payout                                              | 5     | ✔                                       | unit env, settlement locked |
+| Orders   | Vendor accept/reject/prepare/ready; illegal transitions rejected; history append-only | 6     | ✔                                       | DB fulfilment, e2e          |
+| Handover | One-time code (hashed), mandatory signature, evidence, replay/wrong-order tests       | 6     | ✔                                       | DB fulfilment, e2e          |
+| Receipts | PDF receipt for customer and shop                                                     | 6     | ✔                                       | e2e                         |
+| Ops      | Expiry job route; request id in logs; CI job for DB+e2e                               | 5–6   | ✔ route/logs; ✔ CI job passed on GitHub | e2e, unit                   |

@@ -8,7 +8,7 @@
 ## 0.1 Corrections from Batch 3
 
 1. **Paystack was never exercised against the real API** (paystack.com unreachable from the build sandbox); everything ran against `scripts/fake-paystack.mjs`. Facts used (HMAC-SHA512 `x-paystack-signature` over the raw body, `charge.success`, `/transaction/initialize`, `/transaction/verify/:reference`, refund fields) came from third-party summaries (K30). If network access exists, re-verify against official docs and, with an owner-supplied `sk_test_` key, run the manual check list in `docs/reports/batch-3.md` §M. Do not build refunds execution until verified.
-2. CI job `db-and-e2e` was written but not yet run on GitHub (K23): check its result on the PR and fix it.
+2. CI job `db-and-e2e` ran green on GitHub for the Batch 3 commit (K23 resolved); keep it green and extend it with any new suites.
 3. Handover signature lives in a database `bytea` (K26), has no keyboard alternative (K27); pickup code cannot be re-issued/unlocked (K28). Decide with the owner; build a support unlock/re-issue tool only if approved.
 4. Concurrency tests prove outcomes, not lock presence (K31): where a lock is the control, add a test that fails without it (e.g. interleave using `pg_sleep`/advisory locks) or state clearly that a constraint is the backstop.
 5. After a rejected form submission React clears typed fields (K33); keep this in mind for rider forms (use `defaultValue` or preserve state).
