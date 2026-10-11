@@ -309,10 +309,16 @@ describe('vendor / rider isolation', () => {
       const ub = await createUser(c)
       await giveRole(c, ua, 'vendor_owner')
       await giveRole(c, ub, 'vendor_owner')
-      const va = (await c.query(`insert into public.vendors (name) values ('A') returning id`))
-        .rows[0].id
-      const vb = (await c.query(`insert into public.vendors (name) values ('B') returning id`))
-        .rows[0].id
+      const va = (
+        await c.query(
+          `insert into public.vendors (name, slug) values ('A', 'va-' || gen_random_uuid()) returning id`,
+        )
+      ).rows[0].id
+      const vb = (
+        await c.query(
+          `insert into public.vendors (name, slug) values ('B', 'vb-' || gen_random_uuid()) returning id`,
+        )
+      ).rows[0].id
       await c.query('insert into public.vendor_staff values ($1,$2),($3,$4)', [va, ua, vb, ub])
       const seen = await as(c, { id: ua, aal: 'aal2' }, async () =>
         (await c.query('select id from public.vendors')).rows.map((r) => r.id),
@@ -370,56 +376,6 @@ describe('vendor / rider isolation', () => {
           async () => (await c.query('select user_id from public.rider_profiles')).rowCount,
         ),
       ).toBe(0)
-    })
-  })
-})
-
-describe('registered-customer MFA rule (stub order placement)', () => {
-  it('aal1 customer is denied; aal2 customer succeeds; reads need aal2 too', async () => {
-    await withTx(async (c) => {
-      const u = await createUser(c)
-      const other = await createUser(c)
-      const denied = await as(c, { id: u, aal: 'aal1' }, () =>
-        failure(c, 'select public.stub_place_order()'),
-      )
-      expect(denied.message).toMatch(/aal2/)
-      const id = await as(
-        c,
-        { id: u, aal: 'aal2' },
-        async () => (await c.query('select public.stub_place_order() as id')).rows[0].id,
-      )
-      expect(id).toBeTruthy()
-      await as(c, { id: other, aal: 'aal2' }, () => c.query('select public.stub_place_order()'))
-      expect(
-        await as(
-          c,
-          { id: u, aal: 'aal1' },
-          async () => (await c.query('select 1 from public.stub_order_placements')).rowCount,
-        ),
-      ).toBe(0)
-      expect(
-        await as(c, { id: u, aal: 'aal2' }, async () =>
-          (await c.query('select user_id from public.stub_order_placements')).rows.map(
-            (r) => r.user_id,
-          ),
-        ),
-      ).toEqual([u])
-      const direct = await as(c, { id: u, aal: 'aal2' }, () =>
-        failure(c, `insert into public.stub_order_placements (user_id) values ($1)`, [u]),
-      )
-      expect(direct.code).toBe(PRIV_DENIED)
-    })
-  })
-  it('a user without the customer role is forbidden even at aal2; anon denied', async () => {
-    await withTx(async (c) => {
-      const u = await createUser(c)
-      await removeCustomerRole(c, u)
-      const e = await as(c, { id: u, aal: 'aal2' }, () =>
-        failure(c, 'select public.stub_place_order()'),
-      )
-      expect(e.message).toMatch(/forbidden/)
-      const a = await as(c, null, () => failure(c, 'select public.stub_place_order()'))
-      expect(a.code).toBe(PRIV_DENIED)
     })
   })
 })

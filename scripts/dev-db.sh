@@ -24,6 +24,12 @@ EXCLUDE="studio,imgproxy,vector,logflare,edge-runtime,realtime,storage-api,postg
 if ! pgrep -f "^node scripts/mail-sink" >/dev/null; then
   (nohup node scripts/mail-sink.mjs >/tmp/mail-sink.log 2>&1 &)
 fi
-${SB} start -x "${EXCLUDE}"
+# `supabase start` can exit non-zero while the DB container is still warming up; wait for health instead.
+${SB} start -x "${EXCLUDE}" || echo "supabase start reported a status error; waiting for containers to become healthy..."
+for _ in $(seq 1 60); do
+  if [ "$(docker inspect -f '{{.State.Health.Status}}' supabase_db_nepamzy 2>/dev/null)" = "healthy" ] && \
+     [ "$(docker inspect -f '{{.State.Health.Status}}' supabase_auth_nepamzy 2>/dev/null)" = "healthy" ]; then break; fi
+  sleep 2
+done
 bash scripts/mail-forwarder.sh
 echo "Local stack ready. Print keys with: ./node_modules/.bin/supabase status -o env"

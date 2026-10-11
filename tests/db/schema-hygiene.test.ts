@@ -20,7 +20,16 @@ describe('schema hygiene (asserted from the catalog)', () => {
       ).toBe(true)
     }
   })
-  it('no function in public/app_private is executable by PUBLIC or anon', async () => {
+  // The ONLY functions anonymous visitors may execute: read-only public browsing. Adding to this list
+  // needs a conscious review (each returns public-safe columns of approved vendors / active products).
+  const ANON_ALLOWLIST = [
+    'public.list_categories',
+    'public.browse_vendors',
+    'public.get_vendor_menu',
+    'public.get_product',
+    'public.search_products',
+  ]
+  it('no function in public/app_private is executable by PUBLIC or anon, except the public read allowlist', async () => {
     const r = await pool.query(`
       select n.nspname || '.' || p.proname as fn,
              has_function_privilege('anon', p.oid, 'execute') as anon_exec,
@@ -28,10 +37,12 @@ describe('schema hygiene (asserted from the catalog)', () => {
                 where a.privilege_type = 'EXECUTE') as public_exec
       from pg_proc p join pg_namespace n on n.oid = p.pronamespace
       where n.nspname in ('public','app_private')`)
-    for (const row of r.rows) {
-      expect(row.anon_exec, `anon can execute ${row.fn}`).toBe(false)
-      expect(row.public_exec, `PUBLIC can execute ${row.fn}`).not.toBe(true)
-    }
+    const anonCan = r.rows
+      .filter((row) => row.anon_exec)
+      .map((row) => row.fn)
+      .sort()
+    expect(anonCan).toEqual([...ANON_ALLOWLIST].sort())
+    for (const row of r.rows) expect(row.public_exec, `PUBLIC can execute ${row.fn}`).not.toBe(true)
   })
   it('service-role-only and internal functions are not executable by authenticated', async () => {
     for (const fn of [
@@ -39,6 +50,8 @@ describe('schema hygiene (asserted from the catalog)', () => {
       'public.record_security_event(uuid,text,jsonb)',
       'app_private.audit_write(uuid,text,text,text,jsonb)',
       'app_private.handle_new_user()',
+      'public.expire_unpaid_orders()',
+      'app_private.price_cart(uuid,text,uuid)',
     ]) {
       const r = await pool.query(
         `select has_function_privilege('authenticated', $1::regprocedure, 'execute') as x`,
