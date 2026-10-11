@@ -22,3 +22,4 @@
 | 13  | Real-device Android tests of rider location (`docs/testing/android-background-location-test.md`)                              | Owner/devices   | Any claim about background tracking |
 | 14  | Decision on typed acknowledgement as a signature alternative; signature storage location                                      | Owner + counsel | Accessible handover                 |
 | 15  | Rider eligibility, ID/badge, vehicle and insurance rules, and what happens when a rider goes offline mid-route                | AFIT + owner    | Rider onboarding policy             |
+| 16  | AFIT-approved rider terms (also unblocks K48: placeholder terms must never authorise real rider work)                         | AFIT + owner    | Any real rider operation            |

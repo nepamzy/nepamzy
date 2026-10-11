@@ -102,3 +102,10 @@ Open owner decisions are listed in `docs/reports/batch-1.md` §L.
 - **Concurrency**: order exclusivity has three layers; capacity has two. Removing the lock alone never breaks either invariant, which is why the control-removal tests remove layers together.
 - **Batch 1 stub replaced**: `stub_claim_slot`/`stub_capacity_slots` and their test were removed in favour of the real capacity rule.
 - Facts about Paystack remain unverified (K30). Nothing in this batch was reviewed by ChatGPT or the owner.
+
+## 11 Oct 2026 — Batch 5 prompt consolidated (documentation only)
+
+- Owner's consolidated instruction applied: `docs/reports/batch-5-prompt.md` rewritten as v2 (all carried-forward corrections first, then Phases 9 and 10, tests, report, review package, Batch 6 appendix); new `docs/reports/batch-6-prompt.md` (Phases 11 and 12).
+- Verified from the repository: `rider_go_active` / `rider_accept_order` do not reject placeholder rider terms (recorded as K48, not fixed; no application code changed).
+- CI checked through the GitHub API: Batch 4 implementation `1f6c8c1` (runs #15/#16), docs `eecc4d2` (#17/#18) and `402c95a` (#19/#20) all concluded success; job logs not opened.
+- Nothing here was reviewed by ChatGPT or approved by the owner. No Phase 9, 10, 11 or 12 work was started.
