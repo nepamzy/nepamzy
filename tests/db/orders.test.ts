@@ -774,18 +774,20 @@ describe('orders: access control and immutability', () => {
 })
 
 describe('mock payment (fails closed) and cancellation', () => {
-  it('is refused while mock_payments_enabled is false (the default)', async () => {
+  it('the shipped migrations seed mock_payments_enabled = false (only the LOCAL seed file turns it on)', async () => {
+    const { readFileSync } = await import('node:fs')
+    const migration = readFileSync('supabase/migrations/20261011000002_cart_orders.sql', 'utf8')
+    expect(migration).toMatch(/\('mock_payments_enabled', 'false'::jsonb/)
+    expect(migration).not.toMatch(/'mock_payments_enabled', 'true'/)
+    expect(readFileSync('supabase/seed.sql', 'utf8')).toMatch(/LOCAL ONLY/)
+  })
+
+  it('is refused while mock_payments_enabled is false', async () => {
     await withTx(async (c) => {
+      await setSetting(c, 'mock_payments_enabled', false) // explicit precondition; the local seed turns it on
       const s = await shop(c)
       await addToCart(c, AAL2(s.cust), s.p, 1)
       const id = await createOrderAs(c, AAL2(s.cust))
-      expect(
-        (
-          await c.query(
-            `select value from public.platform_settings where key='mock_payments_enabled'`,
-          )
-        ).rows[0].value,
-      ).toBe(false)
       const e = await as(c, AAL2(s.cust), () =>
         failure(c, `select public.mock_pay_order($1)`, [id]),
       )

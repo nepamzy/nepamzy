@@ -69,6 +69,10 @@ export type RoutePolicy = { prefix: string; requirement: AccessRequirement }
 /** Longest matching prefix wins. Paths not listed here are public. */
 export const ROUTE_POLICIES: RoutePolicy[] = [
   { prefix: '/admin/roles', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  { prefix: '/admin/applications', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  { prefix: '/admin/vendors', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  { prefix: '/admin/delivery-points', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  { prefix: '/admin/categories', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   {
     prefix: '/admin/audit',
     requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
@@ -80,6 +84,11 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   { prefix: '/vendor', requirement: { roles: ['vendor_owner', 'vendor_staff'], aal: 'aal2' } },
   { prefix: '/rider', requirement: { roles: ['rider'], aal: 'aal2' } },
   { prefix: '/orders', requirement: { roles: ['customer'], aal: 'aal2' } },
+  // The cart is usable at aal1 by plain customers (privileged accounts are lifted to aal2 by decideAccess);
+  // checkout, vendor applications and everything that creates orders need aal2.
+  { prefix: '/cart', requirement: { roles: ['customer'], aal: 'aal1' } },
+  { prefix: '/checkout', requirement: { roles: ['customer'], aal: 'aal2' } },
+  { prefix: '/apply', requirement: { roles: ['customer'], aal: 'aal2' } },
   { prefix: '/account', requirement: { aal: 'aal2' } },
   { prefix: '/mfa', requirement: { aal: 'aal1', mfaSetup: true } },
 ]

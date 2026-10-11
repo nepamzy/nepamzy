@@ -176,6 +176,7 @@ describe('idempotency under contention', () => {
 })
 
 describe('cancellation and payment under contention', () => {
+  let prevMock: unknown = false
   it('two simultaneous cancels release stock once', async () => {
     const fx = await setup(1, 5, 2)
     try {
@@ -201,6 +202,7 @@ describe('cancellation and payment under contention', () => {
     const fx = await setup(2, 5)
     const c = await pool.connect()
     try {
+      prevMock = (await c.query(`select value from public.platform_settings where key='mock_payments_enabled'`)).rows[0].value
       await setSetting(c, 'mock_payments_enabled', true)
       const [a, b] = fx.users as [string, string]
       const o1 = await runAs<string>(a, `select public.create_order('pickup', null, $1) as r`, [
@@ -240,7 +242,7 @@ describe('cancellation and payment under contention', () => {
       expect(pays).toBe(st === 'PAID' ? 1 : 0) // never both a payment and a cancellation
       expect(await stockOf(fx.product)).toBe(st === 'CANCELLED' ? before + 1 : before) // stock released only if cancelled
     } finally {
-      await setSetting(c, 'mock_payments_enabled', false)
+      await setSetting(c, 'mock_payments_enabled', prevMock) // restore, never assume
       c.release()
       await teardown(fx)
     }

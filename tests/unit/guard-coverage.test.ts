@@ -10,9 +10,22 @@ describe('every protected route prefix is guarded by its layout', () => {
     it(p.prefix, () => {
       const file = join(process.cwd(), 'src/app', p.prefix, 'layout.tsx')
       expect(existsSync(file), `missing ${file}`).toBe(true)
-      expect(readFileSync(file, 'utf8')).toContain(`enforceRoutePolicy('${p.prefix}')`)
+      const src = readFileSync(file, 'utf8')
+      // Either the layout calls the guard itself, or it uses the shared CustomerLayout with its own prefix.
+      const direct = src.includes(`enforceRoutePolicy('${p.prefix}')`)
+      const viaShared = src.includes(`<CustomerLayout prefix="${p.prefix}"`)
+      expect(direct || viaShared, `${file} must guard ${p.prefix}`).toBe(true)
     })
   }
+})
+
+describe('shared layout helper', () => {
+  it('CustomerLayout enforces the policy for the prefix it is given, before rendering anything', () => {
+    const src = readFileSync(join(process.cwd(), 'src/components/shells/customer-layout.tsx'), 'utf8')
+    const guard = src.indexOf('await enforceRoutePolicy(prefix)')
+    expect(guard).toBeGreaterThan(-1)
+    expect(guard).toBeLessThan(src.indexOf('return <AppShell'))
+  })
 })
 
 describe('server-only boundaries', () => {

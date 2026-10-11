@@ -357,6 +357,15 @@ begin
   return v_id;
 end $$;
 
+create function public.admin_list_categories() returns jsonb
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  perform app_private.require_platform_admin();
+  return (select coalesce(jsonb_agg(jsonb_build_object('id', c.id, 'slug', c.slug, 'name', c.name, 'sort_order', c.sort_order,
+            'is_active', c.is_active) order by c.sort_order, c.name), '[]'::jsonb) from public.categories c);
+end $$;
+
 -- ---------------------------------------------------------------------------------------------
 -- Vendor self-service
 -- ---------------------------------------------------------------------------------------------
@@ -644,7 +653,7 @@ begin
   -- authenticated-callable (each validates identity/role/aal inside)
   foreach f in array array[
     'public.submit_vendor_application(text, text, uuid, text, text, boolean)',
-    'public.decide_vendor_application(uuid, text, text)', 'public.set_vendor_status(uuid, text, text)',
+    'public.decide_vendor_application(uuid, text, text)', 'public.set_vendor_status(uuid, text, text)', 'public.admin_list_categories()',
     'public.category_upsert(uuid, text, text, int, boolean)', 'public.my_vendor()',
     'public.vendor_update_profile(uuid, text, text, text, int)', 'public.vendor_set_temporarily_closed(uuid, boolean)',
     'public.vendor_set_hours(uuid, jsonb)', 'public.vendor_add_staff(uuid, text)', 'public.vendor_remove_staff(uuid, uuid)',

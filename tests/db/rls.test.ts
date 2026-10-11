@@ -6,7 +6,6 @@ import {
   failure,
   giveRole,
   pool,
-  removeCustomerRole,
   withTx,
 } from './helpers'
 
