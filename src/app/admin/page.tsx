@@ -12,6 +12,7 @@ const CARDS = [
     'Approved places for delivery (fictional placeholders for now).',
   ],
   ['/admin/categories', 'Categories', 'Vendor categories.'],
+  ['/admin/payments', 'Payments', 'Reconciliation flags and refund requests (test mode).'],
   ['/admin/audit', 'Audit trail', 'Read-only record of important actions.'],
   ['/admin/roles', 'Roles', 'Grant or revoke roles (administrators only).'],
 ]

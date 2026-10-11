@@ -164,7 +164,7 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
   // 8. The vendor sees the paid order (read-only); a stranger cannot open it.
   await applicant.page.goto('/vendor/orders')
   await expect(applicant.page.getByRole('cell', { name: /AFM-\d{6}/ })).toBeVisible()
-  await expect(applicant.page.getByRole('button', { name: /accept|prepare|ready/i })).toHaveCount(0) // no order actions yet
+  await expect(applicant.page.getByRole('button', { name: 'Accept order' })).toBeVisible() // paid order is ready for the vendor to act on
   await applicant.page.goto('/vendor')
   await expect(applicant.page.getByTestId('paid-count')).toHaveText('1')
   await applicant.page.goto('/vendor/catalogue')
@@ -326,12 +326,12 @@ test('double submission of the same checkout creates a single order', async ({ b
 
 test('production mode: the test payment does not exist (button absent, action refuses)', async ({
   browser,
-}, info) => {
+}) => {
   test.setTimeout(180000)
   // A second copy of the built app, started with APP_ENV=production on another port.
   const port = 3101
   const child = spawn('node_modules/.bin/next', ['start', '-H', '127.0.0.1', '-p', String(port)], {
-    env: { ...process.env, APP_ENV: 'production', PORT: String(port) },
+    env: { ...process.env, APP_ENV: 'production', PORT: String(port), PAYSTACK_SECRET_KEY: '' },
     stdio: 'ignore',
   })
   try {

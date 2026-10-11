@@ -14,16 +14,39 @@ export function redact(value: unknown, depth = 0): unknown {
 }
 
 type Level = 'debug' | 'info' | 'warn' | 'error'
-export function log(level: Level, msg: string, ctx: Record<string, unknown> = {}) {
-  const line = JSON.stringify({
+
+/** The id set by the proxy for this request (undefined outside a request, e.g. in tests or scripts). */
+async function currentRequestId(): Promise<string | undefined> {
+  try {
+    const { headers } = await import('next/headers')
+    return (await headers()).get('x-request-id') ?? undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function formatLine(
+  level: Level,
+  msg: string,
+  ctx: Record<string, unknown>,
+  requestId?: string,
+) {
+  return JSON.stringify({
     t: new Date().toISOString(),
     level,
     msg,
+    ...(requestId ? { requestId } : {}),
     ...(redact(ctx) as object),
   })
-  if (level === 'error') console.error(line)
-  else if (level === 'warn') console.warn(line)
-  else console.log(line)
+}
+
+export function log(level: Level, msg: string, ctx: Record<string, unknown> = {}) {
+  void currentRequestId().then((rid) => {
+    const line = formatLine(level, msg, ctx, rid)
+    if (level === 'error') console.error(line)
+    else if (level === 'warn') console.warn(line)
+    else console.log(line)
+  })
 }
 export const logger = {
   debug: (m: string, c?: Record<string, unknown>) => log('debug', m, c),

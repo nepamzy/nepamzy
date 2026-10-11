@@ -21,5 +21,27 @@ jobs:
       - run: pnpm build
       # Scans tracked files and the client bundle for secrets (no secrets are needed or provided here).
       - run: pnpm check:secrets
-# Not run in CI yet (need the local Supabase stack + Docker + browsers): pnpm test:db, pnpm test:e2e.
-# They are run locally and reported in docs/reports/batch-1.md. Adding them to CI is tracked in docs/known-issues.md.
+  # Database + browser suites need Docker (local Supabase stack). Written in Batch 3; it has NOT been run on GitHub
+  # yet - treat the first run as a trial (see docs/known-issues.md K23). Local runs are recorded in the batch reports.
+  db-and-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:start
+      - run: bash scripts/make-env-local.sh
+      - run: pnpm test:db
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results
+          retention-days: 7

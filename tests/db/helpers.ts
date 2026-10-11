@@ -67,7 +67,7 @@ export async function as<T>(c: PoolClient, who: Principal, fn: () => Promise<T>)
   try {
     return await fn()
   } finally {
-    await c.query('reset role')
+    await c.query('reset role').catch(() => undefined)
   }
 }
 
@@ -257,6 +257,16 @@ export async function purge(
   await c.query(`set session_replication_role = replica`)
   try {
     if (o.users?.length) {
+      const own = `(select id from public.orders where customer_id = any($1::uuid[]))`
+      for (const t of [
+        'handover_evidence',
+        'pickup_codes',
+        'refunds',
+        'ledger_entries',
+        'reconciliation_flags',
+        'payment_transactions',
+      ])
+        await c.query(`delete from public.${t} where order_id in ${own}`, [o.users])
       await c.query(
         `delete from public.payment_attempts where order_id in (select id from public.orders where customer_id = any($1::uuid[]))`,
         [o.users],
@@ -285,4 +295,68 @@ export async function purge(
   } finally {
     await c.query(`set session_replication_role = origin`)
   }
+}
+
+/** Run fn as the service role (the webhook/verify path). */
+export async function svc<T>(c: PoolClient, fn: () => Promise<T>): Promise<T> {
+  await c.query('set local role service_role')
+  try {
+    return await fn()
+  } finally {
+    await c.query('reset role')
+  }
+}
+
+export const PNG = (n = 600) =>
+  Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), Buffer.alloc(n, 7)])
+
+/** Prepare a payment as the customer and return {reference, amount_kobo}. */
+export async function prepare(c: PoolClient, who: Principal, order: string) {
+  return as(
+    c,
+    who,
+    async () =>
+      (await c.query(`select public.payment_prepare($1) as r`, [order])).rows[0].r as {
+        reference: string
+        amount_kobo: number
+        currency: string
+      },
+  )
+}
+
+export async function applyEvent(
+  c: PoolClient,
+  id: string,
+  type: string,
+  reference: string,
+  amount: number,
+  currency = 'NGN',
+) {
+  return svc(
+    c,
+    async () =>
+      (
+        await c.query(`select public.payment_apply_event($1,$2,$3,$4,$5,'{}'::jsonb) as r`, [
+          id,
+          type,
+          reference,
+          amount,
+          currency,
+        ])
+      ).rows[0].r as string,
+  )
+}
+
+/** Drive an order to PAID through the real payment path. */
+export async function payOrder(c: PoolClient, who: Principal, order: string) {
+  const t = await prepare(c, who, order)
+  const out = await applyEvent(
+    c,
+    `evt-${randomUUID()}`,
+    'charge.success',
+    t.reference,
+    t.amount_kobo,
+  )
+  if (out !== 'paid') throw new Error(`expected paid, got ${out}`)
+  return t
 }

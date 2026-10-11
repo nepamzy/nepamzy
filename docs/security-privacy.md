@@ -43,7 +43,17 @@ Verified facts (local stack, GoTrue v2.197.0):
 
 SECURITY DEFINER functions: fixed `search_path`, EXECUTE revoked from PUBLIC/anon, identity + authorization inside, allowed/denied tests, parallel-connection harness (stub). Catalog tests fail if any function loses `search_path`, becomes executable by PUBLIC/anon, or any table loses RLS or its restrictive policy. A mutation check (weakening three protections) made four tests fail, as intended.
 
-## 6. Location, proof, payments (rules carried forward; nothing built)
+## 5a. Payments and handover (Batch 3)
+
+- Webhook: HMAC-SHA512 over the **raw** body with the test secret, constant-time compare, 64 KB cap; invalid signature = 401 and nothing is read further. Unknown events get 200 and are ignored; processing errors get 500 so the provider retries.
+- The browser return URL proves nothing: the server asks Paystack to verify and the database applies the answer idempotently. Amount and currency are compared with the order row; a mismatch never pays the order.
+- Only `sk_test_` keys are accepted (a live key disables payment). A non-default provider URL is honoured only when `APP_ENV=local`.
+- Stored webhook payloads are whitelisted (no email, card or customer data).
+- Pickup code: stored as a hash, shown only to the ordering customer at aal2, single use, 48 h expiry, locks after 5 wrong tries; wrong tries are counted (returned, not raised, so the counter commits) and audited. Signature must be a PNG of plausible size; recipient name required.
+- Receipts are served by a route that checks the session itself (route handlers sit outside layouts) and relies on RLS for which order is visible.
+- Limitation: a vendor who knows the customer is present can ask for the code; the code proves possession, the signature proves acknowledgement, neither proves identity. Documented for counsel.
+
+## 6. Location, proof, payments (rules carried forward)
 
 Rider location only after Go Active; stale/inaccurate fixes ignored; GPS never completes an order; no claim of background tracking without real Android evidence (if the PWA cannot do it: stop and report evidence; no native app without owner approval). Mandatory signature; single-use, expiring, assignment-bound tokens; reassignment invalidates tokens; auditable. Payments mocked/test-mode only; settlement disabled (code-locked); never called escrow.
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { appEnv, mockPaymentsAllowed, serverEnv, serviceEnv } from './env'
+import { appEnv, mockPaymentsAllowed, paystackConfig, serverEnv, serviceEnv } from './env'
 
 const keep = { ...process.env }
 afterEach(() => {
@@ -39,5 +39,35 @@ describe('env validation', () => {
     expect(mockPaymentsAllowed()).toBe(false)
     process.env.APP_ENV = 'local'
     expect(mockPaymentsAllowed()).toBe(true)
+  })
+
+  it('Paystack: only test keys are accepted; live or malformed keys disable payments', () => {
+    process.env.APP_ENV = 'production'
+    delete process.env.PAYSTACK_BASE_URL
+    for (const bad of [
+      undefined,
+      '',
+      'sk_live_abc_defg_hijkl',
+      'pk_test_abc_defg_hijkl',
+      'sk_test_',
+      'sk_test_short',
+    ]) {
+      if (bad === undefined) delete process.env.PAYSTACK_SECRET_KEY
+      else process.env.PAYSTACK_SECRET_KEY = bad
+      expect(paystackConfig()).toBeNull()
+    }
+    process.env.PAYSTACK_SECRET_KEY = 'sk_test_abc_defg_hijkl'
+    expect(paystackConfig()).toEqual({
+      secretKey: 'sk_test_abc_defg_hijkl',
+      baseUrl: 'https://api.paystack.co',
+    })
+  })
+  it('Paystack: a custom base URL is honoured only when APP_ENV=local', () => {
+    process.env.PAYSTACK_SECRET_KEY = 'sk_test_abc_defg_hijkl'
+    process.env.PAYSTACK_BASE_URL = 'http://127.0.0.1:3002/'
+    process.env.APP_ENV = 'local'
+    expect(paystackConfig()?.baseUrl).toBe('http://127.0.0.1:3002')
+    process.env.APP_ENV = 'production'
+    expect(paystackConfig()?.baseUrl).toBe('https://api.paystack.co')
   })
 })

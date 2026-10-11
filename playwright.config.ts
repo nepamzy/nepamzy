@@ -32,10 +32,20 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: 'pnpm build && pnpm start -H 127.0.0.1 -p 3000',
-    url: 'http://127.0.0.1:3000/',
-    reuseExistingServer: true,
-    timeout: 240000,
-  },
+  webServer: [
+    {
+      command: 'pnpm build && pnpm start -H 127.0.0.1 -p 3000',
+      url: 'http://127.0.0.1:3000/',
+      reuseExistingServer: true,
+      timeout: 240000,
+    },
+    {
+      // Local stand-in for Paystack test mode (signs webhooks with the same test secret the app uses)
+      command: 'node --env-file=.env.local scripts/fake-paystack.mjs',
+      url: 'http://127.0.0.1:3002/health',
+      reuseExistingServer: true,
+      timeout: 30000,
+      ignoreHTTPSErrors: true,
+    },
+  ],
 })

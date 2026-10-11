@@ -51,3 +51,11 @@ Real Android devices and screen readers; actual email deliverability (local sink
 - Unit (`pnpm test`, 107 tests): env/APP_ENV, db-error mapping, form parsing, money input, guard coverage.
 - e2e (`pnpm exec playwright test`, 126 tests over mobile-360 and desktop): `marketplace.spec.ts` (apply→approve→catalogue→browse→cart→MFA→checkout→test pay→vendor sees order→suspension; blocked checkout; double-tap; production-mode server has no test-pay button), axe + no-horizontal-scroll on new pages.
 - Reset the DB (`pnpm db:reset`) before DB tests if earlier e2e runs left data; the vendor-application test is tolerant of leftovers.
+
+## Batch 3 coverage
+
+- DB (`pnpm test:db`, 123 tests): `payments.test.ts` (prepare, apply-event outcomes incl. mismatch/late/duplicate/out-of-order/replay, visibility, immutability, finance tools, parallel events) and `fulfilment.test.ts` (state machine, rejection, pickup code, signature rules, wrong/foreign codes, evidence visibility, parallel accepts/completions).
+- Unit (118): signature (valid/tampered/malformed/whitespace), webhook/verify mapping, Paystack config (test keys only), logger request id.
+- e2e: `payments-fulfilment.spec.ts` against the fake provider: full pay -> accept -> prepare -> ready -> code -> signature -> receipt journey, failed-payment retry, webhook signature/replay/tamper/ignored events, vendor rejection -> finance flag -> resolve, protected admin page and job route.
+- Mutation check: removing the row locks in `complete_pickup` did NOT fail the concurrency test (the primary key and conditional update still enforce the invariant), so that test proves outcomes, not lock presence.
+- Not tested: the real Paystack API (unreachable here), real devices, screen readers.

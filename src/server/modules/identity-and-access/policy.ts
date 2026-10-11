@@ -74,6 +74,10 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   { prefix: '/admin/delivery-points', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/categories', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   {
+    prefix: '/admin/payments',
+    requirement: { roles: ['platform_admin', 'finance_admin'], aal: 'aal2' },
+  },
+  {
     prefix: '/admin/audit',
     requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
   },

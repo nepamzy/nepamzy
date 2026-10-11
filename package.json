@@ -21,12 +21,14 @@
     "check:secrets": "node scripts/check-secrets.mjs",
     "db:start": "bash scripts/dev-db.sh",
     "db:reset": "bash scripts/db-reset.sh",
-    "db:lint": "supabase db lint --level warning"
+    "db:lint": "supabase db lint --level warning",
+    "dev:paystack": "node --env-file=.env.local scripts/fake-paystack.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.117.3",
     "next": "16.4.0",
+    "pdf-lib": "^1.17.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "0.0.1",

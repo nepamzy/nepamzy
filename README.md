@@ -2,7 +2,7 @@
 
 A mobile-first campus marketplace and delivery platform for the approved community of the Air Force Institute of Technology (AFIT), Nigeria.
 
-> **Status: Batch 2 built (vendor onboarding, catalogue, browsing, cart, checkout, order creation with a MOCK payment), awaiting owner review.** Real payments, order fulfilment, riders, delivery proof, refunds are **not built yet**. Rider screens and vendor handover show clearly labelled sample data. **Not deployed; not for real users or real money.**
+> **Status: Batch 3 built (Paystack test-mode payments with signed webhooks and ledger, vendor order operations, pickup handover with one-time code and signature, PDF receipts), awaiting owner review.** Riders, live location, delivery proof, refunds execution, disputes and notifications are **not built yet**. **Not deployed; not for real users or real money.**
 
 **Status vocabulary:** _Planned_ (designed, not built) → _Implemented_ (code exists) → _Tested_ (automated/manual evidence recorded). _Unverified_ marks assumptions not yet checked. Full table: [`docs/requirements-checklist.md`](docs/requirements-checklist.md).
 
@@ -26,8 +26,10 @@ Students, lecturers, civilian staff, military personnel and other AFIT-authorise
 | Email + password sign-up with emailed confirmation, sign-in, sign-out                                                                             | Implemented, Tested                              |
 | TOTP MFA: enrol, challenge, backup authenticator, removal; enforced in app **and** database                                                       | Implemented, Tested                              |
 | Roles and RLS; administrators grant/revoke roles (audited); append-only audit trail                                                               | Implemented, Tested                              |
+| Paystack test-mode payment, signed webhook, ledger, reconciliation, refund requests (no money moved)                                              | Implemented, Tested (local fake provider only)   |
+| Vendor accept/reject/prepare/ready, pickup code + signature handover, PDF receipt                                                                 | Implemented, Tested (DB + e2e)                   |
 | MFA recovery after losing every authenticator                                                                                                     | **Not implemented — owner decision needed**      |
-| Real payments (Paystack), vendor order transitions, riders, location, handover proof, refunds, disputes, notifications                            | **Planned** (Batches 2–6)                        |
+| Riders, location, handover proof, refunds, disputes, notifications                                                                                | **Planned** (Batches 2–6)                        |
 
 ## Architecture
 

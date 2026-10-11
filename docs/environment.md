@@ -18,3 +18,13 @@ Dev-script env: `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io` (set by `scripts/*.
 ## `APP_ENV` (Batch 2)
 
 `APP_ENV` = `local` | `staging` | `production`. Anything else, or unset, is treated as `production` (fail closed). The test-payment action exists only when `APP_ENV=local` **and** the database setting `mock_payments_enabled` is true (set only by `supabase/seed.sql`, i.e. local resets). `.env.example` documents it.
+
+## Payments and jobs (Batch 3)
+
+| Variable              | Purpose                                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `PAYSTACK_SECRET_KEY` | Paystack **test** secret (`sk_test_...`). Unset or any other value disables online payment. Also signs/verifies webhooks. |
+| `PAYSTACK_BASE_URL`   | Local fake provider (`http://127.0.0.1:3002`). Ignored unless `APP_ENV=local`.                                            |
+| `JOBS_SECRET`         | Bearer secret for `POST /api/jobs/expire-orders` (16+ characters).                                                        |
+
+`pnpm dev:paystack` starts the fake provider (`scripts/fake-paystack.mjs`); `bash scripts/make-env-local.sh` writes `.env.local` from the running local stack.

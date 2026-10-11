@@ -28,3 +28,17 @@ export type AppEnv = z.infer<typeof appEnvSchema>
 export const appEnv = (): AppEnv => appEnvSchema.parse(process.env.APP_ENV)
 /** The mock payment button/action exists ONLY when APP_ENV=local (the database flag is a second guard). */
 export const mockPaymentsAllowed = () => appEnv() === 'local'
+
+const PAYSTACK_DEFAULT_URL = 'https://api.paystack.co'
+/**
+ * Paystack TEST mode only. Returns null (payments unavailable, fail closed) unless PAYSTACK_SECRET_KEY is a test
+ * key (`sk_test_...`); a live key is never accepted. A custom base URL (the local fake provider) is honoured only
+ * when APP_ENV=local.
+ */
+export function paystackConfig(): { secretKey: string; baseUrl: string } | null {
+  const secretKey = process.env.PAYSTACK_SECRET_KEY ?? ''
+  if (!/^sk_test_[A-Za-z0-9_]{8,}$/.test(secretKey)) return null
+  const custom = process.env.PAYSTACK_BASE_URL
+  const baseUrl = custom && appEnv() === 'local' ? custom.replace(/\/+$/, '') : PAYSTACK_DEFAULT_URL
+  return { secretKey, baseUrl }
+}

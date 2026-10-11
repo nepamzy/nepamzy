@@ -60,18 +60,18 @@ test.describe('wrong role -> 403', () => {
     { role: 'rider', denied: ['/vendor', '/admin'], allowed: ['/rider', '/orders'] },
     {
       role: 'support_agent',
-      denied: ['/admin/roles', '/vendor', '/rider'],
+      denied: ['/admin/roles', '/vendor', '/rider', '/admin/payments'],
       allowed: ['/admin', '/admin/audit'],
     },
     {
       role: 'finance_admin',
       denied: ['/admin/roles', '/admin/audit', '/admin/applications', '/admin/vendors'],
-      allowed: ['/admin'],
+      allowed: ['/admin', '/admin/payments'],
     },
     {
       role: 'platform_admin',
       denied: ['/vendor', '/rider'],
-      allowed: ['/admin', '/admin/audit', '/admin/roles'],
+      allowed: ['/admin', '/admin/audit', '/admin/roles', '/admin/payments'],
     },
   ]
   for (const m of matrix) {

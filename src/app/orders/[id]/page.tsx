@@ -7,9 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { Timeline } from '@/components/ui/timeline'
-import { mockPaymentsAllowed } from '@/lib/env'
+import { ActionForm } from '@/components/forms/action-form'
+import { mockPaymentsAllowed, paystackConfig } from '@/lib/env'
 import { cancelOrderAction, mockPayAction } from '@/server/modules/cart-and-checkout/actions'
-import { getOrder } from '@/server/modules/orders-and-state-machine/queries'
+import { payWithPaystackAction } from '@/server/modules/payments/actions'
+import {
+  getOrder,
+  getPickupCode,
+  listPaymentTransactions,
+} from '@/server/modules/orders-and-state-machine/queries'
 
 export const metadata: Metadata = { title: 'Order' }
 
@@ -18,6 +24,10 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   if (!found) notFound()
   const { order, items, history, payments } = found
   const unpaid = order.status === 'PENDING_PAYMENT'
+  const paystack = paystackConfig() !== null
+  const pickup = order.status === 'PICKUP_AWAITING_HANDOVER' ? await getPickupCode(order.id) : null
+  const txns = await listPaymentTransactions(order.id)
+  const hasReceipt = !['PENDING_PAYMENT', 'CANCELLED'].includes(order.status)
   const label = (c: string) => ORDER_STATES.find((s) => s.code === c)?.label ?? c
   return (
     <>
@@ -50,13 +60,24 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             )}
           </p>
           <div className="flex flex-wrap gap-3">
+            {paystack && (
+              <ActionForm
+                action={payWithPaystackAction}
+                submitLabel="Pay with Paystack (test mode)"
+                pendingLabel="Opening payment…"
+              >
+                <input type="hidden" name="orderId" value={order.id} />
+              </ActionForm>
+            )}
             {mockPaymentsAllowed() ? (
               <form action={mockPayAction}>
                 <input type="hidden" name="orderId" value={order.id} />
                 <Button type="submit">Pay (test only, no real money)</Button>
               </form>
             ) : (
-              <p className="font-medium text-warning-700">Online payment is not open yet.</p>
+              !paystack && (
+                <p className="font-medium text-warning-700">Online payment is not open yet.</p>
+              )
             )}
             <form action={cancelOrderAction}>
               <input type="hidden" name="orderId" value={order.id} />
@@ -71,6 +92,22 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               in a later release.
             </p>
           )}
+        </Card>
+      )}
+
+      {pickup && (
+        <Card className="mb-5 space-y-2 border-brand-700">
+          <h2 className="text-lg font-bold">Your pickup code</h2>
+          <p
+            className="text-3xl font-bold tracking-widest"
+            aria-label={`Pickup code ${pickup.code.split('').join(' ')}`}
+          >
+            {pickup.code}
+          </p>
+          <p className="text-sm text-muted">
+            Show this code to the vendor when you collect your order, then sign for it. Do not share
+            it with anyone else.
+          </p>
         </Card>
       )}
 
@@ -129,6 +166,21 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               {order.prep_minutes_snapshot
                 ? ` · ready in about ${order.prep_minutes_snapshot} min`
                 : ''}
+            </p>
+          )}
+          {hasReceipt && (
+            <p className="text-sm">
+              <a
+                className="font-semibold text-brand-700 underline"
+                href={`/orders/${order.id}/receipt`}
+              >
+                Download receipt (PDF)
+              </a>
+            </p>
+          )}
+          {txns.length > 0 && (
+            <p className="text-sm text-muted">
+              Card payment (test mode): {txns.map((t) => t.status).join(', ')}
             </p>
           )}
           {payments.length > 0 && (

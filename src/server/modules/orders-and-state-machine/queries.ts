@@ -86,3 +86,48 @@ export async function getOrder(id: string) {
       [],
   }
 }
+
+/** The ordering customer's one-time pickup code (database re-checks identity, aal2 and order status). */
+export async function getPickupCode(orderId: string) {
+  const sb = await createSupabaseServerClient()
+  const { data, error } = await sb.rpc('get_pickup_code', { p_order: orderId })
+  if (error || !data) return null
+  const r = data as { available: boolean; code?: string; expires_at?: string }
+  return r.available && r.code ? { code: r.code, expiresAt: r.expires_at ?? null } : null
+}
+
+export async function getHandoverEvidence(orderId: string) {
+  const sb = await createSupabaseServerClient()
+  const { data } = await sb
+    .from('handover_evidence')
+    .select('recipient_name, signature_png, completed_at')
+    .eq('order_id', orderId)
+    .maybeSingle()
+  return data as { recipient_name: string; signature_png: string; completed_at: string } | null
+}
+
+export async function listPaymentTransactions(orderId: string) {
+  const sb = await createSupabaseServerClient()
+  const { data } = await sb
+    .from('payment_transactions')
+    .select('status, amount_kobo, created_at')
+    .eq('order_id', orderId)
+    .order('created_at')
+  return (data as { status: string; amount_kobo: number; created_at: string }[] | null) ?? []
+}
+
+/** Item lines for several orders at once (vendors need to know what to prepare). RLS applies. */
+export async function listItemsForOrders(orderIds: string[]) {
+  const map = new Map<string, OrderItemRow[]>()
+  if (orderIds.length === 0) return map
+  const sb = await createSupabaseServerClient()
+  const { data } = await sb
+    .from('order_items')
+    .select('id, order_id, product_name, quantity, unit_price_kobo, line_total_kobo, options')
+    .in('order_id', orderIds)
+    .order('product_name')
+  for (const r of (data as (OrderItemRow & { order_id: string })[] | null) ?? []) {
+    map.set(r.order_id, [...(map.get(r.order_id) ?? []), r])
+  }
+  return map
+}

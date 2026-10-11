@@ -128,7 +128,7 @@ test.describe('authenticated shells (real sessions at aal2)', () => {
     {
       role: 'platform_admin',
       label: 'admin',
-      paths: ['/admin', '/admin/applications', '/admin/audit', '/admin/roles'],
+      paths: ['/admin', '/admin/applications', '/admin/audit', '/admin/roles', '/admin/payments'],
     },
   ]
   for (const c of cases) {
