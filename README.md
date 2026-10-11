@@ -2,7 +2,7 @@
 
 A mobile-first campus marketplace and delivery platform for the approved community of the Air Force Institute of Technology (AFIT), Nigeria.
 
-> **Status: Batch 1 built (foundation, design system, authentication, roles, TOTP MFA), awaiting owner review.** The marketplace itself (catalogue, cart, orders, payments, riders, delivery proof, refunds) is **not built yet**. Vendor, rider and admin screens other than sign-in/MFA/roles/audit show clearly labelled sample data. **Not deployed; not for real users or real money.**
+> **Status: Batch 2 built (vendor onboarding, catalogue, browsing, cart, checkout, order creation with a MOCK payment), awaiting owner review.** Real payments, order fulfilment, riders, delivery proof, refunds are **not built yet**. Rider screens and vendor handover show clearly labelled sample data. **Not deployed; not for real users or real money.**
 
 **Status vocabulary:** _Planned_ (designed, not built) → _Implemented_ (code exists) → _Tested_ (automated/manual evidence recorded). _Unverified_ marks assumptions not yet checked. Full table: [`docs/requirements-checklist.md`](docs/requirements-checklist.md).
 
@@ -21,12 +21,13 @@ Students, lecturers, civilian staff, military personnel and other AFIT-authorise
 | Next.js + TypeScript + Tailwind app, installable PWA shell, offline fallback page                                                                 | Implemented, Tested                              |
 | Design system (tokens, buttons, forms, cards, tabs, dialog, toast, tables, timeline, empty/error/loading/offline states, order-status vocabulary) | Implemented, Tested (axe, 360px) — see `/design` |
 | Role shells for customer, vendor, rider, admin (mock data)                                                                                        | Implemented, Tested                              |
-| Public browsing without an account (sample vendors)                                                                                               | Implemented (sample data)                        |
+| Vendor application, admin approval/suspension, shop profile/hours, catalogue with options and stock                                               | Implemented, Tested (DB + e2e)                   |
+| Public browsing/search without an account; cart; checkout; order creation (pickup/delivery); test payment (local only)                            | Implemented, Tested (DB + e2e)                   |
 | Email + password sign-up with emailed confirmation, sign-in, sign-out                                                                             | Implemented, Tested                              |
 | TOTP MFA: enrol, challenge, backup authenticator, removal; enforced in app **and** database                                                       | Implemented, Tested                              |
 | Roles and RLS; administrators grant/revoke roles (audited); append-only audit trail                                                               | Implemented, Tested                              |
 | MFA recovery after losing every authenticator                                                                                                     | **Not implemented — owner decision needed**      |
-| Catalogue, cart, checkout, payments, orders, riders, location, handover proof, refunds, disputes, notifications                                   | **Planned** (Batches 2–6)                        |
+| Real payments (Paystack), vendor order transitions, riders, location, handover proof, refunds, disputes, notifications                            | **Planned** (Batches 2–6)                        |
 
 ## Architecture
 

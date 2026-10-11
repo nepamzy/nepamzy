@@ -1,4 +1,4 @@
-# Requirements checklist (end of Batch 1)
+# Requirements checklist (end of Batch 2)
 
 Legend: ☐ Planned (not built) · ◐ Planned, designed (Phase 0) · ◑ Implemented, not fully tested · ✔ Implemented and Tested · ⛔ Blocked / owner decision.
 
@@ -29,3 +29,17 @@ Legend: ☐ Planned (not built) · ◐ Planned, designed (Phase 0) · ◑ Implem
 | Refunds, returns, disputes                                | Full/partial, caps, idempotency, evidence                                                                                        | 5     | ☐                                                            | —                            |
 | Notifications, reviews, admin, hardening, pilot readiness |                                                                                                                                  | 6     | ☐                                                            | —                            |
 | External                                                  | AFIT permission, Paystack/legal confirmations                                                                                    | —     | ☐ (owner)                                                    | `external-approvals.md`      |
+
+## Batch 2 additions
+
+| Area      | Requirement                                                                                 | Batch | Status                            | Evidence                 |
+| --------- | ------------------------------------------------------------------------------------------- | ----- | --------------------------------- | ------------------------ |
+| Vendors   | Application, admin approve/reject (no self-approval), suspend/reinstate, audit              | 3     | ✔                                 | DB vendors tests, e2e    |
+| Vendors   | Shop profile, weekly hours (Africa/Lagos), temporary closure, staff                         | 3     | ✔                                 | DB + e2e                 |
+| Catalogue | Products, options, stock, availability, archive; integer kobo                               | 3     | ✔ (no images)                     | DB + e2e                 |
+| Browsing  | Anonymous browse/search/filter via function-only read model; suspended/archived hidden      | 4     | ✔                                 | DB public, e2e           |
+| Cart      | One-vendor cart, quantity/option rules, conflict message, server pricing                    | 4     | ✔ (no anonymous cart)             | DB orders, e2e           |
+| Checkout  | Pickup/delivery, approved delivery points, blocked-state messages, aal2                     | 4     | ✔                                 | e2e marketplace          |
+| Orders    | Atomic idempotent creation, immutable snapshots, stock reservation, cancel, expiry, history | 4     | ✔ (expiry not scheduled, K18)     | DB orders + concurrency  |
+| Payments  | Mock payment, local only, fails closed in production mode                                   | 4     | ✔ (mock only; Paystack = Batch 3) | DB + e2e production mode |
+| Quality   | Axe + 360px/desktop on new pages                                                            | 3–4   | ✔ automated; ☐ manual             | e2e                      |

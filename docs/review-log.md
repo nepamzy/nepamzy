@@ -85,3 +85,10 @@ Adversarial review of my own diff and test results; all resolved unless stated.
 | 9   | TOTP replay accepted inside 30 s; no GoTrue-level guess limit; account-scoped lockout enables nuisance lockouts                                                          | spike + tests                    | accepted limitations S1/S3; our rate limits added                                                 |
 
 Open owner decisions are listed in `docs/reports/batch-1.md` §L.
+
+## Batch 2 pre-work findings (self-review, not an independent review)
+
+- Local Postgres 17 provides `pg_trgm`, `btree_gist`, `pg_cron`; chose `ILIKE` + trigram index for search (no external search service).
+- Confirmed by tests that a vendor with no shop sees "No vendor account yet", suspended vendors vanish from public reads and lose write access, and the last-unit race (10 buyers, 3 units) never oversells.
+- Defects found and fixed during build: cart line ordering, radio-group name collisions across option groups, `'use server'` file exporting a sync function, admin applications page embedding an ungranted table, cart "Remove" ineffective, axe contrast on the home search panel, `admin_list_categories` wrongly STABLE (caught by `supabase db lint`).
+- Nothing in this batch has been reviewed by ChatGPT or the owner yet.

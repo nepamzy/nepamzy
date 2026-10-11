@@ -44,3 +44,10 @@ Node 22, pnpm 10, Docker (daemon running), local Supabase stack (`pnpm db:start`
 ## Not tested / manual
 
 Real Android devices and screen readers; actual email deliverability (local sink only); production hosting; load; DB tests and e2e are not yet in CI. See `docs/reports/batch-1.md` §M.
+
+## Batch 2 coverage
+
+- DB (`pnpm test:db`, 97 tests): vendor lifecycle, RLS, public read model, order creation/cancel/expiry/mock-pay, concurrency (last unit, idempotency, double cancel/pay), catalogue hygiene incl. anon allowlist.
+- Unit (`pnpm test`, 107 tests): env/APP_ENV, db-error mapping, form parsing, money input, guard coverage.
+- e2e (`pnpm exec playwright test`, 126 tests over mobile-360 and desktop): `marketplace.spec.ts` (apply→approve→catalogue→browse→cart→MFA→checkout→test pay→vendor sees order→suspension; blocked checkout; double-tap; production-mode server has no test-pay button), axe + no-horizontal-scroll on new pages.
+- Reset the DB (`pnpm db:reset`) before DB tests if earlier e2e runs left data; the vendor-application test is tolerant of leftovers.

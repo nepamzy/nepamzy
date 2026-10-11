@@ -14,3 +14,7 @@ All values below are LOCAL development values for the local Supabase stack. Neve
 Get local values: `./node_modules/.bin/supabase status -o env` (map `API_URL`, `PUBLISHABLE_KEY`, `SECRET_KEY`, `DB_URL`). `src/lib/env.ts` validates with zod, fails fast and reports variable names only.
 
 Dev-script env: `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io` (set by `scripts/*.sh`), `PLAYWRIGHT_CHROMIUM_PATH` (optional).
+
+## `APP_ENV` (Batch 2)
+
+`APP_ENV` = `local` | `staging` | `production`. Anything else, or unset, is treated as `production` (fail closed). The test-payment action exists only when `APP_ENV=local` **and** the database setting `mock_payments_enabled` is true (set only by `supabase/seed.sql`, i.e. local resets). `.env.example` documents it.
