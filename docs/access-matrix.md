@@ -5,38 +5,38 @@ Every function below checks identity, role and assurance level **inside the data
 
 ## Delivery proof (Phase 9)
 
-| Operation | Anonymous | Customer (order owner) | Other customer | Shop | Rider | Support | Finance | Admin |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `delivery_proof_begin(order)` | - | Y (arrival detected; not if they are the assigned rider) | - | - | - | - | - | - |
-| `complete_delivery(order, token, name, drawn signature)` | - | Y (once; own session token) | - | - | - | - | - | - |
-| Read delivery evidence row (`handover_evidence`) | - | own | - | - (pickup evidence only) | - | - (use audited function) | - | - |
-| `staff_get_delivery_proof(order, purpose, include_signature)` | - | - | - | - | - | Y (purpose >= 10 chars, audited) | - | Y (same) |
-| `ops_handle_delivery_exception(order, reason)` | - | - | - | - | - | Y | - | Y |
-| `vendor_find_pickup_by_code(code)` | - | - | - | Y (own shop members; 10 failed tries / 10 min) | - | - | - | - |
-| Mark an order DELIVERED / COMPLETED any other way | - | - | - | - | - | - | - | - |
+| Operation                                                     | Anonymous | Customer (order owner)                                   | Other customer | Shop                                           | Rider | Support                          | Finance | Admin    |
+| ------------------------------------------------------------- | --------- | -------------------------------------------------------- | -------------- | ---------------------------------------------- | ----- | -------------------------------- | ------- | -------- |
+| `delivery_proof_begin(order)`                                 | -         | Y (arrival detected; not if they are the assigned rider) | -              | -                                              | -     | -                                | -       | -        |
+| `complete_delivery(order, token, name, drawn signature)`      | -         | Y (once; own session token)                              | -              | -                                              | -     | -                                | -       | -        |
+| Read delivery evidence row (`handover_evidence`)              | -         | own                                                      | -              | - (pickup evidence only)                       | -     | - (use audited function)         | -       | -        |
+| `staff_get_delivery_proof(order, purpose, include_signature)` | -         | -                                                        | -              | -                                              | -     | Y (purpose >= 10 chars, audited) | -       | Y (same) |
+| `ops_handle_delivery_exception(order, reason)`                | -         | -                                                        | -              | -                                              | -     | Y                                | -       | Y        |
+| `vendor_find_pickup_by_code(code)`                            | -         | -                                                        | -              | Y (own shop members; 10 failed tries / 10 min) | -     | -                                | -       | -        |
+| Mark an order DELIVERED / COMPLETED any other way             | -         | -                                                        | -              | -                                              | -     | -                                | -       | -        |
 
 ## Refunds, returns, reports (Phase 10)
 
-| Operation | Anonymous | Customer (owner) | Other customer | Shop | Rider | Support | Finance | Admin |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `customer_request_refund` | - | Y (finished + paid order) | - | - | - | - | - | - |
-| `refund_request` (finance-created) | - | - | - | - | - | - | Y | Y |
-| `refund_start_review` | - | - | - | - | - | Y (not own) | Y (not own) | Y (not own) |
-| `refund_decide` approve | - | - | - | - | - | only up to `refund_support_approval_limit_kobo` (default 0) | Y (not own) | Y (not own) |
-| `refund_decide` reject | - | - | - | - | - | Y | Y | Y |
-| `refund_begin_execution` (FAKE mode only) | - | - | - | - | - | - | Y (not own request) | Y |
-| `refund_record_outcome` / `refund_reconcile` | - | - | - | - | - | - | Y | Y |
-| `refund_provider_outcome` (provider-event path) | - | - | - | - | - | - | - | service role only |
-| Read refunds table | - | own | - | - | - | Y | Y | Y |
-| Read refund events (internal notes) | - | - | - | - | - | Y | Y | Y |
-| `customer_request_return` | - | Y | - | - | - | - | - | - |
-| `staff_decide_return` | - | - | - | - | - | Y | - | Y |
-| `vendor_confirm_return_received` | - | - | - | Y (own shop) | - | - | - | - |
-| `open_support_case` | - | Y (own paid order) | - | - | - | - | - | - |
-| `case_add_statement` | - | Y (reporter) | - | Y (party) | Y (party) | Y (public or internal) | - | Y |
-| `get_case` | - | own, own side | - | own side, no description | own side, no description | full | - | full |
-| `staff_case_bundle` (neutral evidence) | - | - | - | - | - | Y (audited) | - | Y (audited) |
-| `case_start_review`, `case_decide`, `case_close` | - | - | - | - | - | Y (not own case) | - | Y |
+| Operation                                        | Anonymous | Customer (owner)          | Other customer | Shop                     | Rider                    | Support                                                     | Finance             | Admin             |
+| ------------------------------------------------ | --------- | ------------------------- | -------------- | ------------------------ | ------------------------ | ----------------------------------------------------------- | ------------------- | ----------------- |
+| `customer_request_refund`                        | -         | Y (finished + paid order) | -              | -                        | -                        | -                                                           | -                   | -                 |
+| `refund_request` (finance-created)               | -         | -                         | -              | -                        | -                        | -                                                           | Y                   | Y                 |
+| `refund_start_review`                            | -         | -                         | -              | -                        | -                        | Y (not own)                                                 | Y (not own)         | Y (not own)       |
+| `refund_decide` approve                          | -         | -                         | -              | -                        | -                        | only up to `refund_support_approval_limit_kobo` (default 0) | Y (not own)         | Y (not own)       |
+| `refund_decide` reject                           | -         | -                         | -              | -                        | -                        | Y                                                           | Y                   | Y                 |
+| `refund_begin_execution` (FAKE mode only)        | -         | -                         | -              | -                        | -                        | -                                                           | Y (not own request) | Y                 |
+| `refund_record_outcome` / `refund_reconcile`     | -         | -                         | -              | -                        | -                        | -                                                           | Y                   | Y                 |
+| `refund_provider_outcome` (provider-event path)  | -         | -                         | -              | -                        | -                        | -                                                           | -                   | service role only |
+| Read refunds table                               | -         | own                       | -              | -                        | -                        | Y                                                           | Y                   | Y                 |
+| Read refund events (internal notes)              | -         | -                         | -              | -                        | -                        | Y                                                           | Y                   | Y                 |
+| `customer_request_return`                        | -         | Y                         | -              | -                        | -                        | -                                                           | -                   | -                 |
+| `staff_decide_return`                            | -         | -                         | -              | -                        | -                        | Y                                                           | -                   | Y                 |
+| `vendor_confirm_return_received`                 | -         | -                         | -              | Y (own shop)             | -                        | -                                                           | -                   | -                 |
+| `open_support_case`                              | -         | Y (own paid order)        | -              | -                        | -                        | -                                                           | -                   | -                 |
+| `case_add_statement`                             | -         | Y (reporter)              | -              | Y (party)                | Y (party)                | Y (public or internal)                                      | -                   | Y                 |
+| `get_case`                                       | -         | own, own side             | -              | own side, no description | own side, no description | full                                                        | -                   | full              |
+| `staff_case_bundle` (neutral evidence)           | -         | -                         | -              | -                        | -                        | Y (audited)                                                 | -                   | Y (audited)       |
+| `case_start_review`, `case_decide`, `case_close` | -         | -                         | -              | -                        | -                        | Y (not own case)                                            | -                   | Y                 |
 
 ## Rider terms (K48 correction)
 

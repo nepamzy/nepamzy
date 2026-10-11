@@ -91,22 +91,21 @@ Legend: ☐ Planned (not built) · ◐ Planned, designed (Phase 0) · ◑ Implem
 
 Legend as above. "Tested" means executed locally in this sandbox (GitHub results are in `docs/reports/batch-5.md` section J). Nothing is verified against the real Paystack API or on real devices.
 
-| ID | Requirement | Status | Evidence |
-| --- | --- | --- | --- |
-| A8/K48 | Placeholder rider terms never authorise rider work (database level) | ✔ | `20261014000001`; `riders.test.ts` A8 block; rider e2e |
-| B1/P9-4 | Delivery completion is server-authoritative; the rider has no completion action | ✔ | `complete_delivery`; `delivery.test.ts` (actors, catalog list) |
-| B2/P9-1 | Mandatory drawn signature; empty/tiny/non-PNG/oversize refused; typed refused for deliveries | ✔ | `delivery.test.ts`, `signature.test.ts`, `delivery.spec.ts` |
-| B3/P9-7 | Immutable evidence bound to order + assignment; audit event; receipt (on demand) | ✔ | `handover_evidence` extension; tests |
-| B4/P9-3 | One-time hashed expiring bound proof token; substitution, expiry, replay, reassignment refused | ✔ | `delivery.test.ts` |
-| B5/B8 | One transaction; partial failure leaves no state; exactly one completion under 8 concurrent requests; control-removal | ✔ | `delivery-concurrency.test.ts` |
-| P9-6/P9-8 | Slot freed once, location stored position removed, `completed` status, rider-capacity tests re-run | ✔ | `delivery.test.ts`, `rider-concurrency.test.ts` |
-| 1.4 | Vendor counter: find ONE pending order by code (rate limited); completion still needs code + signature | ✔ | `delivery.test.ts`, `payments-fulfilment.spec.ts` |
-| 1.5 | Supervised exception path that never delivers | ✔ | `ops_handle_delivery_exception`; tests |
-| C1-C4/P10-1,2 | Refund request/approval/execution separated; caps, idempotency, quantities; fake provider only; reconciliation | ✔ (local, fake) | `refunds.test.ts`, `refund-concurrency.test.ts`, `support.spec.ts` |
-| C5/P10-4 | Returns separate from refunds; policy per category configurable; no restock | ✔ (customer-brings only) | `cases-returns.test.ts`; K49 |
-| C6-C7/P10-3,5,6 | Cases with party-scoped statements, neutral bundle, reasoned human decisions, original proof untouched | ✔ | `cases-returns.test.ts`, `support.spec.ts` |
-| C8 | Vendor-rejected paid orders keep the flag -> request -> approval -> execution distinction | ✔ | request on a CANCELLED paid order leaves it CANCELLED |
-| C9 | Audit + events for every step | ✔ | `refund_events`, `case_events`, `audit_events` |
-| Real refund execution | Paystack refund call | ☐ not built (fake only) | K29/K30 |
-| Return rider tasks, QR image, evidence upload, notifications | | ☐ | K49, K51, K54, K55 |
-
+| ID                                                           | Requirement                                                                                                           | Status                   | Evidence                                                           |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------ |
+| A8/K48                                                       | Placeholder rider terms never authorise rider work (database level)                                                   | ✔                        | `20261014000001`; `riders.test.ts` A8 block; rider e2e             |
+| B1/P9-4                                                      | Delivery completion is server-authoritative; the rider has no completion action                                       | ✔                        | `complete_delivery`; `delivery.test.ts` (actors, catalog list)     |
+| B2/P9-1                                                      | Mandatory drawn signature; empty/tiny/non-PNG/oversize refused; typed refused for deliveries                          | ✔                        | `delivery.test.ts`, `signature.test.ts`, `delivery.spec.ts`        |
+| B3/P9-7                                                      | Immutable evidence bound to order + assignment; audit event; receipt (on demand)                                      | ✔                        | `handover_evidence` extension; tests                               |
+| B4/P9-3                                                      | One-time hashed expiring bound proof token; substitution, expiry, replay, reassignment refused                        | ✔                        | `delivery.test.ts`                                                 |
+| B5/B8                                                        | One transaction; partial failure leaves no state; exactly one completion under 8 concurrent requests; control-removal | ✔                        | `delivery-concurrency.test.ts`                                     |
+| P9-6/P9-8                                                    | Slot freed once, location stored position removed, `completed` status, rider-capacity tests re-run                    | ✔                        | `delivery.test.ts`, `rider-concurrency.test.ts`                    |
+| 1.4                                                          | Vendor counter: find ONE pending order by code (rate limited); completion still needs code + signature                | ✔                        | `delivery.test.ts`, `payments-fulfilment.spec.ts`                  |
+| 1.5                                                          | Supervised exception path that never delivers                                                                         | ✔                        | `ops_handle_delivery_exception`; tests                             |
+| C1-C4/P10-1,2                                                | Refund request/approval/execution separated; caps, idempotency, quantities; fake provider only; reconciliation        | ✔ (local, fake)          | `refunds.test.ts`, `refund-concurrency.test.ts`, `support.spec.ts` |
+| C5/P10-4                                                     | Returns separate from refunds; policy per category configurable; no restock                                           | ✔ (customer-brings only) | `cases-returns.test.ts`; K49                                       |
+| C6-C7/P10-3,5,6                                              | Cases with party-scoped statements, neutral bundle, reasoned human decisions, original proof untouched                | ✔                        | `cases-returns.test.ts`, `support.spec.ts`                         |
+| C8                                                           | Vendor-rejected paid orders keep the flag -> request -> approval -> execution distinction                             | ✔                        | request on a CANCELLED paid order leaves it CANCELLED              |
+| C9                                                           | Audit + events for every step                                                                                         | ✔                        | `refund_events`, `case_events`, `audit_events`                     |
+| Real refund execution                                        | Paystack refund call                                                                                                  | ☐ not built (fake only)  | K29/K30                                                            |
+| Return rider tasks, QR image, evidence upload, notifications |                                                                                                                       | ☐                        | K49, K51, K54, K55                                                 |

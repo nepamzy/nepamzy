@@ -74,4 +74,3 @@ Real Android devices and screen readers; actual email deliverability (local sink
 - Unit: `signature.test.ts` (payload validation), `refund-provider.test.ts` (fake provider, fail-closed outside `local`).
 - e2e: `delivery.spec.ts` (recipient confirmation incl. empty/lone-dot signature, double click, expiry, rider has no control, support exception), `support.spec.ts` (refund journey with fake execution and reconciliation; report -> decision -> refund request; return flow), find-by-code added to `payments-fulfilment.spec.ts`, the rider journey now starts on placeholder terms. All run on mobile-360 and desktop with axe and an overflow check on each new page.
 - Convention: e2e tests that need approved rider terms install the synthetic fixture and always restore the placeholder (`afterEach`).
-

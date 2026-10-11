@@ -118,4 +118,3 @@ Open owner decisions are listed in `docs/reports/batch-1.md` §L.
 - **Idempotent replay vs state:** a replayed return request was refused by the state check before the replay lookup; widened the allowed states so a double click returns the first request.
 - **`truncate order_items`** is now refused by the foreign keys from refund/return tables before the immutability trigger fires; the test accepts either message. No weaker protection.
 - Facts about Paystack remain unverified (K19/K30); the fake refund provider says nothing about real behaviour.
-

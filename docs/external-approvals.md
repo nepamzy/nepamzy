@@ -13,16 +13,16 @@
 
 ## Added in Batch 4
 
-| #   | Approval / confirmation                                                                                                       | From            | Blocks                              |
-| --- | ----------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------- |
-| 9   | Approved delivery points, coordinates, geofence sizes and prohibited zones (none held; all current coordinates are synthetic) | AFIT            | Real arrival detection, launch      |
-| 10  | Whether live rider location may be shown to customers at all, and map detail allowed                                          | AFIT            | Live map                            |
-| 11  | Rider terms, conduct rules and privacy notice (current text is a development placeholder)                                     | AFIT + counsel  | Onboarding any real rider           |
-| 12  | Choice and purchase of a routing/map provider (cost + privacy review)                                                         | Owner           | Real route distance/ETA             |
-| 13  | Real-device Android tests of rider location (`docs/testing/android-background-location-test.md`)                              | Owner/devices   | Any claim about background tracking |
-| 14  | Decision on typed acknowledgement as a signature alternative; signature storage location                                      | Owner + counsel | Accessible handover                 |
-| 15  | Rider eligibility, ID/badge, vehicle and insurance rules, and what happens when a rider goes offline mid-route                | AFIT + owner    | Rider onboarding policy             |
-| 16  | AFIT-approved rider terms (also unblocks K48: placeholder terms must never authorise real rider work)                         | AFIT + owner    | Any real rider operation            |
-| 17  | Refund and return policy: partial refunds, service-fee share, who may approve and up to what amount, food/hygiene return rules per category, restocking | Owner + counsel | Any real refund or return |
-| 18  | Written procedure for a recipient who cannot draw a signature, and for a recipient who is not the account holder (K27/K47/K52)                 | Owner + AFIT    | Real deliveries |
-| 19  | Independent verification of real Paystack refund behaviour with owner-controlled test credentials (K19/K29/K30) before any real execution        | Owner           | Refund execution |
+| #   | Approval / confirmation                                                                                                                                 | From            | Blocks                              |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------- |
+| 9   | Approved delivery points, coordinates, geofence sizes and prohibited zones (none held; all current coordinates are synthetic)                           | AFIT            | Real arrival detection, launch      |
+| 10  | Whether live rider location may be shown to customers at all, and map detail allowed                                                                    | AFIT            | Live map                            |
+| 11  | Rider terms, conduct rules and privacy notice (current text is a development placeholder)                                                               | AFIT + counsel  | Onboarding any real rider           |
+| 12  | Choice and purchase of a routing/map provider (cost + privacy review)                                                                                   | Owner           | Real route distance/ETA             |
+| 13  | Real-device Android tests of rider location (`docs/testing/android-background-location-test.md`)                                                        | Owner/devices   | Any claim about background tracking |
+| 14  | Decision on typed acknowledgement as a signature alternative; signature storage location                                                                | Owner + counsel | Accessible handover                 |
+| 15  | Rider eligibility, ID/badge, vehicle and insurance rules, and what happens when a rider goes offline mid-route                                          | AFIT + owner    | Rider onboarding policy             |
+| 16  | AFIT-approved rider terms (also unblocks K48: placeholder terms must never authorise real rider work)                                                   | AFIT + owner    | Any real rider operation            |
+| 17  | Refund and return policy: partial refunds, service-fee share, who may approve and up to what amount, food/hygiene return rules per category, restocking | Owner + counsel | Any real refund or return           |
+| 18  | Written procedure for a recipient who cannot draw a signature, and for a recipient who is not the account holder (K27/K47/K52)                          | Owner + AFIT    | Real deliveries                     |
+| 19  | Independent verification of real Paystack refund behaviour with owner-controlled test credentials (K19/K29/K30) before any real execution               | Owner           | Refund execution                    |

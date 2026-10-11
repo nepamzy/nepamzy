@@ -83,4 +83,3 @@ Synthetic data only; no real AFIT locations; no analytics; logs redact secrets; 
 - **No automatic guilt.** Only `case_decide` can set a decision (tested). GPS or a missing location update never decides a case; the bundle contains arrival time and geofence radius, never raw coordinates.
 - **Parties.** Each side of a case sees its own statements plus support's public ones; the customer cannot read vendor/rider statements through the table either.
 - Limitations: see K49-K55 in `known-issues.md`.
-
