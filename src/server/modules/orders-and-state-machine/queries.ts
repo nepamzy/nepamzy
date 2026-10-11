@@ -143,7 +143,9 @@ export async function getHandoverEvidence(orderId: string) {
   const sb = await createSupabaseServerClient()
   const { data } = await sb
     .from('handover_evidence')
-    .select('recipient_name, signature_png, completed_at, capture_method, typed_text')
+    .select(
+      'recipient_name, signature_png, completed_at, capture_method, typed_text, evidence_kind, arrival_detected_at',
+    )
     .eq('order_id', orderId)
     .maybeSingle()
   return data as {
@@ -152,6 +154,8 @@ export async function getHandoverEvidence(orderId: string) {
     completed_at: string
     capture_method: 'drawn' | 'typed_acknowledgement'
     typed_text: string | null
+    evidence_kind: 'pickup' | 'delivery'
+    arrival_detected_at: string | null
   } | null
 }
 

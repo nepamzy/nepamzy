@@ -277,9 +277,41 @@ export async function makeShopWithPoint(ownerId: string, productName: string) {
   return { vendorId: v!.id as string, slug, pointId: dp!.id as string, pointLabel: label }
 }
 
+export const APPROVED_FIXTURE_TERMS = 'test-approved-fixture-1'
+
+/** TEST-ONLY: installs a synthetic non-placeholder terms version and makes it current (A8). Never real AFIT terms. */
+export async function installApprovedTermsFixture() {
+  const a = admin()
+  const { error } = await a.from('rider_terms_versions').upsert(
+    {
+      version: APPROVED_FIXTURE_TERMS,
+      title: 'TEST FIXTURE - not real terms',
+      body: 'Synthetic test fixture. Not approved by AFIT.',
+      is_placeholder: false,
+    },
+    { onConflict: 'version', ignoreDuplicates: true },
+  )
+  if (error) throw error
+  const { error: e2 } = await a
+    .from('platform_settings')
+    .update({ value: APPROVED_FIXTURE_TERMS })
+    .eq('key', 'rider_terms_current_version')
+  if (e2) throw e2
+}
+
+/** Puts the shipped placeholder back as the current terms so no test leaves the fixture behind. */
+export async function restorePlaceholderTerms() {
+  const { error } = await admin()
+    .from('platform_settings')
+    .update({ value: 'dev-placeholder-1' })
+    .eq('key', 'rider_terms_current_version')
+  if (error) throw error
+}
+
 /** An approved rider with the current terms accepted (optionally with an active shift) - created directly, no UI. */
 export async function seedRider(opts: { active?: boolean } = {}) {
   const a = admin()
+  await installApprovedTermsFixture()
   const u = await createUser('seedrider', ['rider'])
   const { error } = await a.from('rider_profiles').insert({
     user_id: u.id,
@@ -374,3 +406,63 @@ export async function countGeolocationCalls(context: import('@playwright/test').
 }
 export const geoCalls = (page: Page) =>
   page.evaluate(() => (window as unknown as { __geoCalls?: number }).__geoCalls ?? 0)
+
+/**
+ * (Batch 5) A delivery order that has reached ARRIVAL_DETECTED with an active en-route assignment, created directly in
+ * the database (the journey up to this point is covered by the rider journey test). SYNTHETIC data only.
+ */
+export async function seedArrivedOrder(
+  shop: { vendorId: string; pointId: string; pointLabel: string },
+  customerId: string,
+  rider: { id: string; shift: string | null },
+) {
+  const a = admin()
+  const order_number = `AFM-T${tag()}`
+  const { data: o, error } = await a
+    .from('orders')
+    .insert({
+      order_number,
+      customer_id: customerId,
+      vendor_id: shop.vendorId,
+      vendor_name: 'Fixture shop',
+      fulfilment: 'delivery',
+      delivery_point_id: shop.pointId,
+      delivery_point_label: shop.pointLabel,
+      pickup_location_snapshot: 'Counter (placeholder)',
+      status: 'ARRIVAL_DETECTED',
+      items_total_kobo: 300000,
+      delivery_fee_kobo: 50000,
+      platform_fee_kobo: 15000,
+      total_kobo: 365000,
+      idempotency_key: `fixture-${tag()}-arrived-key`,
+    })
+    .select('id, order_number')
+    .single()
+  if (error) throw error
+  const { error: ie } = await a.from('order_items').insert({
+    order_id: o!.id,
+    product_name: 'Jollof rice (fixture)',
+    base_price_kobo: 150000,
+    unit_price_kobo: 150000,
+    quantity: 2,
+    line_total_kobo: 300000,
+  })
+  if (ie) throw ie
+  const { data: asg, error: ae } = await a
+    .from('delivery_assignments')
+    .insert({
+      order_id: o!.id,
+      rider_id: rider.id,
+      shift_id: rider.shift,
+      slot: 1,
+      status: 'en_route',
+      arrival_detected_at: new Date().toISOString(),
+      dest_lat: SYNTH_POINT.lat,
+      dest_lng: SYNTH_POINT.lng,
+      dest_radius_m: SYNTH_POINT.radius,
+    })
+    .select('id')
+    .single()
+  if (ae) throw ae
+  return { id: o!.id as string, number: order_number, assignmentId: asg!.id as string }
+}

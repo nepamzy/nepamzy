@@ -17,6 +17,8 @@ export async function buildReceiptPdf(a: {
     signaturePng: Uint8Array | null
     method: 'drawn' | 'typed_acknowledgement'
     typedText: string | null
+    kind?: 'pickup' | 'delivery'
+    arrivalAt?: string | null
   } | null
 }): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
@@ -64,7 +66,11 @@ export async function buildReceiptPdf(a: {
   y -= 10
   line(`Status: ${a.order.status}`, { gap: 20 })
   if (a.evidence) {
-    line('Handover', { b: true })
+    line(a.evidence.kind === 'delivery' ? 'Delivery confirmed by the recipient' : 'Handover', {
+      b: true,
+    })
+    if (a.evidence.kind === 'delivery' && a.evidence.arrivalAt)
+      line(`Rider arrival detected: ${new Date(a.evidence.arrivalAt).toLocaleString('en-NG')}`)
     line(`Received by: ${a.evidence.recipient}`)
     line(`At: ${new Date(a.evidence.completedAt).toLocaleString('en-NG')}`, { gap: 8 })
     if (a.evidence.method === 'typed_acknowledgement' || !a.evidence.signaturePng) {

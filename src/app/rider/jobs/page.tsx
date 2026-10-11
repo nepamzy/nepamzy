@@ -88,8 +88,11 @@ export default async function Jobs() {
               )}
               {a.arrival_detected_at && (
                 <p className="font-semibold">
-                  Arrival detected. The recipient confirms receipt with their code and signature
-                  (coming in the next release).
+                  Arrival detected. Now the recipient confirms receipt in their own app and signs.
+                  {a.order_status === 'AWAITING_RECIPIENT_PROOF' &&
+                    ' They have started: wait for them to finish.'}{' '}
+                  This app cannot mark the order delivered for you; if the recipient is not there,
+                  report it below.
                 </p>
               )}
               <ReportIssueForm assignmentId={a.assignment_id} />

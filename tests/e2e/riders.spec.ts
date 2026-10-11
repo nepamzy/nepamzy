@@ -7,10 +7,12 @@ import {
   countGeolocationCalls,
   fixPricing,
   geoCalls,
+  installApprovedTermsFixture,
   makeShopWithPoint,
   openAnonymous,
   openSession,
   openSessionFor,
+  restorePlaceholderTerms,
   seedOfferOrders,
   seedRider,
   statusIn,
@@ -18,6 +20,12 @@ import {
 } from './helpers'
 
 test.describe.configure({ mode: 'serial' })
+
+// A8/K48: the shipped terms are a placeholder. Tests that need an approved version install a synthetic fixture and always
+// put the placeholder back.
+test.afterEach(async () => {
+  await restorePlaceholderTerms()
+})
 
 /** Chromium only emits a position event when the emulated position CHANGES, so nudge it first. */
 async function moveTo(
@@ -106,6 +114,14 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await countGeolocationCalls(riderUser.context)
   await riderUser.context.grantPermissions(['geolocation'], { origin: 'http://127.0.0.1:3000' })
   await riderUser.context.setGeolocation(FAR)
+  await r.goto('/rider')
+  // placeholder terms (the shipped default): the database refuses, and the UI says why instead of offering Go Active
+  await a11yClean(r, '/rider (terms awaiting approval)')
+  await expect(r.getByText(/rider terms are still awaiting approval/)).toBeVisible()
+  await expect(r.getByRole('button', { name: 'Go Active' })).toHaveCount(0)
+  await expect(r.getByRole('button', { name: 'I accept the rider terms' })).toHaveCount(0)
+  expect(await geoCalls(r)).toBe(0)
+  await installApprovedTermsFixture()
   await r.goto('/rider')
   await a11yClean(r, '/rider (terms)')
   await expect(r.getByText('I accept the rider terms')).toBeVisible()

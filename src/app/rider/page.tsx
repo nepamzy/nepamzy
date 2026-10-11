@@ -34,7 +34,21 @@ export default async function RiderHome() {
           . This app never collects your location until you choose <strong>Go Active</strong>, and
           only shares it while you hold an accepted delivery.
         </p>
-        {!me.terms_acknowledged ? (
+        {!me.terms_approved ? (
+          <div role="status" className="space-y-2">
+            <p className="rounded-[var(--radius-control)] bg-warning-50 px-3 py-2 font-medium text-warning-700">
+              The rider terms are still awaiting approval, so you cannot go active or accept
+              deliveries yet. Please check back later.
+            </p>
+            <details>
+              <summary className="cursor-pointer font-semibold">Read the draft terms</summary>
+              <p className="mt-2 text-sm font-medium text-warning-700">
+                Draft only: not approved by AFIT or counsel.
+              </p>
+              <p className="mt-2 whitespace-pre-line text-sm">{me.terms_body}</p>
+            </details>
+          </div>
+        ) : !me.terms_acknowledged ? (
           <TermsForm
             version={me.terms_version}
             title={me.terms_title}

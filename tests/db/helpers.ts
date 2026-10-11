@@ -319,6 +319,10 @@ export async function purge(
       ])
     if (o.users?.length)
       await c.query(`delete from auth.users where id = any($1::uuid[])`, [o.users])
+    // committed rider fixtures install an approved TEST terms version (A8); put the shipped placeholder back
+    await c.query(
+      `update public.platform_settings set value='"dev-placeholder-1"'::jsonb where key='rider_terms_current_version'`,
+    )
   } finally {
     await c.query(`set session_replication_role = origin`)
   }

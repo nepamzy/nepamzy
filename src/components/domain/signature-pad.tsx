@@ -2,6 +2,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
+const MIN_INK_PIXELS = 150
+
+/** Counts dark pixels so an accidental tap or a lone dot does not pass as a signature. */
+function inkPixels(c: HTMLCanvasElement): number {
+  const g = c.getContext('2d')
+  if (!g) return 0
+  const d = g.getImageData(0, 0, c.width, c.height).data
+  let n = 0
+  for (let i = 0; i < d.length; i += 4) if (d[i]! < 128) n++
+  return n
+}
+
 /** Draw-to-sign box. Writes a PNG data URL into a hidden `signature` field; touch, pen and mouse supported. */
 export function SignaturePad({ label = 'Recipient signature' }: { label?: string }) {
   const canvas = useRef<HTMLCanvasElement>(null)
@@ -29,7 +41,8 @@ export function SignaturePad({ label = 'Recipient signature' }: { label?: string
     const form = canvas.current?.closest('form')
     if (!form) return
     const onFormData = (e: FormDataEvent) => {
-      if (signedRef.current && canvas.current)
+      // A single tap or a dot is not a signature: require a minimum amount of ink before the image is sent at all.
+      if (signedRef.current && canvas.current && inkPixels(canvas.current) >= MIN_INK_PIXELS)
         e.formData.set('signature', canvas.current.toDataURL('image/png'))
     }
     form.addEventListener('formdata', onFormData)

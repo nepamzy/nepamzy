@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { RiderPickupForm } from '@/components/domain/rider-pickup-form'
+import { FindByCode } from '@/components/domain/find-by-code'
 import { HandoverForm } from '@/components/domain/handover-form'
 import { Card, PageHeader } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/states'
@@ -43,6 +44,7 @@ export default async function Handover() {
         </section>
       )}
       <h2 className="mb-3 text-lg font-bold">Customer pickups</h2>
+      {waiting.length > 0 && <FindByCode />}
       {waiting.length === 0 ? (
         <EmptyState title="Nothing waiting for pickup">
           Orders you mark as ready for pickup appear here.
@@ -50,7 +52,7 @@ export default async function Handover() {
       ) : (
         <div className="space-y-5">
           {waiting.map((o) => (
-            <Card key={o.id} className="space-y-3">
+            <Card key={o.id} id={`order-${o.id}`} className="space-y-3">
               <h2 className="text-lg font-bold">{o.order_number}</h2>
               <HandoverForm orderId={o.id} typedEnabled={typedEnabled} />
             </Card>

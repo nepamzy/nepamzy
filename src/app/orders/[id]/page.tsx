@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DeliveryProofPanel } from '@/components/domain/delivery-proof-panel'
 import { OrderStatusPill, ORDER_STATES } from '@/components/domain/order-status'
 import { OrderTracking } from '@/components/domain/order-tracking'
 import { Badge } from '@/components/ui/badge'
@@ -119,6 +120,26 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <Card className="mb-5 space-y-2">
             <h2 className="text-lg font-bold">Delivery tracking</h2>
             <OrderTracking orderId={order.id} />
+          </Card>
+        )}
+
+      {order.fulfilment === 'delivery' &&
+        ['ARRIVAL_DETECTED', 'AWAITING_RECIPIENT_PROOF'].includes(order.status) && (
+          <Card className="mb-5 border-brand-700">
+            <DeliveryProofPanel
+              orderId={order.id}
+              orderNumber={order.order_number}
+              vendorName={order.vendor_name}
+              deliverTo={order.delivery_point_label ?? ''}
+              totalKobo={order.total_kobo}
+              items={items.map((i) => ({
+                id: i.id,
+                name: i.product_name,
+                quantity: i.quantity,
+                lineKobo: i.line_total_kobo,
+              }))}
+              helpHref={`/orders/${order.id}/help`}
+            />
           </Card>
         )}
 

@@ -8,6 +8,7 @@ export type MyRider = {
   terms_title: string
   terms_body: string
   terms_is_placeholder: boolean
+  terms_approved: boolean
   terms_acknowledged: boolean
   active: boolean
   shift_started_at: string | null

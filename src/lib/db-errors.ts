@@ -31,6 +31,8 @@ const MESSAGES: Record<string, string> = {
   already_a_rider: 'This account is already a rider.',
   rider_not_approved: 'Your rider account is not approved.',
   terms_not_acknowledged: 'Please read and accept the rider terms first.',
+  terms_not_approved:
+    'The rider terms are still awaiting approval, so deliveries cannot start yet. Please check back later.',
   terms_version_mismatch: 'The rider terms changed. Reload the page and read the latest version.',
   not_active: 'Go Active first.',
   capacity_reached: 'You already have five active deliveries. Finish one first.',

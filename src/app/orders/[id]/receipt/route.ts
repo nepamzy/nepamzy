@@ -23,6 +23,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
           : null,
         method: ev.capture_method,
         typedText: ev.typed_text,
+        kind: ev.evidence_kind,
+        arrivalAt: ev.arrival_detected_at,
       }
     : null
   const pdf = await buildReceiptPdf({ order, items, history, evidence })

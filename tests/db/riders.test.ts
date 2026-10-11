@@ -211,6 +211,110 @@ describe('rider application and approval', () => {
   })
 })
 
+describe('A8/K48: placeholder rider terms never authorise rider work', () => {
+  const usePlaceholder = (c: Parameters<typeof orderStatus>[0]) =>
+    c.query(
+      `update public.platform_settings set value='"dev-placeholder-1"'::jsonb where key='rider_terms_current_version'`,
+    )
+
+  it('the shipped default terms are a placeholder, and the seeded version is flagged as one', async () => {
+    const { rows } = await pool.query(
+      `select is_placeholder from public.rider_terms_versions where version='dev-placeholder-1'`,
+    )
+    expect(rows[0].is_placeholder).toBe(true)
+  })
+
+  it('placeholder terms are refused for acknowledgement, Go Active and accepting a delivery', async () => {
+    await isoTx(async (c) => {
+      const r = await mkRider(c, { active: true })
+      const o = await deliveryOrder(c, { ready: true })
+      await usePlaceholder(c)
+      expect(
+        (await callFails(c, rider(r.id), `select public.rider_ack_terms('dev-placeholder-1')`))
+          .message,
+      ).toMatch(/terms_not_approved/)
+      // a rider who acknowledged earlier (approved fixture) and has an active shift still cannot take NEW work
+      expect(
+        (await callFails(c, rider(r.id), `select public.rider_accept_order($1)`, [o.order]))
+          .message,
+      ).toMatch(/terms_not_approved/)
+      await c.query(`delete from public.rider_shifts where rider_id=$1`, [r.id])
+      expect((await callFails(c, rider(r.id), `select public.rider_go_active()`)).message).toMatch(
+        /terms_not_approved/,
+      )
+      // even with an acknowledgement row for the placeholder (inserted directly), the database still refuses
+      await c.query(
+        `insert into public.rider_terms_acknowledgements (user_id, version) values ($1,'dev-placeholder-1')`,
+        [r.id],
+      )
+      expect((await callFails(c, rider(r.id), `select public.rider_go_active()`)).message).toMatch(
+        /terms_not_approved/,
+      )
+      expect(await orderStatus(c, o.order)).toBe('AWAITING_RIDER')
+    })
+  })
+
+  it('an unknown or missing current version is refused like a placeholder', async () => {
+    await isoTx(async (c) => {
+      const r = await mkRider(c, { active: false })
+      await c.query(
+        `update public.platform_settings set value='"no-such-version"'::jsonb where key='rider_terms_current_version'`,
+      )
+      expect((await callFails(c, rider(r.id), `select public.rider_go_active()`)).message).toMatch(
+        /terms_not_approved/,
+      )
+      await c.query(`delete from public.platform_settings where key='rider_terms_current_version'`)
+      expect((await callFails(c, rider(r.id), `select public.rider_go_active()`)).message).toMatch(
+        /terms_not_approved/,
+      )
+    })
+  })
+
+  it('approved (non-placeholder) terms work end to end, and switching back to a placeholder blocks again', async () => {
+    await isoTx(async (c) => {
+      const r = await mkRider(c, { active: false })
+      const o = await deliveryOrder(c, { ready: true })
+      await callJson(c, rider(r.id), `select public.rider_go_active() r`)
+      const acc = await callJson(c, rider(r.id), `select public.rider_accept_order($1) r`, [
+        o.order,
+      ])
+      expect(acc.already_assigned).toBe(false)
+      const me = await callJson(c, rider(r.id), `select public.my_rider() r`)
+      expect(me.terms_approved).toBe(true)
+      expect(me.terms_is_placeholder).toBe(false)
+      await usePlaceholder(c)
+      const me2 = await callJson(c, rider(r.id), `select public.my_rider() r`)
+      expect(me2.terms_approved).toBe(false)
+      expect(me2.terms_is_placeholder).toBe(true)
+      const o2 = await deliveryOrder(c, { ready: true })
+      expect(
+        (await callFails(c, rider(r.id), `select public.rider_accept_order($1)`, [o2.order]))
+          .message,
+      ).toMatch(/terms_not_approved/)
+    })
+  })
+
+  it('rider_terms_versions cannot be edited through the API (approved wording needs direct database access)', async () => {
+    await isoTx(async (c) => {
+      const r = await mkRider(c, { active: false })
+      const e = await callFails(
+        c,
+        rider(r.id),
+        `update public.rider_terms_versions set is_placeholder=false where version='dev-placeholder-1'`,
+      )
+      expect(e.code).toBe(PRIV_DENIED)
+      const admin = await createUser(c, 'admin')
+      await giveRole(c, admin, 'platform_admin')
+      const e2 = await callFails(
+        c,
+        AAL2(admin),
+        `update public.rider_terms_versions set is_placeholder=false where version='dev-placeholder-1'`,
+      )
+      expect(e2.code).toBe(PRIV_DENIED)
+    })
+  })
+})
+
 describe('terms acknowledgement and shifts', () => {
   it('Go Active is refused until the CURRENT terms version is acknowledged, then recorded and idempotent', async () => {
     await isoTx(async (c) => {
@@ -236,7 +340,7 @@ describe('terms acknowledgement and shifts', () => {
       expect(s1).toBe(s2)
       // a NEW terms version needs a new acknowledgement
       await c.query(
-        `insert into public.rider_terms_versions (version,title,body) values ('v2','t','b')`,
+        `insert into public.rider_terms_versions (version,title,body,is_placeholder) values ('v2','t','b',false)`,
       )
       await c.query(
         `update public.platform_settings set value='"v2"'::jsonb where key='rider_terms_current_version'`,
