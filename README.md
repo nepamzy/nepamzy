@@ -2,7 +2,7 @@
 
 A mobile-first campus marketplace and delivery platform for the approved community of the Air Force Institute of Technology (AFIT), Nigeria.
 
-> **Status: Batch 4 built (rider onboarding, shifts, capacity-five assignment, vendor-to-rider handover, synthetic live location, server-side arrival detection, plus Batch 3 corrections), awaiting owner review.** Delivery proof/recipient completion, refund execution, disputes and notifications are **not built yet**. Background GPS tracking is **unverified**. **Not deployed; not for real users or real money.**
+> **Status: Batch 5 built (rider-terms correction K48; recipient-only delivery completion with a drawn signature and one-time proof token; refund workflow with caps, idempotency and a FAKE provider only; returns; support cases), awaiting owner review.** Notifications, reviews, real refund execution, return logistics and evidence uploads are **not built yet**. Real Paystack behaviour and background GPS are **unverified**. **Not deployed; not for real users or real money.**
 
 **Status vocabulary:** _Planned_ (designed, not built) → _Implemented_ (code exists) → _Tested_ (automated/manual evidence recorded). _Unverified_ marks assumptions not yet checked. Full table: [`docs/requirements-checklist.md`](docs/requirements-checklist.md).
 

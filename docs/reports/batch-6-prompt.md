@@ -2,7 +2,7 @@
 
 **Phase 11 (notifications, reviews and administration tools) + Phase 12 (security hardening, reliability and pilot readiness)**
 
-Status: **DRAFT prepared before Batch 5 is implemented.** It must be re-read and updated with the real outcome, findings and owner corrections from Batch 5 before use. **The owner must review and explicitly approve this complete prompt before implementation begins.** Do not claim ChatGPT or the owner reviewed anything until evidence is submitted and reviewed.
+Status: **DRAFT, updated after Batch 5 was implemented (see `docs/reports/batch-5.md`).** It must still be re-read and updated with the owner's own review findings and corrections from Batch 5 before use. **The owner must review and explicitly approve this complete prompt before implementation begins.** Do not claim ChatGPT or the owner reviewed anything until evidence is submitted and reviewed.
 
 ---
 
@@ -16,14 +16,16 @@ Next.js App Router, React, TypeScript strict, Tailwind PWA; Supabase Postgres/Au
 
 ### 0.2 Corrections and facts from Batch 4 and earlier (verify, preserve)
 
-- **Rider terms placeholder defect (K48).** Verified during Batch 5 prompt preparation: `rider_go_active` and `rider_accept_order` check only that the rider acknowledged the _current_ terms version and never reject a version flagged `is_placeholder`. Batch 5 must correct this at the database level with tests; Batch 6 must verify the correction exists, passes, and that no real rider operation can run on placeholder terms.
+- **Rider terms placeholder defect (K48): corrected in Batch 5** (`20261014000001`): `rider_ack_terms`, `rider_go_active` and `rider_accept_order` refuse a placeholder, unknown or missing terms version (`terms_not_approved`). Batch 6 must re-verify it and that no real rider operation can run on placeholder terms; AFIT-approved wording is still needed (K38).
 - **Pickup secret.** Codes derive from server-only `PICKUP_CODE_SECRET` (fails closed); the database stores a nonce and a hash only. Rotation (K44) and unlock/re-issue (K28) remain owner decisions.
 - **Signature.** Drawn signature mandatory; typed acknowledgement disabled (`typed_signature_enabled=false`) and not approved as a substitute (K27); signature storage decision (K26) open; evidence immutable once accepted; capture method preserved in receipts and audit.
 - **Payments.** Real Paystack behaviour is **unverified** (K19/K30). Fake-provider tests are not proof of real behaviour. No live payments, real refunds, payouts, settlement or escrow claims.
 - **Riders.** Capacity five and one active rider per order are database-enforced; location only during an active shift with an active delivery; **Android background tracking is UNVERIFIED (K34)**; polling not Realtime (K37); no real map provider (K35); synthetic coordinates only (K36).
 - **K45** (unsafe/impossible batches beyond the cap) and **K46** (rider identity and vehicle verification) remain unresolved operational requirements; software approval is not proof of identity, vehicle, background or institutional checks.
 - **Jobs.** Expiry and location-purge jobs exist but are not scheduled (K18/K39); who schedules them is an owner decision.
-- No QR image unless Batch 5 delivered one safely; a short code is not a QR image. No notifications existed before Batch 6.
+- **Batch 5 facts to build on (verify, do not re-decide):** only the customer (recipient) can start and complete a delivery (`delivery_proof_begin`, `complete_delivery`; drawn signature; one-time hashed proof token bound to the current assignment); the rider has no completion action; typed acknowledgement is OFF and refused for deliveries; supervised exceptions go through `ops_handle_delivery_exception` and never deliver. Refunds are request -> review -> approval -> execution -> outcome with caps, idempotency, triggers and a FAKE provider only (`provider_mode`, fails closed outside `local`); a refund decision from a case only creates a request. Returns are separate (customer brings; no restock). Cases are decided only by people. Access rules: `docs/access-matrix.md`; transitions: `docs/state-machines.md`; ADR 0003.
+- **New Batch 5 known issues Batch 6 must carry:** K49 (no return logistics/rider return tasks), K50 (placeholder policy values: fee share, support approval limit, return policy), K51 (no evidence upload, no signature viewer UI), K52 (recipient is the account holder; cannot-draw path is support), K53 (points without coordinates; receipt rendered on demand), K54 (no notifications: Phase 11), K55 (proof token is internal; no QR). Batch 6 notifications must cover refund, return and report status changes without leaking amounts, payment references, locations or tokens.
+- No QR image exists. No notifications existed before Batch 6.
 
 ### 0.3 Open owner decisions (do not decide)
 

@@ -376,7 +376,7 @@ Stop and report if: the local stack cannot run; a security-critical or financial
 
 ---
 
-## APPENDIX — BATCH 6 PROMPT (verbatim copy of `docs/reports/batch-6-prompt.md` at the time of writing)
+## APPENDIX — BATCH 6 PROMPT (copy as it was when this prompt was approved; the CURRENT version is `docs/reports/batch-6-prompt.md`, updated after Batch 5)
 
 # AFIT MARKET — MASTER BATCH 6 PROMPT
 
