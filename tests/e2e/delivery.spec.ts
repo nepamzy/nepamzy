@@ -40,7 +40,7 @@ test('recipient confirms receipt: summary, signature, one completion; the rider 
 }, info) => {
   const customer = await openSession(browser, info, 'dcust')
   const ownerId = (await openSession(browser, info, 'downer')).user.id
-  const shop = await makeShopWithPoint(ownerId, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(ownerId, `Fixture dish ${tag()}`)
   const rider = await seedRider({ active: true })
   const o = await seedArrivedOrder(shop, customer.user.id, rider)
   const c = customer.page
@@ -131,7 +131,7 @@ test('an expired or restarted confirmation cannot be used; the screen explains w
 }, info) => {
   const customer = await openSession(browser, info, 'dcust2')
   const ownerId = (await openSession(browser, info, 'downer2')).user.id
-  const shop = await makeShopWithPoint(ownerId, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(ownerId, `Fixture dish ${tag()}`)
   const rider = await seedRider({ active: true })
   const o = await seedArrivedOrder(shop, customer.user.id, rider)
   const c = customer.page
@@ -166,7 +166,7 @@ test('support handles a recipient who never shows up: the parcel is released, a 
 }, info) => {
   const customer = await openSession(browser, info, 'dcust3')
   const ownerId = (await openSession(browser, info, 'downer3')).user.id
-  const shop = await makeShopWithPoint(ownerId, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(ownerId, `Fixture dish ${tag()}`)
   const rider = await seedRider({ active: true })
   const o = await seedArrivedOrder(shop, customer.user.id, rider)
   await admin().from('rider_issues').insert({

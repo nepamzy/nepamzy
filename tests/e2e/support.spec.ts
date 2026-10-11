@@ -43,7 +43,7 @@ test('refund journey: request -> review -> approval (not paid) -> FAKE execution
   const support = await openSession(browser, info, 'ssup', ['support_agent'])
   const finance = await openSession(browser, info, 'sfin', ['finance_admin'])
   const stranger = await openSession(browser, info, 'sstr')
-  const shop = await makeShopWithPoint(owner.user.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.user.id, `Fixture dish ${tag()}`)
   const o = await seedPaidCompletedOrder(shop, customer.user.id)
   const c = customer.page
 
@@ -174,7 +174,7 @@ test('report -> support decision -> a refund REQUEST (not a refund); return appr
   const customer = await openSession(browser, info, 'rcust')
   const owner = await openSession(browser, info, 'rowner', ['vendor_owner'])
   const support = await openSession(browser, info, 'rsup', ['support_agent'])
-  const shop = await makeShopWithPoint(owner.user.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.user.id, `Fixture dish ${tag()}`)
   const o = await seedPaidCompletedOrder(shop, customer.user.id)
   const c = customer.page
 
