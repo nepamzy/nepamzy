@@ -109,3 +109,13 @@ Open owner decisions are listed in `docs/reports/batch-1.md` §L.
 - Verified from the repository: `rider_go_active` / `rider_accept_order` do not reject placeholder rider terms (recorded as K48, not fixed; no application code changed).
 - CI checked through the GitHub API: Batch 4 implementation `1f6c8c1` (runs #15/#16), docs `eecc4d2` (#17/#18) and `402c95a` (#19/#20) all concluded success; job logs not opened.
 - Nothing here was reviewed by ChatGPT or approved by the owner. No Phase 9, 10, 11 or 12 work was started.
+
+## 12 Oct 2026 - Batch 5 implementation notes (engineer's own observations; not reviewed by ChatGPT or the owner)
+
+- **K48 fixed at the database level.** Terms checks moved into helper functions; tests install a synthetic approved fixture and the purge helper restores the placeholder so committed fixtures never leave the shipped default changed.
+- **Policy leak found by my own test and fixed:** the first version of the `case_statements` read policy let the customer read vendor and rider statements through the table. It now allows only customer and support-public statements; the function view was already scoped.
+- **Two backstops matter for refunds:** the trigger that locks the order and re-checks the ledger is what keeps the cap when the function-level lock is removed; the control-removal tests prove it and prove that removing both really breaks the cap.
+- **Idempotent replay vs state:** a replayed return request was refused by the state check before the replay lookup; widened the allowed states so a double click returns the first request.
+- **`truncate order_items`** is now refused by the foreign keys from refund/return tables before the immutability trigger fires; the test accepts either message. No weaker protection.
+- Facts about Paystack remain unverified (K19/K30); the fake refund provider says nothing about real behaviour.
+

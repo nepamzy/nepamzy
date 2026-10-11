@@ -67,3 +67,11 @@ Real Android devices and screen readers; actual email deliverability (local sink
 - Unit: geometry/fix checks, geofence, routing adapter (fake + labelled straight line), pickup-code derivation, `pickupCodeSecret` fail-closed.
 - e2e: `riders.spec.ts` (full rider journey with a geolocation call counter, synthetic Playwright geolocation, privacy checks, stale label, geofence arrival; capacity/denied-permission/Go-Inactive; Permissions-Policy; wrong-account 403s).
 - Convention: tests that count rows globally clear rider data inside their own rolled-back transaction (`isoTx`); append-only tables (payment events) need unique ids per run.
+
+## Batch 5 coverage
+
+- DB: `delivery.test.ts` (completion happy path, every refusal, actors, evidence privacy, exceptions, find-by-code), `delivery-concurrency.test.ts` (8 simultaneous completions; control removal incl. all-layers-removed), `refunds.test.ts` (request, caps, items, discount/fee arithmetic, roles, separation of duties, fake execution, reconciliation, backstop triggers, reads), `refund-concurrency.test.ts` (cap under 8 simultaneous requests; control removal; idempotency; approval/execution once), `cases-returns.test.ts` (returns, cases, party scoping, bundle, decisions, exceptions), `riders.test.ts` (A8/K48 block). `rider-helpers.ts` installs a clearly synthetic approved terms fixture (never shipped; the seeded default stays the placeholder) and `purge` restores it.
+- Unit: `signature.test.ts` (payload validation), `refund-provider.test.ts` (fake provider, fail-closed outside `local`).
+- e2e: `delivery.spec.ts` (recipient confirmation incl. empty/lone-dot signature, double click, expiry, rider has no control, support exception), `support.spec.ts` (refund journey with fake execution and reconciliation; report -> decision -> refund request; return flow), find-by-code added to `payments-fulfilment.spec.ts`, the rider journey now starts on placeholder terms. All run on mobile-360 and desktop with axe and an overflow check on each new page.
+- Convention: e2e tests that need approved rider terms install the synthetic fixture and always restore the placeholder (`afterEach`).
+

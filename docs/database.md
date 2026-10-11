@@ -57,3 +57,18 @@ All commerce tables (Batch 2+), retention jobs, location tables, storage buckets
 **Settings added** (placeholders, validated by `set_platform_setting`): `rider_terms_current_version`, `handover_token_ttl_minutes`, `location_max_accuracy_m`, `location_max_age_seconds`, `location_min_interval_seconds`, `location_stale_after_seconds`, `arrival_max_accuracy_m`, `arrival_max_age_seconds`, `default_geofence_radius_m`, `location_history_retention_hours`, `typed_signature_enabled`.
 
 **Invariant layers** - I1 (<=5 active per rider): rider-row lock -> `unique(rider_id, slot)`. I2 (<=1 active per order): order-row lock -> unique partial index -> conditional update in `step_order`.
+
+## Batch 5 additions (migrations `20261014000001` - `000003`)
+
+**K48 (000001):** `app_private.current_terms_version`, `require_approved_terms`, `require_terms_ack`; `rider_ack_terms`, `rider_go_active`, `rider_accept_order` and `my_rider` replaced so a placeholder, unknown or missing terms version raises `terms_not_approved`.
+
+**Phase 9 (000002):** assignment status `completed` (+ `completed_at`; the two active-assignment unique indexes list their statuses explicitly, so completion frees the rider's slot and the order); `handover_evidence` extended (`evidence_kind` pickup|delivery, `assignment_id`, `proof_session_id`, `arrival_detected_at`, shape constraint: deliveries are drawn only); `delivery_proof_sessions` (hash only, expiring, one live per assignment, 5 wrong tries); `delivery_proof_begin` (recipient; ARRIVAL_DETECTED -> AWAITING_RECIPIENT_PROOF), `complete_delivery` (one transaction: validate -> consume token -> evidence -> AWAITING_RECIPIENT_PROOF -> DELIVERED -> COMPLETED -> assignment `completed` -> stop stored location); `staff_get_delivery_proof` (audited); `vendor_find_pickup_by_code` + `code_lookup_attempts`; evidence read policy narrowed (customer, and the shop for pickup only). Setting `delivery_proof_ttl_minutes`.
+
+**Phase 10 (000003):** `refunds` state machine `requested -> under_review -> approved -> processing -> succeeded | failed | reconciliation_required` (or `rejected`), `refund_items`, `refund_events`, ledger `refund_id`; `support_cases`, `case_statements`, `case_events`; `return_requests`, `return_request_items`. Functions are listed in `docs/access-matrix.md`. Settings `refund_fee_policy`, `refund_support_approval_limit_kobo`, `return_policy` (validated by `set_platform_setting`).
+
+**Invariant layers**
+- Delivery completion once: order-row lock -> assignment-row lock + status re-check -> proof-session lock + `used_at is null` -> evidence primary key (order) -> conditional update in `step_order`. `tests/db/delivery-concurrency.test.ts` removes them one by one; with every layer removed duplicates DO happen.
+- Refund cap (R1): order-row lock -> balance check -> trigger `refunds_cap_guard` (its own order lock + sum re-check). Item quantities: trigger `refund_items_cap_guard` / `return_items_cap_guard`. State machine: trigger `refunds_state_guard` / `return_state_guard`. `tests/db/refund-concurrency.test.ts`.
+- Idempotency: unique `(requested_by, idempotency_key)` on refunds, `(reporter_id, idempotency_key)` on cases, `(customer_id, idempotency_key)` on returns; one open case per (order, type).
+- Provider boundary: `refund_begin_execution` accepts mode `fake` only; the real modes raise `provider_not_enabled`. Success needs a provider reference (unique) and writes one `refund_paid` ledger entry per refund (unique `refund_id`).
+

@@ -23,3 +23,6 @@
 | 14  | Decision on typed acknowledgement as a signature alternative; signature storage location                                      | Owner + counsel | Accessible handover                 |
 | 15  | Rider eligibility, ID/badge, vehicle and insurance rules, and what happens when a rider goes offline mid-route                | AFIT + owner    | Rider onboarding policy             |
 | 16  | AFIT-approved rider terms (also unblocks K48: placeholder terms must never authorise real rider work)                         | AFIT + owner    | Any real rider operation            |
+| 17  | Refund and return policy: partial refunds, service-fee share, who may approve and up to what amount, food/hygiene return rules per category, restocking | Owner + counsel | Any real refund or return |
+| 18  | Written procedure for a recipient who cannot draw a signature, and for a recipient who is not the account holder (K27/K47/K52)                 | Owner + AFIT    | Real deliveries |
+| 19  | Independent verification of real Paystack refund behaviour with owner-controlled test credentials (K19/K29/K30) before any real execution        | Owner           | Refund execution |

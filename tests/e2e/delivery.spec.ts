@@ -52,8 +52,11 @@ test('recipient confirms receipt: summary, signature, one completion; the rider 
   await expect(rmain.getByText(o.number)).toBeVisible()
   await expect(rmain).toContainText(/Arrival detected/)
   await expect(rmain).toContainText(/cannot mark the order delivered/)
+  // nothing in the rider's own deliveries lets them deliver, complete or confirm (other offers' Accept buttons are elsewhere)
   await expect(
-    riderSession.page.getByRole('button', { name: /deliver|complete|confirm/i }),
+    rmain
+      .getByRole('region', { name: 'My deliveries' })
+      .getByRole('button', { name: /deliver|complete|confirm/i }),
   ).toHaveCount(0)
 
   // ---- the recipient ----

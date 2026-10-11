@@ -72,3 +72,15 @@ Rider location only after Go Active; stale/inaccurate fixes ignored; GPS never c
 ## 7. Privacy
 
 Synthetic data only; no real AFIT locations; no analytics; logs redact secrets; emails never stored in audit details (hash prefix only). Retention periods and data-subject workflows are placeholders pending legal advice.
+
+## 5c. Delivery proof, refunds and reports (Batch 5)
+
+- **No rider completion.** No function a rider can use sets DELIVERED/COMPLETED. The recipient (the account holder) completes the delivery in their own app with a drawn signature after the server detected arrival. A rider who is also the customer cannot confirm their own delivery. A test lists every function that can reach the proof/completed states; adding one needs a conscious change to that list.
+- **Proof token.** 6 random bytes (12 hex characters), only a SHA-256 hash stored, bound to the order and the current assignment, 20 minutes (placeholder), one live per assignment, locked after 5 wrong tries, invalidated when the screen is restarted or the assignment is released. It is a different secret from the customer pickup code and from the rider handover token; substituting either fails.
+- **Typed acknowledgement** is refused for deliveries even if the owner flag is switched on (decision K27 outstanding). The signature is never labelled otherwise: receipts and audit show the real capture method.
+- **Evidence privacy.** Signature rows are readable by the customer (and by the shop for pickups only). Support sees metadata through `staff_case_bundle` (no image, no coordinates) and the image only through `staff_get_delivery_proof` (purpose required, audited). Cases never edit proof.
+- **Refunds.** Request, approval and execution are separate roles/steps; nobody decides or runs their own request; the provider is FAKE and labelled everywhere (customer and staff screens, `provider_mode`); real modes fail closed. An unknown outcome keeps the money reserved and opens a reconciliation flag; a contradictory late report changes nothing and opens a flag.
+- **No automatic guilt.** Only `case_decide` can set a decision (tested). GPS or a missing location update never decides a case; the bundle contains arrival time and geofence radius, never raw coordinates.
+- **Parties.** Each side of a case sees its own statements plus support's public ones; the customer cannot read vendor/rider statements through the table either.
+- Limitations: see K49-K55 in `known-issues.md`.
+
