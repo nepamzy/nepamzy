@@ -39,6 +39,8 @@ export type Assignment = {
 }
 export type RiderIssue = {
   id: string
+  order_id: string
+  order_status: string
   order_number: string
   reason: string
   note: string | null

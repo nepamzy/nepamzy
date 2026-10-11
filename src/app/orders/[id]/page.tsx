@@ -202,6 +202,16 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           )}
           {hasReceipt && (
             <p className="text-sm">
+              <Link
+                className="font-semibold text-brand-700 underline"
+                href={`/orders/${order.id}/help`}
+              >
+                Problem with this order? Report it, or ask for a refund or return
+              </Link>
+            </p>
+          )}
+          {hasReceipt && (
+            <p className="text-sm">
               <a
                 className="font-semibold text-brand-700 underline"
                 href={`/orders/${order.id}/receipt`}

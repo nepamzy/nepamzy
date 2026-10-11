@@ -528,6 +528,25 @@ begin
                 from public.refunds r where r.order_id = p_order));
 end $$;
 
+
+-- What is still refundable / returnable per line, for the customer's help page.
+create function public.my_order_item_balances(p_order uuid) returns jsonb
+language plpgsql security definer set search_path = ''
+as $$
+declare v_actor uuid := (select auth.uid());
+begin
+  if v_actor is null then raise exception 'authentication required' using errcode = '28000'; end if;
+  if not app_private.is_aal2() then raise exception 'MFA (aal2) required' using errcode = '42501'; end if;
+  if not exists (select 1 from public.orders where id = p_order and customer_id = v_actor) then raise exception 'forbidden' using errcode = '42501'; end if;
+  return (select coalesce(jsonb_agg(jsonb_build_object('id', i.id, 'name', i.product_name, 'bought', i.quantity,
+      'unit_price_kobo', i.unit_price_kobo,
+      'refund_left', i.quantity - coalesce((select sum(ri.quantity) from public.refund_items ri join public.refunds r on r.id = ri.refund_id
+          where ri.order_item_id = i.id and r.status in ('requested', 'under_review', 'approved', 'processing', 'succeeded', 'reconciliation_required')), 0),
+      'return_left', i.quantity - coalesce((select sum(qi.quantity) from public.return_request_items qi join public.return_requests q on q.id = qi.return_id
+          where qi.order_item_id = i.id and q.status <> 'rejected'), 0)) order by i.product_name), '[]'::jsonb)
+    from public.order_items i where i.order_id = p_order);
+end $$;
+
 -- ---------------------------------------------------------------------------------------------
 -- Support cases (disputes)
 -- ---------------------------------------------------------------------------------------------
@@ -1020,7 +1039,7 @@ end $$;
 create function public.ops_handle_delivery_exception(p_order uuid, p_reason text) returns jsonb
 language plpgsql security definer set search_path = ''
 as $$
-declare v_actor uuid := app_private.require_ops(); o public.orders%rowtype; a public.delivery_assignments%rowtype; v_case jsonb; v_id uuid; v_no text;
+declare v_actor uuid := app_private.require_ops(); o public.orders%rowtype; a public.delivery_assignments%rowtype; v_id uuid; v_no text;
 begin
   if p_reason is null or char_length(btrim(p_reason)) < 10 or char_length(p_reason) > 500 then raise exception 'reason_required' using errcode = '22023'; end if;
   perform app_private.lock_order_row(p_order);
@@ -1049,6 +1068,21 @@ begin
   perform app_private.case_log(v_id, v_actor, 'opened_by_support', null, 'under_review', btrim(p_reason));
   perform app_private.audit_write(v_actor, 'delivery.exception_handled', 'order', p_order::text, jsonb_build_object('case', v_id, 'assignment', a.id));
   return jsonb_build_object('case_id', v_id, 'case_no', v_no);
+end $$;
+
+
+-- The rider-issues list also needs the order id so support can start a supervised exception from it.
+create or replace function public.list_rider_issues() returns jsonb
+language plpgsql security definer set search_path = ''
+as $$
+begin
+  perform app_private.require_ops();
+  return (select coalesce(jsonb_agg(jsonb_build_object('id', i.id, 'order_id', i.order_id, 'order_status', o.status, 'order_number', o.order_number,
+            'reason', i.reason, 'note', i.note, 'created_at', i.created_at, 'assignment_id', i.assignment_id, 'assignment_status', d.status)
+            order by i.created_at), '[]'::jsonb)
+          from public.rider_issues i join public.orders o on o.id = i.order_id
+          left join public.delivery_assignments d on d.id = i.assignment_id
+          where i.status = 'open');
 end $$;
 
 -- ---------------------------------------------------------------------------------------------
@@ -1098,6 +1132,7 @@ begin
     'public.refund_reconcile(uuid, text, text, text)',
     'public.staff_list_refunds(text)',
     'public.my_order_refunds(uuid)',
+    'public.my_order_item_balances(uuid)',
     'public.open_support_case(uuid, text, text, text)',
     'public.case_add_statement(uuid, text, boolean)',
     'public.get_case(uuid)',

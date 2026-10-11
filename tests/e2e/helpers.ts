@@ -466,3 +466,63 @@ export async function seedArrivedOrder(
   if (ae) throw ae
   return { id: o!.id as string, number: order_number, assignmentId: asg!.id as string }
 }
+
+/**
+ * (Batch 5) A paid, COMPLETED pickup order with two lines (2 x 1,500 and 1 x 1,000 naira = 4,000 + 5% fee = 4,200 naira received),
+ * created directly in the database. SYNTHETIC data only.
+ */
+export async function seedPaidCompletedOrder(shop: { vendorId: string }, customerId: string) {
+  const a = admin()
+  const order_number = `AFM-T${tag()}`
+  const { data: o, error } = await a
+    .from('orders')
+    .insert({
+      order_number,
+      customer_id: customerId,
+      vendor_id: shop.vendorId,
+      vendor_name: 'Fixture shop',
+      fulfilment: 'pickup',
+      pickup_location_snapshot: 'Counter (placeholder)',
+      status: 'COMPLETED',
+      items_total_kobo: 400000,
+      delivery_fee_kobo: 0,
+      platform_fee_kobo: 20000,
+      total_kobo: 420000,
+      idempotency_key: `fixture-${tag()}-paid-key`,
+    })
+    .select('id')
+    .single()
+  if (error) throw error
+  const { data: items, error: ie } = await a
+    .from('order_items')
+    .insert([
+      {
+        order_id: o!.id,
+        product_name: 'Jollof rice (fixture)',
+        base_price_kobo: 150000,
+        unit_price_kobo: 150000,
+        quantity: 2,
+        line_total_kobo: 300000,
+      },
+      {
+        order_id: o!.id,
+        product_name: 'Zobo drink (fixture)',
+        base_price_kobo: 100000,
+        unit_price_kobo: 100000,
+        quantity: 1,
+        line_total_kobo: 100000,
+      },
+    ])
+    .select('id, product_name')
+  if (ie) throw ie
+  const { error: le } = await a
+    .from('ledger_entries')
+    .insert({ order_id: o!.id, entry_type: 'payment_received', amount_kobo: 420000 })
+  if (le) throw le
+  return {
+    id: o!.id as string,
+    number: order_number,
+    jollofId: items!.find((i) => i.product_name.startsWith('Jollof'))!.id as string,
+    zoboId: items!.find((i) => i.product_name.startsWith('Zobo'))!.id as string,
+  }
+}

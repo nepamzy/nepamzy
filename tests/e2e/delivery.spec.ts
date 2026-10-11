@@ -157,3 +157,46 @@ test('an expired or restarted confirmation cannot be used; the screen explains w
   await expect.poll(async () => (await orderRow(o.id)).status).toBe('COMPLETED')
   await customer.context.close()
 })
+
+test('support handles a recipient who never shows up: the parcel is released, a report opens, nothing is marked delivered', async ({
+  browser,
+}, info) => {
+  const customer = await openSession(browser, info, 'dcust3')
+  const ownerId = (await openSession(browser, info, 'downer3')).user.id
+  const shop = await makeShopWithPoint(ownerId, `Rice ${tag()}`)
+  const rider = await seedRider({ active: true })
+  const o = await seedArrivedOrder(shop, customer.user.id, rider)
+  await admin().from('rider_issues').insert({
+    assignment_id: o.assignmentId,
+    order_id: o.id,
+    rider_id: rider.id,
+    reason: 'recipient_unavailable',
+    note: 'Waited ten minutes at the point',
+  })
+  const support = await openSession(browser, info, 'dsup', ['support_agent'])
+  const s = support.page
+  await s.goto('/admin/rider-issues')
+  await a11yClean(s, '/admin/rider-issues')
+  const card = s.locator('main').getByText(o.number).locator('xpath=ancestor::div[.//summary][1]')
+  await card.getByText(/Handle a parcel that is on its way/).click()
+  await card.getByLabel('What happened?').fill('Recipient never showed up at the delivery point')
+  await clickAndWait(s, () =>
+    card.getByRole('button', { name: 'Release parcel and open a report' }).click(),
+  )
+  await expect.poll(async () => (await orderRow(o.id)).status).toBe('DISPUTED')
+  expect(await evidenceCount(o.id)).toBe(0)
+  const a = (
+    await admin().from('delivery_assignments').select('status').eq('id', o.assignmentId).single()
+  ).data!
+  expect(a.status).toBe('released')
+  const cases = (await admin().from('support_cases').select('case_no, status').eq('order_id', o.id))
+    .data!
+  expect(cases).toHaveLength(1)
+  expect(cases[0]!.status).toBe('under_review')
+  // the customer can see the report, and the old confirmation screen no longer offers a confirmation
+  await customer.page.goto(`/orders/${o.id}`)
+  await expect(customer.page.getByRole('heading', { name: /Your rider has arrived/ })).toHaveCount(
+    0,
+  )
+  await Promise.all([customer.context.close(), support.context.close()])
+})

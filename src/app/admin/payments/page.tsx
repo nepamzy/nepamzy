@@ -23,6 +23,10 @@ const WHY: Record<string, string> = {
   unknown_reference: 'A payment event arrived for a reference we do not know.',
   vendor_rejected_paid_order:
     'The vendor rejected an order that had been paid. A refund is needed.',
+  refund_outcome_unknown:
+    'A refund was started but its outcome is not known. Check the real outcome in Refunds before anything else happens to it.',
+  refund_outcome_conflict:
+    'A refund that already had a final outcome was told a different outcome. Nothing was changed; a person must look.',
 }
 
 export default async function PaymentsAdmin() {

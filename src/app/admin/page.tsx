@@ -15,6 +15,13 @@ const CARDS = [
   ['/admin/riders', 'Riders', 'Approve rider applications; suspend or reinstate riders.'],
   ['/admin/rider-issues', 'Rider issues', 'Problems reported by riders (support).'],
   ['/admin/payments', 'Payments', 'Reconciliation flags and refund requests (test mode).'],
+  [
+    '/admin/refunds',
+    'Refunds',
+    'Review, approve and (fake-)execute refund requests. Approval and execution are separate.',
+  ],
+  ['/admin/cases', 'Reports', 'Customer reports and disputes (support).'],
+  ['/admin/returns', 'Returns', 'Decide return requests (support).'],
   ['/admin/audit', 'Audit trail', 'Read-only record of important actions.'],
   ['/admin/roles', 'Roles', 'Grant or revoke roles (administrators only).'],
 ]

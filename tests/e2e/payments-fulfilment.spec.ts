@@ -140,6 +140,14 @@ test('Paystack test payment -> vendor accepts, prepares, readies -> pickup code 
 
   // handover: wrong code, missing signature, then the real thing
   await v.goto('/vendor/handover')
+  // finding an order by its code only POINTS at the order; it never completes it
+  await v.getByLabel('Code the customer shows you').fill('NOTACODE')
+  await clickAndWait(v, () => v.getByRole('button', { name: 'Find order' }).click())
+  await expect(v.getByText('No pickup is waiting for that code at your shop.')).toBeVisible()
+  await v.getByLabel('Code the customer shows you').fill(code.toLowerCase())
+  await clickAndWait(v, () => v.getByRole('button', { name: 'Find order' }).click())
+  await expect(v.getByText(/Go to this order to complete the handover/)).toBeVisible()
+  expect((await orderRow(orderId)).status).toBe('PICKUP_AWAITING_HANDOVER')
   await v.getByLabel('Pickup code from the customer').fill('WRONG123')
   await v.getByLabel('Recipient name').fill('Ada Student')
   const pad = v.locator('canvas')

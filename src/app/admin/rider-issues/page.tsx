@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { ReleaseForm, ResolveIssueForm } from '@/components/domain/rider-admin-forms'
+import { OpsExceptionForm } from '@/components/domain/support-forms'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/states'
@@ -45,6 +46,21 @@ export default async function RiderIssues() {
                   </summary>
                   <div className="mt-2">
                     <ReleaseForm assignmentId={i.assignment_id} />
+                  </div>
+                </details>
+              )}
+              {[
+                'PICKED_UP_BY_RIDER',
+                'EN_ROUTE',
+                'ARRIVAL_DETECTED',
+                'AWAITING_RECIPIENT_PROOF',
+              ].includes(i.order_status) && (
+                <details>
+                  <summary className="cursor-pointer font-semibold">
+                    Handle a parcel that is on its way (recipient unavailable, rider cannot finish)
+                  </summary>
+                  <div className="mt-2">
+                    <OpsExceptionForm orderId={i.order_id} />
                   </div>
                 </details>
               )}

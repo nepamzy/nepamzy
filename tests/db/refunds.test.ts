@@ -252,7 +252,6 @@ describe('approval is not execution: roles, separation of duties and the provide
     await withTx(async (c) => {
       const o = await paidOrder(c)
       const sup = await staff(c, 'support_agent')
-      const fin = await staff(c, 'finance_admin')
       const r = await requestRefund(c, o.cust, o.order, null)
       // the customer and the shop have no review or decision powers
       for (const who of [AAL2(o.cust), AAL2(o.owner), rider(o.cust), AAL1(sup)]) {

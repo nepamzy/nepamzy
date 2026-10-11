@@ -83,6 +83,18 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
     requirement: { roles: ['platform_admin', 'finance_admin'], aal: 'aal2' },
   },
   {
+    prefix: '/admin/cases',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/returns',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/refunds',
+    requirement: { roles: ['platform_admin', 'support_agent', 'finance_admin'], aal: 'aal2' },
+  },
+  {
     prefix: '/admin/audit',
     requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
   },
@@ -100,6 +112,8 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   { prefix: '/apply', requirement: { roles: ['customer'], aal: 'aal2' } },
   { prefix: '/rider-apply', requirement: { roles: ['customer'], aal: 'aal2' } },
   { prefix: '/account', requirement: { aal: 'aal2' } },
+  // Reports (support cases): customers, shops and riders who are a party see their own; the database decides which.
+  { prefix: '/cases', requirement: { aal: 'aal2' } },
   { prefix: '/mfa', requirement: { aal: 'aal1', mfaSetup: true } },
 ]
 
