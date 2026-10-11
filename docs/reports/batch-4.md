@@ -114,7 +114,7 @@ Run `docs/testing/android-background-location-test.md` on the target Android pho
 
 ## N. Completion assessment
 
-**CONDITIONALLY COMPLETE.** All Phase 7 and 8 exit criteria that can be tested without real devices, real coordinates or a real provider are met with executed evidence (six simultaneous accepts cannot exceed five; two riders cannot take one order; tracking is off by default; privacy tests pass; stale/inaccurate GPS and client claims cannot establish arrival; no rider action completes an order). Conditions: R21 device evidence, K45, the open owner decisions in §L, and the CI result in §G.2 being green.
+**CONDITIONALLY COMPLETE.** All Phase 7 and 8 exit criteria that can be tested without real devices, real coordinates or a real provider are met with executed evidence (six simultaneous accepts cannot exceed five; two riders cannot take one order; tracking is off by default; privacy tests pass; stale/inaccurate GPS and client claims cannot establish arrival; no rider action completes an order). Conditions: R21 device evidence, K45, the open owner decisions in §L, and the CI result in §G.2 (green on the implementation commit).
 
 ## O. Next phase prompt
 
@@ -126,7 +126,7 @@ Run `docs/testing/android-background-location-test.md` on the target Android pho
 
 _No review has taken place. This is evidence for the owner to submit._
 
-1. **Report:** this file. 2. **Changed files:** `git diff --stat daea95f 1f6c8c1` and §C. 3. **Test results and commands:** §G. 4. **Concurrency evidence:** §G.4 and `tests/db/rider-concurrency.test.ts`. 5. **CI for the implementation commit:** the section below. 6. **Unresolved defects and owner decisions:** §I, §L, `docs/known-issues.md` K18–K47. 7. **Next prompt:** `docs/reports/batch-5-prompt.md`.
+1. **Report:** this file. 2. **Changed files:** `git diff --stat daea95f 1f6c8c1` and §C. 3. **Test results and commands:** §G. 4. **Concurrency evidence:** §G.4 and `tests/db/rider-concurrency.test.ts`. 5. **CI for the implementation commit:** §G.2 (runs #15/#16 success). 6. **Unresolved defects and owner decisions:** §I, §L, `docs/known-issues.md` K18–K47. 7. **Next prompt:** `docs/reports/batch-5-prompt.md`.
 2. **Security-critical code to inspect:**
    - `20261013000001_*.sql`: `pickup_code_register`, `get_pickup_code`, `complete_pickup` (capture method), `vendor_transition_order` (mark_ready no longer derives the code).
    - `20261013000002_*.sql`: `rider_accept_order`, `rider_go_inactive`, `release_assignment`, `rider_issue_handover_token`, `vendor_confirm_rider_pickup`, `set_rider_status`, `require_rider`, the two partial unique indexes, grants block.
