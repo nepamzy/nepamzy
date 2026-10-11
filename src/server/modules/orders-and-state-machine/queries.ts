@@ -1,6 +1,10 @@
 import 'server-only'
 import { z } from 'zod'
+import { pickupCodeSecret } from '@/lib/env'
+import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServiceClient } from '@/lib/supabase/service'
+import { derivePickupCode, hashPickupCode } from './pickup-code'
 
 export type OrderRow = {
   id: string
@@ -87,23 +91,68 @@ export async function getOrder(id: string) {
   }
 }
 
-/** The ordering customer's one-time pickup code (database re-checks identity, aal2 and order status). */
+/**
+ * The ordering customer's one-time pickup code. The database proves identity/aal2/status and hands back a nonce;
+ * the code is derived here from the server-only secret. If the secret is missing we return nothing (fail closed).
+ */
 export async function getPickupCode(orderId: string) {
   const sb = await createSupabaseServerClient()
   const { data, error } = await sb.rpc('get_pickup_code', { p_order: orderId })
   if (error || !data) return null
-  const r = data as { available: boolean; code?: string; expires_at?: string }
-  return r.available && r.code ? { code: r.code, expiresAt: r.expires_at ?? null } : null
+  const r = data as {
+    available: boolean
+    nonce?: string
+    registered?: boolean
+    expires_at?: string
+  }
+  if (!r.available || !r.nonce) return null
+  try {
+    const code = derivePickupCode(pickupCodeSecret(), orderId, r.nonce)
+    if (!r.registered) await registerPickupCode(orderId, code)
+    return { code, expiresAt: r.expires_at ?? null }
+  } catch (e) {
+    logger.error('pickup code unavailable', { err: String(e) })
+    return null
+  }
+}
+
+/** Stores the hash of the derived code (only if none is stored yet). Service role; the code itself is never stored. */
+export async function registerPickupCode(orderId: string, code: string) {
+  await createSupabaseServiceClient().rpc('pickup_code_register', {
+    p_order: orderId,
+    p_hash: hashPickupCode(code),
+  })
+}
+
+/** Called right after a vendor marks a pickup order ready, so the hash exists before the customer opens the page. */
+export async function registerPickupCodeForOrder(orderId: string) {
+  const svc = createSupabaseServiceClient()
+  const { data } = await svc
+    .from('pickup_codes')
+    .select('nonce, code_hash')
+    .eq('order_id', orderId)
+    .maybeSingle()
+  if (!data || data.code_hash) return
+  await registerPickupCode(
+    orderId,
+    derivePickupCode(pickupCodeSecret(), orderId, data.nonce as string),
+  )
 }
 
 export async function getHandoverEvidence(orderId: string) {
   const sb = await createSupabaseServerClient()
   const { data } = await sb
     .from('handover_evidence')
-    .select('recipient_name, signature_png, completed_at')
+    .select('recipient_name, signature_png, completed_at, capture_method, typed_text')
     .eq('order_id', orderId)
     .maybeSingle()
-  return data as { recipient_name: string; signature_png: string; completed_at: string } | null
+  return data as {
+    recipient_name: string
+    signature_png: string | null
+    completed_at: string
+    capture_method: 'drawn' | 'typed_acknowledgement'
+    typed_text: string | null
+  } | null
 }
 
 export async function listPaymentTransactions(orderId: string) {

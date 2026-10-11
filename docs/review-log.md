@@ -92,3 +92,13 @@ Open owner decisions are listed in `docs/reports/batch-1.md` §L.
 - Confirmed by tests that a vendor with no shop sees "No vendor account yet", suspended vendors vanish from public reads and lose write access, and the last-unit race (10 buyers, 3 units) never oversells.
 - Defects found and fixed during build: cart line ordering, radio-group name collisions across option groups, `'use server'` file exporting a sync function, admin applications page embedding an ungranted table, cart "Remove" ineffective, axe contrast on the home search panel, `admin_list_categories` wrongly STABLE (caught by `supabase db lint`).
 - Nothing in this batch has been reviewed by ChatGPT or the owner yet.
+
+## Batch 4 findings (self-review, not an independent review)
+
+- **Pepper in the database (Batch 3 residual) - fixed.** The code-derivation secret now lives in `PICKUP_CODE_SECRET`; the migration drops the secrets table and derivation function. Tests prove the database exposes only a nonce and hash.
+- **`Permissions-Policy: geolocation=()` blocked rider location everywhere** (set in Batch 1). Found when the browser test reported "permission denied" despite a granted permission. Now `geolocation=(self)` under `/rider` only; tested.
+- **Chromium stops a `watchPosition` after a timeout error** when the device has not moved; the client now restarts the watch (and uses `maximumAge: 0`).
+- **React resets forms after a server action**, so a success message disappears when the page re-renders into a different state; browser tests assert the resulting state instead.
+- **Concurrency**: order exclusivity has three layers; capacity has two. Removing the lock alone never breaks either invariant, which is why the control-removal tests remove layers together.
+- **Batch 1 stub replaced**: `stub_claim_slot`/`stub_capacity_slots` and their test were removed in favour of the real capacity rule.
+- Facts about Paystack remain unverified (K30). Nothing in this batch was reviewed by ChatGPT or the owner.

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { OrderStatusPill, ORDER_STATES } from '@/components/domain/order-status'
+import { OrderTracking } from '@/components/domain/order-tracking'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
@@ -110,6 +111,16 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           </p>
         </Card>
       )}
+
+      {order.fulfilment === 'delivery' &&
+        ['RIDER_ASSIGNED', 'PICKED_UP_BY_RIDER', 'EN_ROUTE', 'ARRIVAL_DETECTED'].includes(
+          order.status,
+        ) && (
+          <Card className="mb-5 space-y-2">
+            <h2 className="text-lg font-bold">Delivery tracking</h2>
+            <OrderTracking orderId={order.id} />
+          </Card>
+        )}
 
       <div className="grid gap-5 md:grid-cols-2">
         <Card className="space-y-3">

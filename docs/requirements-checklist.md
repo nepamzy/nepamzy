@@ -1,4 +1,4 @@
-# Requirements checklist (end of Batch 3)
+# Requirements checklist (end of Batch 4)
 
 Legend: ☐ Planned (not built) · ◐ Planned, designed (Phase 0) · ◑ Implemented, not fully tested · ✔ Implemented and Tested · ⛔ Blocked / owner decision.
 
@@ -56,3 +56,33 @@ Legend: ☐ Planned (not built) · ◐ Planned, designed (Phase 0) · ◑ Implem
 | Handover | One-time code (hashed), mandatory signature, evidence, replay/wrong-order tests       | 6     | ✔                                       | DB fulfilment, e2e          |
 | Receipts | PDF receipt for customer and shop                                                     | 6     | ✔                                       | e2e                         |
 | Ops      | Expiry job route; request id in logs; CI job for DB+e2e                               | 5–6   | ✔ route/logs; ✔ CI job passed on GitHub | e2e, unit                   |
+
+## Batch 4 additions (R-numbers from the owner's Batch 4 v2 prompt)
+
+| ID     | Requirement                                                         | Status                            | Evidence                                          |
+| ------ | ------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------- |
+| R1     | Rider approval, protected access, MFA                               | ✔                                 | `riders.test.ts`, route policy, e2e 403s          |
+| R2     | Terms acknowledgement before first activation (placeholder terms)   | ✔ (terms text ⛔ owner/counsel)   | `riders.test.ts`, e2e                             |
+| R3     | Rider profiles, shifts, current location, limited history           | ✔                                 | migrations 000002/000003, RLS tests               |
+| R4     | Explicit Go Active / Inactive; no geolocation call before Go Active | ✔                                 | e2e geolocation counter                           |
+| R5     | Safe shift end (none / release / refuse)                            | ✔                                 | `riders.test.ts`, e2e                             |
+| R6     | Atomic five-delivery maximum                                        | ✔                                 | `rider-concurrency.test.ts` incl. control-removal |
+| R7     | Assigned orders, pickup, destination, distance, ETA                 | ✔ (fake/straight-line, labelled)  | e2e                                               |
+| R8     | No manual coordinates / client-claimed arrival                      | ✔                                 | catalog test, no endpoint                         |
+| R9     | Server geofence with freshness + accuracy validation                | ✔                                 | `location.test.ts`, unit                          |
+| R10    | Rider issue reporting                                               | ✔                                 | `riders.test.ts`, e2e                             |
+| R11    | No rider-controlled completion                                      | ✔                                 | catalog + journey tests                           |
+| R12    | Assignment-bound, expiring, single-use, hashed tokens               | ✔                                 | `riders.test.ts`                                  |
+| R13    | Location visible only to authorised viewers                         | ✔                                 | `location.test.ts`, e2e API checks                |
+| R14    | Tracking only during eligible active work                           | ✔                                 | lifecycle tests, e2e                              |
+| R15    | Limited history + purge                                             | ✔ (scheduling = deployment)       | `location.test.ts`                                |
+| R16    | Accuracy, freshness, rate limits, stale UX                          | ✔                                 | tests, e2e                                        |
+| R17    | Route distance when a provider exists                               | ✔ adapter + fake; ☐ real provider | unit                                              |
+| R18    | Synthetic coordinates only                                          | ✔                                 | seed, fixtures                                    |
+| R19    | No automatic penalty for missing location                           | ✔ (no such code path)             | code review                                       |
+| R20    | Notifications expose no location                                    | ✔ (no notifications exist yet)    | n/a                                               |
+| R21    | Background tracking                                                 | ⛔ UNVERIFIED                     | manual script                                     |
+| R22    | Physical approvals documented                                       | ✔                                 | `external-approvals.md` #9-15                     |
+| R23    | Earlier requirements intact                                         | ✔                                 | full regression                                   |
+| Part 0 | Pickup secret out of the database                                   | ✔                                 | `fulfilment.test.ts`, unit                        |
+| Part 0 | Accessible signature alternative (gated, off)                       | ◑ owner decision                  | `fulfilment.test.ts`                              |

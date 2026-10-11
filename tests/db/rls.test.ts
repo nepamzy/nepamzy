@@ -340,7 +340,14 @@ describe('vendor / rider isolation', () => {
       await giveRole(c, r1, 'rider')
       await giveRole(c, r2, 'rider')
       await giveRole(c, admin, 'platform_admin')
-      await c.query('insert into public.rider_profiles (user_id) values ($1),($2)', [r1, r2])
+      // rows left behind by browser runs would change the admin's count; clear them inside this (rolled back) transaction
+      await c.query('set local session_replication_role = replica')
+      await c.query('delete from public.rider_profiles')
+      await c.query('set local session_replication_role = origin')
+      await c.query(
+        "insert into public.rider_profiles (user_id, full_name, contact_phone) values ($1,'R One','08000000001'),($2,'R Two','08000000002')",
+        [r1, r2],
+      )
       expect(
         await as(c, { id: r1, aal: 'aal2' }, async () =>
           (await c.query('select user_id from public.rider_profiles')).rows.map((r) => r.user_id),

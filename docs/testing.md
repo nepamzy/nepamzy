@@ -59,3 +59,11 @@ Real Android devices and screen readers; actual email deliverability (local sink
 - e2e: `payments-fulfilment.spec.ts` against the fake provider: full pay -> accept -> prepare -> ready -> code -> signature -> receipt journey, failed-payment retry, webhook signature/replay/tamper/ignored events, vendor rejection -> finance flag -> resolve, protected admin page and job route.
 - Mutation check: removing the row locks in `complete_pickup` did NOT fail the concurrency test (the primary key and conditional update still enforce the invariant), so that test proves outcomes, not lock presence.
 - Not tested: the real Paystack API (unreachable here), real devices, screen readers.
+
+## Batch 4 coverage
+
+- DB (`pnpm test:db`): `riders.test.ts` (application/approval, terms, shifts, offers, accept, tokens, shift-end branches, issues, privacy, no-completion), `rider-concurrency.test.ts` (6 parallel/8-order races with CONTROL-REMOVAL tests), `location.test.ts` (lifecycle, validation, geofence, privacy, retention), plus pickup-secret and signature-method tests in `fulfilment.test.ts`.
+- Control-removal method: `app_private.test_seam` + advisory-lock barrier hold every racing session after its check and before its write. Tests then (1) remove the primary lock only -> the unique index still holds; (2) remove lock and index -> the invariant BREAKS (proving the test can detect it); (3) for order exclusivity remove lock + index -> the conditional update in `step_order` still holds; (4) remove all three -> two riders get one order. The DDL is restored after each test.
+- Unit: geometry/fix checks, geofence, routing adapter (fake + labelled straight line), pickup-code derivation, `pickupCodeSecret` fail-closed.
+- e2e: `riders.spec.ts` (full rider journey with a geolocation call counter, synthetic Playwright geolocation, privacy checks, stale label, geofence arrival; capacity/denied-permission/Go-Inactive; Permissions-Policy; wrong-account 403s).
+- Convention: tests that count rows globally clear rider data inside their own rolled-back transaction (`isoTx`); append-only tables (payment events) need unique ids per run.

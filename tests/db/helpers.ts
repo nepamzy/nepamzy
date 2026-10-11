@@ -180,10 +180,20 @@ export async function mkOptionGroup(
   return { groupId: g.rows[0].id as string, optionIds: ids }
 }
 
-export async function mkDeliveryPoint(c: PoolClient, o: { active?: boolean; label?: string } = {}) {
+export async function mkDeliveryPoint(
+  c: PoolClient,
+  o: { active?: boolean; label?: string; lat?: number; lng?: number; radius?: number } = {},
+) {
   const r = await c.query(
-    `insert into public.approved_delivery_points (label, is_active) values ($1, $2) returning id`,
-    [o.label ?? `Sample point ${randomUUID().slice(0, 4)} (placeholder)`, o.active ?? true],
+    `insert into public.approved_delivery_points (label, is_active, lat, lng, geofence_radius_m)
+     values ($1, $2, $3, $4, $5) returning id`,
+    [
+      o.label ?? `Sample point ${randomUUID().slice(0, 4)} (placeholder)`,
+      o.active ?? true,
+      o.lat ?? null,
+      o.lng ?? null,
+      o.radius ?? null,
+    ],
   )
   return r.rows[0].id as string
 }
@@ -258,6 +268,23 @@ export async function purge(
   try {
     if (o.users?.length) {
       const own = `(select id from public.orders where customer_id = any($1::uuid[]))`
+      await c.query(
+        `delete from public.assignment_tokens where assignment_id in (select id from public.delivery_assignments where order_id in ${own} or rider_id = any($1::uuid[]))`,
+        [o.users],
+      )
+      for (const t of ['rider_issues'])
+        await c.query(
+          `delete from public.${t} where order_id in ${own} or rider_id = any($1::uuid[])`,
+          [o.users],
+        )
+      await c.query(
+        `delete from public.delivery_assignments where order_id in ${own} or rider_id = any($1::uuid[])`,
+        [o.users],
+      )
+      for (const t of ['rider_location_current', 'rider_location_history', 'rider_shifts'])
+        await c.query(`delete from public.${t} where rider_id = any($1::uuid[])`, [o.users])
+      for (const t of ['rider_terms_acknowledgements', 'rider_profiles'])
+        await c.query(`delete from public.${t} where user_id = any($1::uuid[])`, [o.users])
       for (const t of [
         'handover_evidence',
         'pickup_codes',

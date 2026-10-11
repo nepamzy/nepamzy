@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { appEnv, mockPaymentsAllowed, paystackConfig, serverEnv, serviceEnv } from './env'
+import {
+  appEnv,
+  mockPaymentsAllowed,
+  paystackConfig,
+  pickupCodeSecret,
+  serverEnv,
+  serviceEnv,
+} from './env'
 
 const keep = { ...process.env }
 afterEach(() => {
@@ -69,5 +76,22 @@ describe('env validation', () => {
     expect(paystackConfig()?.baseUrl).toBe('http://127.0.0.1:3002')
     process.env.APP_ENV = 'production'
     expect(paystackConfig()?.baseUrl).toBe('https://api.paystack.co')
+  })
+
+  it('pickup code secret: missing, short or placeholder values fail closed with no fallback', () => {
+    for (const bad of [
+      undefined,
+      '',
+      'short',
+      'x'.repeat(31),
+      'replace-with-a-long-random-value-0000000',
+      'has spaces in it xxxxxxxxxxxxxxxxxxxxxxxx',
+    ]) {
+      if (bad === undefined) delete process.env.PICKUP_CODE_SECRET
+      else process.env.PICKUP_CODE_SECRET = bad
+      expect(() => pickupCodeSecret()).toThrow(/PICKUP_CODE_SECRET/)
+    }
+    process.env.PICKUP_CODE_SECRET = 'a'.repeat(16) + 'B'.repeat(16)
+    expect(pickupCodeSecret()).toHaveLength(32)
   })
 })

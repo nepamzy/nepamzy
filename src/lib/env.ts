@@ -42,3 +42,16 @@ export function paystackConfig(): { secretKey: string; baseUrl: string } | null 
   const baseUrl = custom && appEnv() === 'local' ? custom.replace(/\/+$/, '') : PAYSTACK_DEFAULT_URL
   return { secretKey, baseUrl }
 }
+
+/**
+ * Server-only secret from which pickup codes are derived (HMAC). Never stored in the database, never sent to the
+ * browser. Missing, short or placeholder values throw: there is no fallback, so a misconfigured deployment cannot
+ * silently use a predictable secret.
+ */
+export function pickupCodeSecret(): string {
+  const v = process.env.PICKUP_CODE_SECRET ?? ''
+  if (v.length < 32 || !/^[A-Za-z0-9+/=_-]+$/.test(v) || /replace-with|changeme|example/i.test(v)) {
+    throw new Error('PICKUP_CODE_SECRET is missing or invalid (use at least 32 random characters)')
+  }
+  return v
+}

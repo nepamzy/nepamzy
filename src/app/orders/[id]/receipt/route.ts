@@ -18,7 +18,11 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     ? {
         recipient: ev.recipient_name,
         completedAt: ev.completed_at,
-        signaturePng: Uint8Array.from(Buffer.from(ev.signature_png.replace(/^\\x/, ''), 'hex')),
+        signaturePng: ev.signature_png
+          ? Uint8Array.from(Buffer.from(ev.signature_png.replace(/^\\x/, ''), 'hex'))
+          : null,
+        method: ev.capture_method,
+        typedText: ev.typed_text,
       }
     : null
   const pdf = await buildReceiptPdf({ order, items, history, evidence })

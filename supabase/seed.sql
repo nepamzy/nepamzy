@@ -3,11 +3,12 @@
 -- Demo owner accounts have no password, so nobody can sign in as them. Synthetic sign-in accounts for
 -- manual testing come from `node --env-file=.env.local scripts/seed-local-users.mjs`.
 
--- Fictional delivery points (labels only; no coordinates exist in this batch).
-insert into public.approved_delivery_points (label, instructions, sort_order) values
-  ('Sample Point A (fictional placeholder)', 'Wait at the sample marker.', 1),
-  ('Sample Point B (fictional placeholder)', null, 2),
-  ('Sample Point C (fictional placeholder)', 'Ask for the sample desk.', 3);
+-- Fictional delivery points (fictional labels with SYNTHETIC coordinates).
+-- Coordinates are SYNTHETIC (Gulf of Guinea, near 0N 0E - open sea). They are NOT AFIT locations.
+insert into public.approved_delivery_points (label, instructions, sort_order, lat, lng, geofence_radius_m, is_synthetic) values
+  ('Sample Point A (fictional placeholder)', 'Wait at the sample marker.', 1, 0.0100, 0.0100, 60, true),
+  ('Sample Point B (fictional placeholder)', null, 2, 0.0100, 0.0200, 60, true),
+  ('Sample Point C (fictional placeholder)', 'Ask for the sample desk.', 3, 0.0200, 0.0100, 60, true);
 
 do $$
 declare

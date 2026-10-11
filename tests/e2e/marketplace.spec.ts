@@ -228,7 +228,8 @@ test('browse, search and filter; cart rules (one vendor at a time, quantities, r
   await expect(p.getByRole('link', { name: 'Sample Print Shop' })).toHaveCount(0)
   await p.goto('/vendors?open=1')
   await expect(p.getByRole('link', { name: 'Sample Souvenirs' })).toHaveCount(0)
-  await p.goto('/vendors')
+  // (unfiltered pages show 24 vendors and other tests keep adding shops, so look it up by name)
+  await p.goto('/vendors?q=Sample%20Souvenirs')
   await expect(p.getByRole('link', { name: 'Sample Souvenirs' })).toBeVisible()
   await expect(p.getByText('Closed now').first()).toBeVisible()
   for (const q of ['%25', '_', '%27%3B%20drop%20table', 'zzzz-nothing']) {

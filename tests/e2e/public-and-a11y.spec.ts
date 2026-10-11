@@ -118,7 +118,11 @@ test.describe('platform basics', () => {
 
 test.describe('authenticated shells (real sessions at aal2)', () => {
   const cases: { role: string; label: string; paths: string[] }[] = [
-    { role: 'customer', label: 'customer', paths: ['/orders', '/account', '/account/security'] },
+    {
+      role: 'customer',
+      label: 'customer',
+      paths: ['/orders', '/account', '/account/security', '/rider-apply'],
+    },
     {
       role: 'vendor_owner',
       label: 'vendor',
@@ -128,7 +132,15 @@ test.describe('authenticated shells (real sessions at aal2)', () => {
     {
       role: 'platform_admin',
       label: 'admin',
-      paths: ['/admin', '/admin/applications', '/admin/audit', '/admin/roles', '/admin/payments'],
+      paths: [
+        '/admin',
+        '/admin/applications',
+        '/admin/audit',
+        '/admin/roles',
+        '/admin/payments',
+        '/admin/riders',
+        '/admin/rider-issues',
+      ],
     },
   ]
   for (const c of cases) {

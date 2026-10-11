@@ -353,6 +353,7 @@ describe('finance tools and refund primitives', () => {
   })
 })
 
+const PAR_SAME = `par-same-${randomUUID()}`
 describe('concurrency', () => {
   it('the same event delivered in parallel pays once; different events for one reference pay once', async () => {
     const setup = await pool.connect()
@@ -390,7 +391,7 @@ describe('concurrency', () => {
         }
       }
       const same = await Promise.all(
-        Array.from({ length: 6 }, () => fire('par-same', t1.reference, Number(t1.amount_kobo))),
+        Array.from({ length: 6 }, () => fire(PAR_SAME, t1.reference, Number(t1.amount_kobo))),
       )
       expect(same.filter((r) => r === 'paid')).toHaveLength(1)
       expect(same.filter((r) => r === 'duplicate_event')).toHaveLength(5)

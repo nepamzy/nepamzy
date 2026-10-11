@@ -143,8 +143,9 @@ test('Paystack test payment -> vendor accepts, prepares, readies -> pickup code 
   await v.getByLabel('Pickup code from the customer').fill('WRONG123')
   await v.getByLabel('Recipient name').fill('Ada Student')
   const pad = v.locator('canvas')
-  const box = (await pad.boundingBox())!
   const sign = async () => {
+    await pad.scrollIntoViewIfNeeded()
+    const box = (await pad.boundingBox())! // measured now: an error message above the pad moves it
     await v.mouse.move(box.x + 20, box.y + 40)
     await v.mouse.down()
     await v.mouse.move(box.x + 120, box.y + 90, { steps: 8 })

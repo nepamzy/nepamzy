@@ -28,3 +28,11 @@ Dev-script env: `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io` (set by `scripts/*.
 | `JOBS_SECRET`         | Bearer secret for `POST /api/jobs/expire-orders` (16+ characters).                                                        |
 
 `pnpm dev:paystack` starts the fake provider (`scripts/fake-paystack.mjs`); `bash scripts/make-env-local.sh` writes `.env.local` from the running local stack.
+
+## Pickup secret (Batch 4)
+
+| Variable             | Purpose                                                                                                                                                                                                                                                                    |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PICKUP_CODE_SECRET` | Server-only HMAC secret for customer pickup codes. 32+ random characters. Missing/short/placeholder values make pickup codes unavailable (no fallback). `scripts/make-env-local.sh` generates a random local value; never commit a real one and never paste one into chat. |
+
+The scheduler routes are `POST /api/jobs/expire-orders` and `POST /api/jobs/purge-location` (both `Authorization: Bearer $JOBS_SECRET`).

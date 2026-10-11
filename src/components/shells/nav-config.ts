@@ -17,6 +17,8 @@ export const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Home', icon: '🏠' },
   { href: '/admin/applications', label: 'Applications', icon: '📝' },
   { href: '/admin/vendors', label: 'Vendors', icon: '🏪' },
+  { href: '/admin/riders', label: 'Riders', icon: '🏍' },
+  { href: '/admin/rider-issues', label: 'Rider issues', icon: '⚠️' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
   { href: '/admin/audit', label: 'Audit', icon: '🧾' },
   { href: '/admin/roles', label: 'Roles', icon: '🔑' },

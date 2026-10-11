@@ -11,7 +11,13 @@ export async function buildReceiptPdf(a: {
   order: OrderRow
   items: OrderItemRow[]
   history: HistoryRow[]
-  evidence: { recipient: string; completedAt: string; signaturePng: Uint8Array } | null
+  evidence: {
+    recipient: string
+    completedAt: string
+    signaturePng: Uint8Array | null
+    method: 'drawn' | 'typed_acknowledgement'
+    typedText: string | null
+  } | null
 }): Promise<Uint8Array> {
   const doc = await PDFDocument.create()
   const page = doc.addPage([420, 700])
@@ -61,6 +67,12 @@ export async function buildReceiptPdf(a: {
     line('Handover', { b: true })
     line(`Received by: ${a.evidence.recipient}`)
     line(`At: ${new Date(a.evidence.completedAt).toLocaleString('en-NG')}`, { gap: 8 })
+    if (a.evidence.method === 'typed_acknowledgement' || !a.evidence.signaturePng) {
+      line('Capture: TYPED acknowledgement (not a drawn signature)')
+      line(`Typed: ${a.evidence.typedText ?? ''}`)
+      return doc.save()
+    }
+    line('Capture: drawn signature', { gap: 8 })
     try {
       const img = await doc.embedPng(a.evidence.signaturePng)
       const w = 200

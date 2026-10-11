@@ -53,6 +53,18 @@ SECURITY DEFINER functions: fixed `search_path`, EXECUTE revoked from PUBLIC/ano
 - Receipts are served by a route that checks the session itself (route handlers sit outside layouts) and relies on RLS for which order is visible.
 - Limitation: a vendor who knows the customer is present can ask for the code; the code proves possession, the signature proves acknowledgement, neither proves identity. Documented for counsel.
 
+## 5b. Pickup secret, riders and location (Batch 4)
+
+- **Pickup-code secret.** `PICKUP_CODE_SECRET` (server-only env var, 32+ random characters, never `NEXT_PUBLIC_`, never in the database or logs) derives each customer code as HMAC(order id, nonce). The database stores the nonce and only the SHA-256 hash of the code. A database dump alone therefore cannot reproduce codes. A missing, short or placeholder secret throws and no code is shown (fail closed; no fallback). Residual: the app server and its environment are trusted; secret rotation is not designed (K44).
+- **Rider access.** Rider functions require the `rider` role, an `approved` profile, aal2, acknowledgement of the current terms and (to accept work) an active shift. Suspension revokes the role, ends the shift, releases un-collected work and flags in-progress parcels for staff.
+- **Capacity and exclusivity.** Enforced in the database with layered controls (locks + unique indexes + conditional update); tests remove layers to show which is the backstop.
+- **Handover token.** Random, hashed, assignment-bound, expiring, locked after 5 wrong tries, invalidated on release. It is separate from the customer pickup code.
+- **Location is sensitive.** Collected only on an active shift with an accepted delivery. Fixes are validated for range, accuracy, freshness and frequency. Current position and limited history live in tables with no API-role access; reads go through functions that check identity (own order, in transit, rider on shift) or, for staff, record an operational purpose in the audit trail. Retention is configurable and purged by a protected job. A missing location never causes a refund, penalty or adverse state change.
+- **Arrival is inferred by the server** from a fresh, accurate fix inside the geofence while the order is `EN_ROUTE`. There is no client-claimed arrival and no manual arrival button. Arrival never completes an order.
+- **Browser permission.** `Permissions-Policy` allows geolocation only under `/rider`; elsewhere it stays blocked. Rider location is sent through a server action, never directly to Supabase.
+- **Synthetic data.** Delivery-point coordinates are fictional (open sea); the map is a labelled sample. No real AFIT coordinates are held.
+- Limitations: background tracking unverified (K34); no real routing provider (K35); staff location access relies on the purpose being truthful (it is audited, not verified).
+
 ## 6. Location, proof, payments (rules carried forward)
 
 Rider location only after Go Active; stale/inaccurate fixes ignored; GPS never completes an order; no claim of background tracking without real Android evidence (if the PWA cannot do it: stop and report evidence; no native app without owner approval). Mandatory signature; single-use, expiring, assignment-bound tokens; reassignment invalidates tokens; auditable. Payments mocked/test-mode only; settlement disabled (code-locked); never called escrow.

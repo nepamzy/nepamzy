@@ -12,6 +12,8 @@ const CARDS = [
     'Approved places for delivery (fictional placeholders for now).',
   ],
   ['/admin/categories', 'Categories', 'Vendor categories.'],
+  ['/admin/riders', 'Riders', 'Approve rider applications; suspend or reinstate riders.'],
+  ['/admin/rider-issues', 'Rider issues', 'Problems reported by riders (support).'],
   ['/admin/payments', 'Payments', 'Reconciliation flags and refund requests (test mode).'],
   ['/admin/audit', 'Audit trail', 'Read-only record of important actions.'],
   ['/admin/roles', 'Roles', 'Grant or revoke roles (administrators only).'],

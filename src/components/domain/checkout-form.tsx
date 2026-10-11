@@ -78,7 +78,7 @@ export function CheckoutForm({
           <p className="font-semibold">Collect from</p>
           <p>{pickup.vendor_name}</p>
           <p className="text-sm text-muted">
-            You will show a code at the vendor to collect. (Pickup codes arrive in a later release.)
+            You will show a pickup code at the vendor to collect.
           </p>
         </Card>
       )}
@@ -88,7 +88,7 @@ export function CheckoutForm({
           name="point"
           required
           defaultValue={points[0]?.id}
-          hint="Delivery goes only to approved points. Riders are not available yet, so test orders cannot be delivered."
+          hint="Delivery goes only to approved points. In this test version the points are fictional samples."
         >
           {points.map((p) => (
             <option key={p.id} value={p.id}>

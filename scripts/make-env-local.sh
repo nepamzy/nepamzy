@@ -16,5 +16,6 @@ APP_ENV=local
 PAYSTACK_SECRET_KEY=sk_test_local_fake_key_for_dev
 PAYSTACK_BASE_URL=http://127.0.0.1:3002
 JOBS_SECRET=local-jobs-secret-for-tests-only-0000
+PICKUP_CODE_SECRET=$(head -c 24 /dev/urandom | base64 | tr -d '+/=\n')pickupLocal0123
 EOF
 echo "wrote .env.local (local values)"

@@ -2,7 +2,7 @@
 
 A mobile-first campus marketplace and delivery platform for the approved community of the Air Force Institute of Technology (AFIT), Nigeria.
 
-> **Status: Batch 3 built (Paystack test-mode payments with signed webhooks and ledger, vendor order operations, pickup handover with one-time code and signature, PDF receipts), awaiting owner review.** Riders, live location, delivery proof, refunds execution, disputes and notifications are **not built yet**. **Not deployed; not for real users or real money.**
+> **Status: Batch 4 built (rider onboarding, shifts, capacity-five assignment, vendor-to-rider handover, synthetic live location, server-side arrival detection, plus Batch 3 corrections), awaiting owner review.** Delivery proof/recipient completion, refund execution, disputes and notifications are **not built yet**. Background GPS tracking is **unverified**. **Not deployed; not for real users or real money.**
 
 **Status vocabulary:** _Planned_ (designed, not built) → _Implemented_ (code exists) → _Tested_ (automated/manual evidence recorded). _Unverified_ marks assumptions not yet checked. Full table: [`docs/requirements-checklist.md`](docs/requirements-checklist.md).
 
@@ -28,8 +28,10 @@ Students, lecturers, civilian staff, military personnel and other AFIT-authorise
 | Roles and RLS; administrators grant/revoke roles (audited); append-only audit trail                                                               | Implemented, Tested                              |
 | Paystack test-mode payment, signed webhook, ledger, reconciliation, refund requests (no money moved)                                              | Implemented, Tested (local fake provider only)   |
 | Vendor accept/reject/prepare/ready, pickup code + signature handover, PDF receipt                                                                 | Implemented, Tested (DB + e2e)                   |
+| Rider application/approval, terms, Go Active/Inactive, capacity-five assignment, handover token, issue reports                                    | Implemented, Tested (DB + e2e)                   |
+| Synthetic live location, customer tracking card, server-side geofence arrival (fake map/route data)                                               | Implemented, Tested; real devices **unverified** |
 | MFA recovery after losing every authenticator                                                                                                     | **Not implemented — owner decision needed**      |
-| Riders, location, handover proof, refunds, disputes, notifications                                                                                | **Planned** (Batches 2–6)                        |
+| Delivery proof and recipient completion, refund execution, disputes, notifications                                                                | **Planned** (Batches 5–6)                        |
 
 ## Architecture
 

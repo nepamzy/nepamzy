@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 import pg from 'pg'
 import * as OTPAuth from 'otpauth'
+import AxeBuilder from '@axe-core/playwright'
 import { expect, type Page } from '@playwright/test'
 
 // Load .env.local (local-stack values) for the test process.
@@ -204,3 +205,172 @@ export async function openAnonymous(browser: Browser, info: TestInfo) {
 export async function clickAndWait(page: Page, click: () => Promise<void>) {
   await Promise.all([page.waitForResponse((r) => r.request().method() === 'POST'), click()])
 }
+
+export async function a11yClean(page: Page, label: string) {
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze()
+  const bad = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+  expect(
+    bad.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`),
+    `axe on ${label}`,
+  ).toEqual([])
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  )
+  expect(overflow, `horizontal overflow on ${label}`).toBeLessThanOrEqual(0)
+}
+
+// ---- Batch 4 fixtures (service role; SYNTHETIC coordinates only) ----------------------------------
+export const SYNTH_POINT = { lat: 0.01, lng: 0.01, radius: 60 }
+
+export async function makeShopWithPoint(ownerId: string, productName: string) {
+  const a = admin()
+  const { data: cat } = await a.from('categories').select('id').eq('slug', 'food').single()
+  const slug = `shop-${tag()}`
+  const { data: v, error } = await a
+    .from('vendors')
+    .insert({
+      name: `Shop ${slug}`,
+      slug,
+      status: 'approved',
+      category_id: cat!.id,
+      owner_id: ownerId,
+      pickup_location_text: 'Counter (placeholder)',
+      prep_minutes: 10,
+    })
+    .select('id')
+    .single()
+  if (error) throw error
+  await a.from('vendor_staff').insert({ vendor_id: v!.id, user_id: ownerId, staff_role: 'owner' })
+  await a.from('store_hours').insert(
+    [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
+      vendor_id: v!.id,
+      weekday,
+      opens: '00:00',
+      closes: '23:59:59',
+    })),
+  )
+  const { error: pe } = await a.from('products').insert({
+    vendor_id: v!.id,
+    name: productName,
+    price_kobo: 150000,
+    stock_quantity: 50,
+    status: 'active',
+    is_available: true,
+  })
+  if (pe) throw pe
+  const label = `AAA Test point ${tag()} (synthetic)`
+  const { data: dp, error: de } = await a
+    .from('approved_delivery_points')
+    .insert({
+      label,
+      is_active: true,
+      sort_order: -999,
+      lat: SYNTH_POINT.lat,
+      lng: SYNTH_POINT.lng,
+      geofence_radius_m: SYNTH_POINT.radius,
+    })
+    .select('id')
+    .single()
+  if (de) throw de
+  return { vendorId: v!.id as string, slug, pointId: dp!.id as string, pointLabel: label }
+}
+
+/** An approved rider with the current terms accepted (optionally with an active shift) - created directly, no UI. */
+export async function seedRider(opts: { active?: boolean } = {}) {
+  const a = admin()
+  const u = await createUser('seedrider', ['rider'])
+  const { error } = await a.from('rider_profiles').insert({
+    user_id: u.id,
+    full_name: 'Fixture Rider',
+    contact_phone: '08000000000',
+    status: 'approved',
+  })
+  if (error) throw error
+  const { data: ver } = await a
+    .from('platform_settings')
+    .select('value')
+    .eq('key', 'rider_terms_current_version')
+    .single()
+  await a
+    .from('rider_terms_acknowledgements')
+    .insert({ user_id: u.id, version: ver!.value as string })
+  let shift: string | null = null
+  if (opts.active) {
+    const { data: sh, error: se } = await a
+      .from('rider_shifts')
+      .insert({ rider_id: u.id })
+      .select('id')
+      .single()
+    if (se) throw se
+    shift = sh!.id as string
+  }
+  return { ...u, shift }
+}
+
+/** Inserts `n` AWAITING_RIDER delivery orders for a shop (bypassing checkout) and returns their ids/numbers. */
+export async function seedOfferOrders(
+  n: number,
+  shop: { vendorId: string; pointId: string; pointLabel: string },
+  customerId: string,
+) {
+  const a = admin()
+  const rows = Array.from({ length: n }, (_, i) => ({
+    order_number: `AFM-T${tag()}${i}`,
+    customer_id: customerId,
+    vendor_id: shop.vendorId,
+    vendor_name: 'Fixture shop',
+    fulfilment: 'delivery',
+    delivery_point_id: shop.pointId,
+    delivery_point_label: shop.pointLabel,
+    pickup_location_snapshot: 'Counter (placeholder)',
+    status: 'AWAITING_RIDER',
+    items_total_kobo: 100000,
+    delivery_fee_kobo: 50000,
+    platform_fee_kobo: 5000,
+    total_kobo: 155000,
+    idempotency_key: `fixture-${tag()}-${i}-key`,
+  }))
+  const { data, error } = await a.from('orders').insert(rows).select('id, order_number')
+  if (error) throw error
+  return data as { id: string; order_number: string }[]
+}
+
+/** Signs in an existing (fixture) user with a freshly enrolled authenticator, in its own browser context. */
+export async function openSessionFor(
+  browser: Browser,
+  info: TestInfo,
+  user: { id: string; email: string },
+): Promise<Session> {
+  const { secret } = await enrolFactorViaApi(user.email)
+  const use = info.project.use
+  const context = await browser.newContext({
+    viewport: use.viewport ?? undefined,
+    userAgent: use.userAgent,
+    isMobile: use.isMobile,
+    hasTouch: use.hasTouch,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  const page = await context.newPage()
+  await uiSignInWithMfa(page, user.email, secret)
+  return { page, context, user, secret }
+}
+
+/** Counts every geolocation call the page makes (to prove none happens before Go Active). */
+export async function countGeolocationCalls(context: import('@playwright/test').BrowserContext) {
+  await context.addInitScript(() => {
+    const w = window as unknown as { __geoCalls: number }
+    w.__geoCalls = 0
+    const g = navigator.geolocation
+    for (const m of ['getCurrentPosition', 'watchPosition'] as const) {
+      const orig = g[m].bind(g) as (...a: unknown[]) => unknown
+      ;(g as unknown as Record<string, unknown>)[m] = (...a: unknown[]) => {
+        w.__geoCalls++
+        return orig(...a)
+      }
+    }
+  })
+}
+export const geoCalls = (page: Page) =>
+  page.evaluate(() => (window as unknown as { __geoCalls?: number }).__geoCalls ?? 0)

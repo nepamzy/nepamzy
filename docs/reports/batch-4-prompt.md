@@ -1,5 +1,7 @@
 # PROMPT — AFIT Market Implementation Batch 4 (Phases 7 + 8)
 
+> **SUPERSEDED.** The owner supplied a consolidated v2 edition (11 Oct 2026) which governs Batch 4; this file is the earlier draft kept for history. The Batch 4 implementation followed v2. See `docs/reports/batch-4.md`.
+
 > Self-contained. Use ONLY after the owner has reviewed the Batch 3 report and explicitly approved this prompt. The owner has said they will send corrections after reviewing Batch 3: **apply those corrections first**, ahead of everything below. Implement Phases 7 and 8 only, then stop and report with the full A–O report, an INDEPENDENT REVIEW PACKAGE FOR CHATGPT, and the complete Batch 5 prompt (Phases 9 + 10). Do not begin Phase 9. Do not claim any review happened until evidence is submitted.
 > Version: v1, written at the end of Batch 3 (2026-10-11).
 

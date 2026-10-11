@@ -1,4 +1,8 @@
 import { afterAll, describe, expect, it } from 'vitest'
+import {
+  derivePickupCode,
+  hashPickupCode,
+} from '../../src/server/modules/orders-and-state-machine/pickup-code'
 import type { PoolClient } from 'pg'
 import {
   AAL1,
@@ -16,6 +20,7 @@ import {
   mkVendor,
   payOrder,
   pool,
+  svc,
   purge,
   withTx,
 } from './helpers'
@@ -68,16 +73,27 @@ const actFails = (
   )
 const status = async (c: PoolClient, o: string) =>
   (await c.query(`select status from public.orders where id=$1`, [o])).rows[0].status as string
-const getCode = (c: PoolClient, who: ReturnType<typeof AAL2>, order: string) =>
-  as(
+const TEST_SECRET = 'test-only-pickup-secret-0123456789abcdef'
+/** What the application server does: ask the DB (as the customer) for the nonce, derive the code, register the hash. */
+const getCode = async (c: PoolClient, who: ReturnType<typeof AAL2>, order: string) => {
+  const r = await as(
     c,
     who,
     async () =>
       (await c.query(`select public.get_pickup_code($1) r`, [order])).rows[0].r as {
         available: boolean
-        code?: string
+        nonce?: string
+        registered?: boolean
       },
   )
+  if (!r.available) return { available: false } as { available: boolean; code?: string }
+  const code = derivePickupCode(TEST_SECRET, order, r.nonce!)
+  if (!r.registered)
+    await svc(c, () =>
+      c.query(`select public.pickup_code_register($1, $2)`, [order, hashPickupCode(code)]),
+    )
+  return { available: true, code }
+}
 const complete = (
   c: PoolClient,
   who: ReturnType<typeof AAL2>,
@@ -283,6 +299,7 @@ describe('pickup code and handover', () => {
       await toHandover(c, a)
       await toHandover(c, b)
       const codeA = (await getCode(c, AAL2(a.cust), a.order)).code!
+      await getCode(c, AAL2(b.cust), b.order) // registers b's own hash
       expect((await complete(c, AAL2(b.owner), b.order, codeA)).reason).toBe('wrong_code')
       expect(await status(c, b.order)).toBe('PICKUP_AWAITING_HANDOVER')
       for (const who of [AAL2(b.owner), AAL2(a.cust), AAL1(a.owner)]) {
@@ -312,6 +329,184 @@ describe('pickup code and handover', () => {
       expect(
         (await failure(c, `update public.handover_evidence set recipient_name='x'`)).message,
       ).toMatch(/append-only|immutable|not allowed|denied/i)
+    })
+  })
+})
+
+describe('pickup-code secret handling (Batch 4 correction)', () => {
+  it('the database holds no pepper: no secrets table, no code-derivation function', async () => {
+    await withTx(async (c) => {
+      expect((await c.query(`select to_regclass('app_private.secrets') r`)).rows[0].r).toBeNull()
+      const f = await c.query(
+        `select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace where p.proname='pickup_code_for'`,
+      )
+      expect(f.rowCount).toBe(0)
+    })
+  })
+
+  it('until the server registers a hash, no code can complete a pickup; registration happens once and is service-only', async () => {
+    await withTx(async (c) => {
+      const o = await paidOrder(c)
+      await toHandover(c, o)
+      const nonce = (
+        await c.query(`select nonce, code_hash from public.pickup_codes where order_id=$1`, [
+          o.order,
+        ])
+      ).rows[0]
+      expect(nonce.code_hash).toBeNull()
+      expect((await complete(c, AAL2(o.owner), o.order, 'ABCDEF12')).reason).toBe(
+        'code_unavailable',
+      )
+      for (const who of [AAL2(o.cust), AAL2(o.owner), null]) {
+        const e = await as(c, who, () =>
+          failure(c, `select public.pickup_code_register($1, $2)`, [o.order, 'a'.repeat(64)]),
+        )
+        expect(e.code).toBe(PRIV_DENIED)
+      }
+      const h1 = hashPickupCode('AAAAAAAA')
+      const first = await svc(
+        c,
+        async () =>
+          (await c.query(`select public.pickup_code_register($1,$2) r`, [o.order, h1])).rows[0].r,
+      )
+      const second = await svc(
+        c,
+        async () =>
+          (
+            await c.query(`select public.pickup_code_register($1,$2) r`, [
+              o.order,
+              hashPickupCode('BBBBBBBB'),
+            ])
+          ).rows[0].r,
+      )
+      expect([first, second]).toEqual([true, false])
+      const bad = await svc(
+        c,
+        async () =>
+          (await c.query(`select public.pickup_code_register($1,'nothex') r`, [o.order])).rows[0].r,
+      )
+      expect(bad).toBe(false)
+      // the customer-facing function never returns the code itself
+      const r = await as(
+        c,
+        AAL2(o.cust),
+        async () => (await c.query(`select public.get_pickup_code($1) r`, [o.order])).rows[0].r,
+      )
+      expect(Object.keys(r).sort()).toEqual(['available', 'expires_at', 'nonce', 'registered'])
+    })
+  })
+
+  it('a code derived with a different secret is refused', async () => {
+    await withTx(async (c) => {
+      const o = await paidOrder(c)
+      await toHandover(c, o)
+      const good = await getCode(c, AAL2(o.cust), o.order)
+      const nonce = (
+        await c.query(`select nonce from public.pickup_codes where order_id=$1`, [o.order])
+      ).rows[0].nonce
+      const forged = derivePickupCode('another-secret-0123456789abcdefghij', o.order, nonce)
+      expect(forged).not.toBe(good.code)
+      expect((await complete(c, AAL2(o.owner), o.order, forged)).reason).toBe('wrong_code')
+    })
+  })
+})
+
+describe('signature capture method (Batch 4 correction)', () => {
+  const typed = (
+    c: PoolClient,
+    who: ReturnType<typeof AAL2>,
+    order: string,
+    code: string,
+    text: string | null,
+    sig: Buffer | null = null,
+  ) =>
+    as(c, who, () =>
+      failure(
+        c,
+        `select public.complete_pickup($1,$2,'Ada Student',$3,'typed_acknowledgement',$4)`,
+        [order, code, sig, text],
+      ),
+    )
+
+  it('a typed acknowledgement is refused unless the owner has enabled it (default off)', async () => {
+    await withTx(async (c) => {
+      const o = await paidOrder(c)
+      await toHandover(c, o)
+      const { code } = await getCode(c, AAL2(o.cust), o.order)
+      expect((await typed(c, AAL2(o.owner), o.order, code!, 'Ada Student')).message).toMatch(
+        /typed_signature_disabled/,
+      )
+      expect(await status(c, o.order)).toBe('PICKUP_AWAITING_HANDOVER')
+    })
+  })
+
+  it('when enabled it is recorded as typed (never as a drawn signature) and still needs the code', async () => {
+    await withTx(async (c) => {
+      const o = await paidOrder(c)
+      await toHandover(c, o)
+      await c.query(
+        `update public.platform_settings set value='true'::jsonb where key='typed_signature_enabled'`,
+      )
+      const { code } = await getCode(c, AAL2(o.cust), o.order)
+      expect((await typed(c, AAL2(o.owner), o.order, code!, null)).message).toMatch(
+        /signature_required/,
+      )
+      expect((await typed(c, AAL2(o.owner), o.order, code!, 'Ada Student', PNG())).message).toMatch(
+        /signature_required/,
+      )
+      const wrong = await as(
+        c,
+        AAL2(o.owner),
+        async () =>
+          (
+            await c.query(
+              `select public.complete_pickup($1,'WRONG123','Ada',null,'typed_acknowledgement','Ada Student') r`,
+              [o.order],
+            )
+          ).rows[0].r,
+      )
+      expect(wrong.reason).toBe('wrong_code')
+      const ok = await as(
+        c,
+        AAL2(o.owner),
+        async () =>
+          (
+            await c.query(
+              `select public.complete_pickup($1,$2,'Ada',null,'typed_acknowledgement','Ada Student') r`,
+              [o.order, code],
+            )
+          ).rows[0].r,
+      )
+      expect(ok.ok).toBe(true)
+      const ev = (
+        await c.query(
+          `select capture_method, typed_text, signature_png from public.handover_evidence where order_id=$1`,
+          [o.order],
+        )
+      ).rows[0]
+      expect(ev).toEqual({
+        capture_method: 'typed_acknowledgement',
+        typed_text: 'Ada Student',
+        signature_png: null,
+      })
+    })
+  })
+
+  it('the evidence shape constraint stops a typed record carrying an image or a drawn record lacking one', async () => {
+    await withTx(async (c) => {
+      const o = await paidOrder(c)
+      const bad1 = await failure(
+        c,
+        `insert into public.handover_evidence (order_id, recipient_name, signature_png, signature_sha256, completed_by, capture_method, typed_text) values ($1,'Ada',$2,'x',$3,'typed_acknowledgement','Ada')`,
+        [o.order, PNG(), o.owner],
+      )
+      expect(bad1.message).toMatch(/handover_evidence_method_shape/)
+      const bad2 = await failure(
+        c,
+        `insert into public.handover_evidence (order_id, recipient_name, signature_png, signature_sha256, completed_by, capture_method) values ($1,'Ada',null,'x',$2,'drawn')`,
+        [o.order, o.owner],
+      )
+      expect(bad2.message).toMatch(/handover_evidence_method_shape|null value/)
     })
   })
 })

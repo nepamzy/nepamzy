@@ -73,6 +73,11 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   { prefix: '/admin/vendors', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/delivery-points', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/categories', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  { prefix: '/admin/riders', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  {
+    prefix: '/admin/rider-issues',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
   {
     prefix: '/admin/payments',
     requirement: { roles: ['platform_admin', 'finance_admin'], aal: 'aal2' },
@@ -93,6 +98,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   { prefix: '/cart', requirement: { roles: ['customer'], aal: 'aal1' } },
   { prefix: '/checkout', requirement: { roles: ['customer'], aal: 'aal2' } },
   { prefix: '/apply', requirement: { roles: ['customer'], aal: 'aal2' } },
+  { prefix: '/rider-apply', requirement: { roles: ['customer'], aal: 'aal2' } },
   { prefix: '/account', requirement: { aal: 'aal2' } },
   { prefix: '/mfa', requirement: { aal: 'aal1', mfaSetup: true } },
 ]
