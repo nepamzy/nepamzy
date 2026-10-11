@@ -268,6 +268,32 @@ export async function purge(
   try {
     if (o.users?.length) {
       const own = `(select id from public.orders where customer_id = any($1::uuid[]))`
+      // Batch 5 tables (refunds, returns, cases, delivery proof sessions)
+      await c.query(
+        `delete from public.refund_events where refund_id in (select id from public.refunds where order_id in ${own})`,
+        [o.users],
+      )
+      await c.query(
+        `delete from public.refund_items where refund_id in (select id from public.refunds where order_id in ${own})`,
+        [o.users],
+      )
+      await c.query(`delete from public.ledger_entries where order_id in ${own}`, [o.users])
+      await c.query(`delete from public.refunds where order_id in ${own}`, [o.users])
+      await c.query(
+        `delete from public.return_request_items where return_id in (select id from public.return_requests where order_id in ${own})`,
+        [o.users],
+      )
+      await c.query(`delete from public.return_requests where order_id in ${own}`, [o.users])
+      for (const t of ['case_events', 'case_statements'])
+        await c.query(
+          `delete from public.${t} where case_id in (select id from public.support_cases where order_id in ${own})`,
+          [o.users],
+        )
+      await c.query(`delete from public.support_cases where order_id in ${own}`, [o.users])
+      await c.query(`delete from public.delivery_proof_sessions where order_id in ${own}`, [
+        o.users,
+      ])
+      await c.query(`delete from public.handover_evidence where order_id in ${own}`, [o.users])
       await c.query(
         `delete from public.assignment_tokens where assignment_id in (select id from public.delivery_assignments where order_id in ${own} or rider_id = any($1::uuid[]))`,
         [o.users],

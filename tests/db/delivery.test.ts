@@ -597,10 +597,18 @@ describe('Phase 9: who may and may not complete a delivery', () => {
         order by 1`,
     )
     // any new function reaching these states must be added here deliberately, after review
+    // (Phase 10 added the customer/staff case, refund-adjacent and return functions that move finished orders to
+    // DISPUTED / RETURN_*; none is granted to riders, which the next test proves from the grants.)
     expect(defs.rows.map((r) => r.proname as string)).toEqual([
+      'case_close',
       'complete_delivery',
       'complete_pickup',
+      'customer_request_refund',
+      'customer_request_return',
       'delivery_proof_begin',
+      'open_support_case',
+      'ops_handle_delivery_exception',
+      'staff_decide_return',
     ])
   })
 })

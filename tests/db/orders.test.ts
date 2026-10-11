@@ -757,7 +757,11 @@ describe('orders: access control and immutability', () => {
         `update public.order_status_history set to_status = 'COMPLETED'`,
         `delete from public.order_status_history`,
       ])
-        expect((await failure(c, sql)).message, sql).toMatch(/immutable|append-only/)
+        // truncating order_items is refused either by the immutability trigger or, since refunds/returns reference
+        // the table (Batch 5), by the foreign key itself
+        expect((await failure(c, sql)).message, sql).toMatch(
+          /immutable|append-only|cannot truncate a table referenced/,
+        )
       // deleting a product only nulls the link; the snapshot (name, price) is untouched
       await c.query(`delete from public.products where id=$1`, [s.p])
       const row = (
