@@ -2,7 +2,7 @@
 
 A mobile-first campus marketplace and delivery platform for the approved community of the Air Force Institute of Technology (AFIT), Nigeria.
 
-> **Status: Batch 5 built (rider-terms correction K48; recipient-only delivery completion with a drawn signature and one-time proof token; refund workflow with caps, idempotency and a FAKE provider only; returns; support cases), awaiting owner review.** Notifications, reviews, real refund execution, return logistics and evidence uploads are **not built yet**. Real Paystack behaviour and background GPS are **unverified**. **Not deployed; not for real users or real money.**
+> **Status: Batch 6 built (in-app notifications with a LOCAL-SINK outbox, reviews with moderation, role-scoped administration, security regression and recovery rehearsal), awaiting owner review.** The system is **not pilot-ready**: nothing schedules or monitors its jobs, no real notification channel exists, retention is undecided, real Paystack behaviour and background GPS are **unverified**, and no independent audit has happened (`docs/pilot-readiness.md`). **Not deployed; not for real users or real money.**
 
 **Status vocabulary:** _Planned_ (designed, not built) → _Implemented_ (code exists) → _Tested_ (automated/manual evidence recorded). _Unverified_ marks assumptions not yet checked. Full table: [`docs/requirements-checklist.md`](docs/requirements-checklist.md).
 
@@ -16,22 +16,23 @@ Students, lecturers, civilian staff, military personnel and other AFIT-authorise
 
 ## What exists today
 
-| Area                                                                                                                                              | Status                                           |
-| ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Next.js + TypeScript + Tailwind app, installable PWA shell, offline fallback page                                                                 | Implemented, Tested                              |
-| Design system (tokens, buttons, forms, cards, tabs, dialog, toast, tables, timeline, empty/error/loading/offline states, order-status vocabulary) | Implemented, Tested (axe, 360px) — see `/design` |
-| Role shells for customer, vendor, rider, admin (mock data)                                                                                        | Implemented, Tested                              |
-| Vendor application, admin approval/suspension, shop profile/hours, catalogue with options and stock                                               | Implemented, Tested (DB + e2e)                   |
-| Public browsing/search without an account; cart; checkout; order creation (pickup/delivery); test payment (local only)                            | Implemented, Tested (DB + e2e)                   |
-| Email + password sign-up with emailed confirmation, sign-in, sign-out                                                                             | Implemented, Tested                              |
-| TOTP MFA: enrol, challenge, backup authenticator, removal; enforced in app **and** database                                                       | Implemented, Tested                              |
-| Roles and RLS; administrators grant/revoke roles (audited); append-only audit trail                                                               | Implemented, Tested                              |
-| Paystack test-mode payment, signed webhook, ledger, reconciliation, refund requests (no money moved)                                              | Implemented, Tested (local fake provider only)   |
-| Vendor accept/reject/prepare/ready, pickup code + signature handover, PDF receipt                                                                 | Implemented, Tested (DB + e2e)                   |
-| Rider application/approval, terms, Go Active/Inactive, capacity-five assignment, handover token, issue reports                                    | Implemented, Tested (DB + e2e)                   |
-| Synthetic live location, customer tracking card, server-side geofence arrival (fake map/route data)                                               | Implemented, Tested; real devices **unverified** |
-| MFA recovery after losing every authenticator                                                                                                     | **Not implemented — owner decision needed**      |
-| Delivery proof and recipient completion, refund execution, disputes, notifications                                                                | **Planned** (Batches 5–6)                        |
+| Area                                                                                                                                              | Status                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Next.js + TypeScript + Tailwind app, installable PWA shell, offline fallback page                                                                 | Implemented, Tested                                             |
+| Design system (tokens, buttons, forms, cards, tabs, dialog, toast, tables, timeline, empty/error/loading/offline states, order-status vocabulary) | Implemented, Tested (axe, 360px) — see `/design`                |
+| Role shells for customer, vendor, rider, admin (mock data)                                                                                        | Implemented, Tested                                             |
+| Vendor application, admin approval/suspension, shop profile/hours, catalogue with options and stock                                               | Implemented, Tested (DB + e2e)                                  |
+| Public browsing/search without an account; cart; checkout; order creation (pickup/delivery); test payment (local only)                            | Implemented, Tested (DB + e2e)                                  |
+| Email + password sign-up with emailed confirmation, sign-in, sign-out                                                                             | Implemented, Tested                                             |
+| TOTP MFA: enrol, challenge, backup authenticator, removal; enforced in app **and** database                                                       | Implemented, Tested                                             |
+| Roles and RLS; administrators grant/revoke roles (audited); append-only audit trail                                                               | Implemented, Tested                                             |
+| Paystack test-mode payment, signed webhook, ledger, reconciliation, refund requests (no money moved)                                              | Implemented, Tested (local fake provider only)                  |
+| Vendor accept/reject/prepare/ready, pickup code + signature handover, PDF receipt                                                                 | Implemented, Tested (DB + e2e)                                  |
+| Rider application/approval, terms, Go Active/Inactive, capacity-five assignment, handover token, issue reports                                    | Implemented, Tested (DB + e2e)                                  |
+| Synthetic live location, customer tracking card, server-side geofence arrival (fake map/route data)                                               | Implemented, Tested; real devices **unverified**                |
+| MFA recovery after losing every authenticator                                                                                                     | **Not implemented — owner decision needed**                     |
+| Delivery proof and recipient completion, refund/return/report workflow (fake provider), in-app notifications, reviews and moderation, admin tools | Implemented, Tested locally (no real refunds, no real messages) |
+| Job scheduling and monitoring, real refund execution, real notification channels, retention rules                                                 | **Not built / owner decisions**                                 |
 
 ## Architecture
 
