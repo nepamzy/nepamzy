@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/server/modules/identity-and-access/security'
 import type { AccessRequirement } from '@/server/modules/identity-and-access/policy'
@@ -132,8 +133,18 @@ export async function setSettingAction(_p: ActionState, fd: FormData): Promise<A
     return failed('The value must be a number, "text in quotes", or a JSON object.')
   }
   const sb = await createSupabaseServerClient()
-  const { error } = await sb.rpc('set_platform_setting', { p_key: key, p_value: value })
-  if (error) return dbFailed(error, 'That value was refused. Check the allowed range.')
+  const reason = text(fd, 'reason', 500)
+  if (reason.length < 10) return failed('Give a reason of at least 10 characters.')
+  const { error } = await sb.rpc('set_platform_setting', {
+    p_key: key,
+    p_value: value,
+    p_reason: reason,
+  })
+  if (error) {
+    // Key and database code only: never the value or the reason text.
+    logger.warn('setting change refused', { setting: key, sqlstate: error.code })
+    return dbFailed(error, 'That value was refused. Check the allowed range.')
+  }
   revalidatePath('/admin/settings')
   return done('Saved and recorded in the audit trail.')
 }

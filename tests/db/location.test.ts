@@ -447,10 +447,12 @@ describe('retention and purge', () => {
       ] as const) {
         expect(
           (
-            await callFails(c, AAL2(admin), `select public.set_platform_setting($1,$2::jsonb)`, [
-              k,
-              JSON.stringify(v),
-            ])
+            await callFails(
+              c,
+              AAL2(admin),
+              `select public.set_platform_setting($1,$2::jsonb, 'Fixture reason for this test')`,
+              [k, JSON.stringify(v)],
+            )
           ).code,
           k,
         ).toBe('22023')
@@ -458,14 +460,14 @@ describe('retention and purge', () => {
       await callJson(
         c,
         AAL2(admin),
-        `select public.set_platform_setting('location_history_retention_hours','48'::jsonb) r`,
+        `select public.set_platform_setting('location_history_retention_hours','48'::jsonb, 'Fixture reason for this test') r`,
       )
       expect(
         (
           await callFails(
             c,
             AAL2(admin),
-            `select public.set_platform_setting('typed_signature_enabled','"yes"'::jsonb)`,
+            `select public.set_platform_setting('typed_signature_enabled','"yes"'::jsonb, 'Fixture reason for this test')`,
           )
         ).code,
       ).toBe('22023')

@@ -296,6 +296,7 @@ test('settings: only administrators; invalid values are refused; a valid change 
   ).data!.value
   const group = a.getByRole('group', { name: 'Setting max_cart_item_quantity' })
 
+  await group.getByLabel(/Reason for the change/).fill('Trying an out-of-range value')
   await group.getByLabel(/New value/).fill('9999')
   await clickAndWait(a, () => group.getByRole('button', { name: 'Save' }).click())
   await expect(alertIn(a)).toContainText(/refused/i)
@@ -310,6 +311,7 @@ test('settings: only administrators; invalid values are refused; a valid change 
   ).toEqual(original)
 
   try {
+    await group.getByLabel(/Reason for the change/).fill('Rehearsal of an audited change')
     await group.getByLabel(/New value/).fill('21')
     await clickAndWait(a, () => group.getByRole('button', { name: 'Save' }).click())
     await expect(statusIn(a)).toContainText(/Saved/)
@@ -320,6 +322,17 @@ test('settings: only administrators; invalid values are refused; a valid change 
       .eq('entity_id', 'max_cart_item_quantity')
       .eq('actor_id', admn.user.id)
     expect(audit.data).toHaveLength(1)
+    const detail = await admin()
+      .from('audit_events')
+      .select('details')
+      .eq('action', 'setting.changed')
+      .eq('entity_id', 'max_cart_item_quantity')
+      .eq('actor_id', admn.user.id)
+      .single()
+    expect(detail.data?.details).toMatchObject({
+      new: 21,
+      reason: 'Rehearsal of an audited change',
+    })
   } finally {
     await admin()
       .from('platform_settings')

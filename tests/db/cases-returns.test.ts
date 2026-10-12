@@ -209,7 +209,7 @@ describe('returns: a separate record, with policy and quantity limits, and no si
         const e = await callFails(
           c,
           AAL2(admin),
-          `select public.set_platform_setting('return_policy',$1::jsonb)`,
+          `select public.set_platform_setting('return_policy',$1::jsonb, 'Fixture reason for this test')`,
           [bad],
         )
         expect(e.message, bad).toMatch(/invalid value/)
@@ -217,7 +217,7 @@ describe('returns: a separate record, with policy and quantity limits, and no si
       await callJson(
         c,
         AAL2(admin),
-        `select public.set_platform_setting('return_policy',$1::jsonb) r`,
+        `select public.set_platform_setting('return_policy',$1::jsonb, 'Fixture reason for this test') r`,
         [
           JSON.stringify({
             default: 'case_by_case',
@@ -252,7 +252,7 @@ describe('returns: a separate record, with policy and quantity limits, and no si
       await callJson(
         c,
         AAL2(admin),
-        `select public.set_platform_setting('return_policy',$1::jsonb) r`,
+        `select public.set_platform_setting('return_policy',$1::jsonb, 'Fixture reason for this test') r`,
         [JSON.stringify({ default: 'case_by_case', categories: {} })],
       )
     })

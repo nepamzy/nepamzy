@@ -387,25 +387,33 @@ describe('platform settings', () => {
       const e1 = await as(c, { id: admin, aal: 'aal2' }, () =>
         failure(
           c,
-          `select public.set_platform_setting('settlement_policy','"PROVIDER_SPLIT_IMMEDIATE"')`,
+          `select public.set_platform_setting('settlement_policy','"PROVIDER_SPLIT_IMMEDIATE"', 'Fixture reason for this test')`,
         ),
       )
       expect(e1.message).toMatch(/locked to DISABLED/)
       const e2 = await as(c, { id: cust, aal: 'aal2' }, () =>
-        failure(c, `select public.set_platform_setting('support_email','"x@example.test"')`),
+        failure(
+          c,
+          `select public.set_platform_setting('max_cart_item_quantity','25'::jsonb, 'Fixture reason for this test')`,
+        ),
       )
       expect(e2.message).toMatch(/forbidden/)
       const e3 = await as(c, { id: admin, aal: 'aal1' }, () =>
-        failure(c, `select public.set_platform_setting('support_email','"x@example.test"')`),
+        failure(
+          c,
+          `select public.set_platform_setting('max_cart_item_quantity','25'::jsonb, 'Fixture reason for this test')`,
+        ),
       )
       expect(e3.message).toMatch(/aal2/)
       await as(c, { id: admin, aal: 'aal2' }, () =>
-        c.query(`select public.set_platform_setting('support_email','"x@example.test"')`),
+        c.query(
+          `select public.set_platform_setting('max_cart_item_quantity','25'::jsonb, 'Fixture reason for this test')`,
+        ),
       )
       expect(
         (
           await c.query(
-            `select 1 from public.audit_events where action='setting.changed' and entity_id='support_email'`,
+            `select 1 from public.audit_events where action='setting.changed' and entity_id='max_cart_item_quantity'`,
           )
         ).rowCount,
       ).toBe(1)

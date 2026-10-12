@@ -803,7 +803,10 @@ describe('mock payment (fails closed) and cancellation', () => {
       const admin = await createUser(c)
       await giveRole(c, admin, 'platform_admin')
       const sw = await as(c, AAL2(admin), () =>
-        failure(c, `select public.set_platform_setting('mock_payments_enabled', 'true'::jsonb)`),
+        failure(
+          c,
+          `select public.set_platform_setting('mock_payments_enabled', 'true'::jsonb, 'Fixture reason for this test')`,
+        ),
       )
       expect(sw.message).toMatch(/direct database access/)
     })
@@ -984,7 +987,11 @@ describe('configuration', () => {
       await giveRole(c, admin, 'platform_admin')
       const set = (k: string, v: unknown) =>
         as(c, AAL2(admin), () =>
-          failure(c, `select public.set_platform_setting($1, $2::jsonb)`, [k, JSON.stringify(v)]),
+          failure(
+            c,
+            `select public.set_platform_setting($1, $2::jsonb, 'Fixture reason for this test')`,
+            [k, JSON.stringify(v)],
+          ),
         )
       expect((await set('platform_fee_bps', 3001)).message).toMatch(/out of range/)
       expect((await set('platform_fee_bps', -1)).message).toMatch(/invalid value/)
@@ -994,7 +1001,9 @@ describe('configuration', () => {
       expect((await set('unpaid_order_expiry_minutes', 1)).message).toMatch(/out of range/)
       expect((await set('max_cart_item_quantity', 0)).message).toMatch(/out of range/)
       await as(c, AAL2(admin), () =>
-        c.query(`select public.set_platform_setting('platform_fee_bps', '750'::jsonb)`),
+        c.query(
+          `select public.set_platform_setting('platform_fee_bps', '750'::jsonb, 'Fixture reason for this test')`,
+        ),
       )
       expect(
         (await c.query(`select value from public.platform_settings where key='platform_fee_bps'`))
@@ -1004,7 +1013,10 @@ describe('configuration', () => {
       expect(
         (
           await as(c, AAL2(cust), () =>
-            failure(c, `select public.set_platform_setting('platform_fee_bps','1'::jsonb)`),
+            failure(
+              c,
+              `select public.set_platform_setting('platform_fee_bps','1'::jsonb, 'Fixture reason for this test')`,
+            ),
           )
         ).message,
       ).toMatch(/forbidden/)

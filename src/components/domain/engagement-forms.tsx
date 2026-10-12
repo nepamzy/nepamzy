@@ -140,6 +140,14 @@ export function SettingForm({ settingKey, value }: { settingKey: string; value: 
     >
       <input type="hidden" name="key" value={settingKey} />
       <Textarea
+        label="Reason for the change (at least 10 characters)"
+        name="reason"
+        required
+        minLength={10}
+        maxLength={500}
+        rows={2}
+      />
+      <Textarea
         label="New value"
         name="value"
         required

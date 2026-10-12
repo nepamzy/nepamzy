@@ -112,7 +112,10 @@ describe('failure injection: a database error part-way through leaves no partial
       const before = await read()
       await failInsertsInto(c, 'audit_events')
       const e = await as(c, AAL2(admin), () =>
-        failure(c, `select public.set_platform_setting('delivery_fee_kobo', '777'::jsonb)`),
+        failure(
+          c,
+          `select public.set_platform_setting('delivery_fee_kobo', '777'::jsonb, 'Fixture reason for this test')`,
+        ),
       )
       expect(e.message).toMatch(/injected failure/)
       expect(await read()).toEqual(before)

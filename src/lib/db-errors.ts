@@ -74,6 +74,8 @@ const MESSAGES: Record<string, string> = {
   'cannot review your own request': 'You cannot review a request you made yourself.',
   'cannot decide your own case': 'You cannot decide a report you opened yourself.',
   'cannot review your own case': 'You cannot review a report you opened yourself.',
+  setting_reason_required: 'Give a reason of at least 10 characters.',
+  unknown_setting: 'That setting does not exist.',
   review_not_eligible: 'Only the customer of a finished order can leave a review.',
   review_exists: 'You already reviewed this order.',
   review_own_shop: 'You cannot review your own shop.',
