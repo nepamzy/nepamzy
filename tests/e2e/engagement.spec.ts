@@ -171,3 +171,167 @@ test('admin lists are bounded and filterable with plain links and a GET form', a
   await expect(fin.page).toHaveURL(/status=requested/)
   await a11yClean(fin.page, '/admin/refunds filtered')
 })
+
+test('jobs: every worker route rejects callers without the secret, and the notification worker uses the local sink only', async ({
+  browser,
+}, info) => {
+  const base = 'http://127.0.0.1:3000/api/jobs'
+  for (const job of ['expire-orders', 'purge-location', 'process-notifications']) {
+    expect((await fetch(`${base}/${job}`, { method: 'POST' })).status).toBe(401)
+    expect(
+      (await fetch(`${base}/${job}`, { method: 'POST', headers: { authorization: 'Bearer nope' } }))
+        .status,
+    ).toBe(401)
+    // GET is not offered
+    expect((await fetch(`${base}/${job}`)).status).toBe(405)
+  }
+  const secret = process.env.JOBS_SECRET
+  test.skip(!secret, 'JOBS_SECRET not configured in this environment')
+
+  const customer = await openSession(browser, info, 'jcust')
+  const owner = await openSession(browser, info, 'jowner', ['vendor_owner'])
+  const shop = await makeShopWithPoint(owner.user.id, `Fixture dish ${tag()}`)
+  const o = await seedPaidCompletedOrder(shop, customer.user.id)
+  // the customer opts in to the local sink, then something happens to their order
+  await customer.page.goto('/notifications')
+  await customer.page.getByLabel(/local test sink/).check()
+  await clickAndWait(customer.page, () =>
+    customer.page.getByRole('button', { name: 'Save' }).click(),
+  )
+  await admin()
+    .from('order_status_history')
+    .insert({ order_id: o.id, from_status: 'PAID', to_status: 'COMPLETED' })
+  const pending = await admin()
+    .from('notification_outbox')
+    .select('id, status, notifications!inner(user_id)')
+    .eq('notifications.user_id', customer.user.id)
+  expect(pending.data?.map((r) => r.status)).toEqual(['pending'])
+
+  const res = await fetch(`${base}/process-notifications`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${secret}` },
+  })
+  expect(res.status).toBe(200)
+  const body = await res.json()
+  expect(body.ok).toBe(true)
+  expect(body.failed).toBe(0)
+  const done = await admin()
+    .from('notification_outbox')
+    .select('status, notifications!inner(user_id)')
+    .eq('notifications.user_id', customer.user.id)
+  expect(done.data?.map((r) => r.status)).toEqual(['sent'])
+  const runs = await admin()
+    .from('job_runs')
+    .select('ok')
+    .eq('job', 'process-notifications')
+    .order('id', { ascending: false })
+    .limit(1)
+  expect(runs.data?.[0]?.ok).toBe(true)
+})
+
+test('keyboard only: the report disclosure and the admin filter form can be operated without a mouse', async ({
+  browser,
+}, info) => {
+  const customer = await openSession(browser, info, 'kcust')
+  const owner = await openSession(browser, info, 'kowner', ['vendor_owner'])
+  const reader = await openSession(browser, info, 'kread')
+  const fin = await openSession(browser, info, 'kfin', ['finance_admin'])
+  const shop = await makeShopWithPoint(owner.user.id, `Fixture dish ${tag()}`)
+  const o = await seedPaidCompletedOrder(shop, customer.user.id)
+  const comment = `Keyboard check ${tag()}`
+  const { error } = await admin().from('reviews').insert({
+    order_id: o.id,
+    vendor_id: shop.vendorId,
+    customer_id: customer.user.id,
+    rating: 5,
+    comment,
+  })
+  expect(error).toBeNull()
+
+  const r = reader.page
+  await r.goto(`/vendors/${shop.slug}`)
+  const summary = r.getByText('Report this review')
+  await summary.focus()
+  await expect(summary).toBeFocused()
+  await r.keyboard.press('Enter') // a <details> summary opens with Enter
+  const why = r.getByLabel('Why?')
+  await expect(why).toBeVisible()
+  await r.keyboard.press('Tab')
+  await expect(why).toBeFocused()
+  // the form's controls come next in the tab order and the submit button is reachable
+  await r.keyboard.press('Tab') // note
+  await r.keyboard.press('Tab') // submit
+  await expect(r.getByRole('button', { name: 'Send report' })).toBeFocused()
+
+  const f = fin.page
+  await f.goto('/admin/refunds')
+  const status = f.getByLabel('Status')
+  await status.focus()
+  await f.keyboard.press('Tab')
+  await expect(f.getByLabel('Search order number')).toBeFocused()
+  await f.keyboard.type('AFM-NOPE')
+  await f.keyboard.press('Enter') // Enter in a text field submits the GET form
+  await expect(f).toHaveURL(/q=AFM-NOPE/)
+  await expect(f.getByText('No refund requests')).toBeVisible()
+})
+
+test('settings: only administrators; invalid values are refused; a valid change is audited; locked keys are not editable', async ({
+  browser,
+}, info) => {
+  const support = await openSession(browser, info, 'ssup2', ['support_agent'])
+  const admn = await openSession(browser, info, 'sadm2', ['platform_admin'])
+  await support.page.goto('/admin/settings')
+  await expect(support.page.getByText(/don’t have access to this page/)).toBeVisible()
+
+  const a = admn.page
+  await a.goto('/admin/settings')
+  await expect(a.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible()
+  await a11yClean(a, '/admin/settings')
+  const original = (
+    await admin()
+      .from('platform_settings')
+      .select('value')
+      .eq('key', 'max_cart_item_quantity')
+      .single()
+  ).data!.value
+  const group = a.getByRole('group', { name: 'Setting max_cart_item_quantity' })
+
+  await group.getByLabel(/New value/).fill('9999')
+  await clickAndWait(a, () => group.getByRole('button', { name: 'Save' }).click())
+  await expect(alertIn(a)).toContainText(/refused/i)
+  expect(
+    (
+      await admin()
+        .from('platform_settings')
+        .select('value')
+        .eq('key', 'max_cart_item_quantity')
+        .single()
+    ).data!.value,
+  ).toEqual(original)
+
+  try {
+    await group.getByLabel(/New value/).fill('21')
+    await clickAndWait(a, () => group.getByRole('button', { name: 'Save' }).click())
+    await expect(statusIn(a)).toContainText(/Saved/)
+    const audit = await admin()
+      .from('audit_events')
+      .select('action, entity_id')
+      .eq('action', 'setting.changed')
+      .eq('entity_id', 'max_cart_item_quantity')
+      .eq('actor_id', admn.user.id)
+    expect(audit.data).toHaveLength(1)
+  } finally {
+    await admin()
+      .from('platform_settings')
+      .update({ value: original })
+      .eq('key', 'max_cart_item_quantity')
+  }
+
+  // locked keys are shown read-only
+  await expect(
+    a.getByRole('group', { name: 'Setting mock_payments_enabled' }).getByText('Not editable here'),
+  ).toBeVisible()
+  await expect(
+    a.getByRole('group', { name: 'Setting settlement_policy' }).getByText('Not editable here'),
+  ).toBeVisible()
+})

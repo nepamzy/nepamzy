@@ -36,3 +36,7 @@ Dev-script env: `SUPABASE_INTERNAL_IMAGE_REGISTRY=docker.io` (set by `scripts/*.
 | `PICKUP_CODE_SECRET` | Server-only HMAC secret for customer pickup codes. 32+ random characters. Missing/short/placeholder values make pickup codes unavailable (no fallback). `scripts/make-env-local.sh` generates a random local value; never commit a real one and never paste one into chat. |
 
 The scheduler routes are `POST /api/jobs/expire-orders` and `POST /api/jobs/purge-location` (both `Authorization: Bearer $JOBS_SECRET`).
+
+## Batch 6
+
+No new variable was introduced. `JOBS_SECRET` now guards all three job routes (`expire-orders`, `purge-location`, `process-notifications`); `/api/health` needs no secret. Nothing in the repository sends mail, SMS or push: the notification "copy" channel is a local sink. `.env.example` is unchanged.

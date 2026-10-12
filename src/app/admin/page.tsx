@@ -25,6 +25,11 @@ const CARDS = [
   ['/admin/returns', 'Returns', 'Decide return requests (support).'],
   ['/admin/reviews', 'Review reports', 'Decide reports about customer reviews (support).'],
   ['/admin/jobs', 'Background jobs', 'Job and notification queue health (administrators only).'],
+  [
+    '/admin/settings',
+    'Settings',
+    'Fees, limits and policies (administrators only). Every change is recorded.',
+  ],
   ['/admin/audit', 'Audit trail', 'Read-only record of important actions.'],
   ['/admin/roles', 'Roles', 'Grant or revoke roles (administrators only).'],
 ]

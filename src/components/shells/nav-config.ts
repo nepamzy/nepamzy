@@ -27,6 +27,7 @@ export const ADMIN_NAV: NavItem[] = [
   { href: '/admin/returns', label: 'Returns', icon: '↩️' },
   { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
   { href: '/admin/jobs', label: 'Jobs', icon: '⚙️' },
+  { href: '/admin/settings', label: 'Settings', icon: '🎛' },
   { href: '/admin/audit', label: 'Audit', icon: '🧾' },
   { href: '/admin/roles', label: 'Roles', icon: '🔑' },
 ]

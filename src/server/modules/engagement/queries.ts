@@ -96,3 +96,39 @@ export const listReviewReports = async (status: string | null, page = 1) =>
 
 export const adminOverview = () => rpc<Record<string, number>>('admin_overview')
 export const jobHealth = () => rpc<JobHealth>('admin_job_health')
+
+/** Settings an administrator may change here. The database validates each value again and refuses locked keys. */
+export const EDITABLE_SETTINGS = [
+  'delivery_fee_kobo',
+  'platform_fee_bps',
+  'unpaid_order_expiry_minutes',
+  'max_cart_item_quantity',
+  'handover_token_ttl_minutes',
+  'location_max_accuracy_m',
+  'location_max_age_seconds',
+  'location_min_interval_seconds',
+  'location_stale_after_seconds',
+  'arrival_max_accuracy_m',
+  'arrival_max_age_seconds',
+  'default_geofence_radius_m',
+  'location_history_retention_hours',
+  'delivery_proof_ttl_minutes',
+  'refund_support_approval_limit_kobo',
+  'refund_fee_policy',
+  'return_policy',
+] as const
+
+export type SettingRow = {
+  key: string
+  value: unknown
+  note: string | null
+  updated_at: string | null
+}
+export const listSettings = async (): Promise<SettingRow[]> => {
+  const sb = await createSupabaseServerClient()
+  const { data } = await sb
+    .from('platform_settings')
+    .select('key, value, note, updated_at')
+    .order('key')
+  return (data ?? []) as SettingRow[]
+}

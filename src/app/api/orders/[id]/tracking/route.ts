@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { checkAccess } from '@/server/modules/identity-and-access/guard'
+import { rateLimit } from '@/server/modules/identity-and-access/security'
 import { describeEstimate, estimateTrip } from '@/server/modules/location/routing'
 
 export const dynamic = 'force-dynamic'
@@ -15,9 +16,12 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const id = (await ctx.params).id
   if (!z.uuid().safeParse(id).success)
     return NextResponse.json({ error: 'not_found' }, { status: 404, headers: noStore })
-  const { decision } = await checkAccess({ roles: ['customer'], aal: 'aal2' })
+  const { who, decision } = await checkAccess({ roles: ['customer'], aal: 'aal2' })
   if (!decision.allow)
     return NextResponse.json({ error: 'unauthorized' }, { status: 401, headers: noStore })
+  // The page polls every 10 s (6 per minute); allow several tabs but stop a runaway client.
+  if (!(await rateLimit(`tracking:${who.userId}`, 60, 40)))
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429, headers: noStore })
   const sb = await createSupabaseServerClient()
   const { data, error } = await sb.rpc('get_order_tracking', { p_order: id })
   if (error) return NextResponse.json({ error: 'not_found' }, { status: 404, headers: noStore })

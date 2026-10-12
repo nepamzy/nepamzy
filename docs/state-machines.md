@@ -35,3 +35,11 @@ All order transitions go through `app_private.step_order(order, from, to, actor,
 ## Support case
 
 `open -> under_review -> decided -> closed`. `case_decide` is the only writer of a decision.
+
+## Notification outbox (Batch 6)
+
+`pending -> processing -> sent`; `processing -> pending` (retry with back-off `2^attempts` minutes, or reclaimed after 5 minutes stuck); `processing -> dead` after 5 failed attempts or when stuck on the fifth attempt; `suppressed` is written at creation when the user has not opted in to the local sink. Terminal: `sent`, `dead`, `suppressed`. Only the service role moves rows.
+
+## Review and review report (Batch 6)
+
+Review: `published -> hidden` (moderation, reason required) and `hidden -> published` (`unhide_review`, platform administrator, reason required). No other changes; no deletion. Report: `open -> upheld | dismissed`; upholding hides the review and closes the other open reports on it.

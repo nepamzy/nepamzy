@@ -26,3 +26,15 @@
 | 17  | Refund and return policy: partial refunds, service-fee share, who may approve and up to what amount, food/hygiene return rules per category, restocking | Owner + counsel | Any real refund or return           |
 | 18  | Written procedure for a recipient who cannot draw a signature, and for a recipient who is not the account holder (K27/K47/K52)                          | Owner + AFIT    | Real deliveries                     |
 | 19  | Independent verification of real Paystack refund behaviour with owner-controlled test credentials (K19/K29/K30) before any real execution               | Owner           | Refund execution                    |
+
+## Added in Batch 6
+
+| #   | Approval / confirmation                                                                           | From            | Blocks                                                          |
+| --- | ------------------------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------- |
+| 20  | Who schedules the three jobs, on which infrastructure, and who is alerted when one fails          | Owner           | Order expiry, location purge, notification delivery in practice |
+| 21  | Any real notification channel (email/SMS/push): provider, cost, privacy review, wording           | Owner + counsel | Real messages                                                   |
+| 22  | Retention periods and data-subject request handling (NDPA/NDPC)                                   | Owner + counsel | Launch; purge jobs                                              |
+| 23  | Review policy: eligibility, edit/delete rules, community rules text, shop replies                 | Owner           | Public reviews to real users                                    |
+| 24  | Backup storage, frequency, encryption, recovery targets; restore rehearsal on the chosen platform | Owner           | Any real data                                                   |
+| 25  | Incident response plan and support staffing/escalation                                            | Owner + AFIT    | Pilot                                                           |
+| 26  | Independent security review / penetration test                                                    | Owner           | Any claim of security assurance                                 |

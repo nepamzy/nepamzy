@@ -22,6 +22,7 @@
     "db:start": "bash scripts/dev-db.sh",
     "db:reset": "bash scripts/db-reset.sh",
     "db:lint": "supabase db lint --level warning",
+    "db:restore-drill": "bash scripts/db-restore-drill.sh",
     "dev:paystack": "node --env-file=.env.local scripts/fake-paystack.mjs"
   },
   "dependencies": {

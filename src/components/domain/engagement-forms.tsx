@@ -7,6 +7,7 @@ import {
   moderateReportAction,
   reportReviewAction,
   setNotificationPreferenceAction,
+  setSettingAction,
   unhideReviewAction,
 } from '@/server/modules/engagement/actions'
 
@@ -124,6 +125,27 @@ export function UnhideForm({ reviewId }: { reviewId: string }) {
         required
         minLength={10}
         maxLength={500}
+      />
+    </ActionForm>
+  )
+}
+
+export function SettingForm({ settingKey, value }: { settingKey: string; value: string }) {
+  return (
+    <ActionForm
+      action={setSettingAction}
+      submitLabel="Save"
+      pendingLabel="Saving…"
+      className="space-y-2"
+    >
+      <input type="hidden" name="key" value={settingKey} />
+      <Textarea
+        label="New value"
+        name="value"
+        required
+        defaultValue={value}
+        maxLength={2000}
+        rows={2}
       />
     </ActionForm>
   )

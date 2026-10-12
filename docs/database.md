@@ -72,3 +72,16 @@ All commerce tables (Batch 2+), retention jobs, location tables, storage buckets
 - Refund cap (R1): order-row lock -> balance check -> trigger `refunds_cap_guard` (its own order lock + sum re-check). Item quantities: trigger `refund_items_cap_guard` / `return_items_cap_guard`. State machine: trigger `refunds_state_guard` / `return_state_guard`. `tests/db/refund-concurrency.test.ts`.
 - Idempotency: unique `(requested_by, idempotency_key)` on refunds, `(reporter_id, idempotency_key)` on cases, `(customer_id, idempotency_key)` on returns; one open case per (order, type).
 - Provider boundary: `refund_begin_execution` accepts mode `fake` only; the real modes raise `provider_not_enabled`. Success needs a provider reference (unique) and writes one `refund_paid` ledger entry per refund (unique `refund_id`).
+
+## Batch 6 additions (migrations `20261015000001`, `20261015000002`)
+
+- **Tables:** `notifications` (unique `(user_id, event_key)`, relative links only, generic text), `notification_preferences`, `notification_outbox` (status `pending|processing|sent|suppressed|dead`, attempts, next attempt, lock time), `notification_deliveries`, `notification_errors` (append-only), `job_runs` (append-only), `reviews` (unique per order; immutable except moderation fields; delete denied), `review_reports` (unique per reporter and review). Every table has RLS and a restrictive aal2 policy; API roles get SELECT on the own-data tables only.
+- **Trigger functions:** `notify_order_status`, `notify_refund_event`, `notify_case_event`, `notify_case_statement`, `notify_return_status`, `reviews_guard`. Helper `app_private.notify` swallows its own failures.
+- **Functions:** user — `list_my_notifications`, `notification_mark_read`, `get_notification_preferences`, `set_notification_preference`, `create_review`, `my_order_review`, `report_review`; anonymous — `get_vendor_reviews`; staff — `admin_overview`, `admin_job_health`, `staff_list_review_reports`, `moderate_review_report`, `unhide_review`; service role only — `notification_outbox_claim`, `notification_outbox_complete`, `record_job_run`.
+- **Replaced (drop + create with defaulted parameters):** `staff_list_refunds(status, limit, offset, search)`, `staff_list_cases(...)`, `list_returns(order, limit, offset)`. Limits are clamped (100 maximum) and offsets bounded.
+- `20261015000002` caps `list_rider_issues()` at 100 rows.
+
+**Invariant layers (new)**
+
+- Notification claim once: `for update skip locked` in the claim CTE -> `processing` status with lock time -> completion is a conditional update (`where status = 'processing'`) -> unique `(notification_id, channel)` on deliveries. Control-removal tests remove the lock and show duplicates appear (so the test has power).
+- Review once: unique `(order_id)` -> eligibility check -> daily cap.

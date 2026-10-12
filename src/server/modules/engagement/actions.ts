@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { rateLimit } from '@/server/modules/identity-and-access/security'
 import type { AccessRequirement } from '@/server/modules/identity-and-access/policy'
+import { EDITABLE_SETTINGS } from './queries'
 import {
   dbFailed,
   done,
@@ -116,4 +117,23 @@ export async function unhideReviewAction(_p: ActionState, fd: FormData): Promise
   if (error) return dbFailed(error, 'Give a reason of at least 10 characters.')
   revalidatePath('/admin/reviews')
   return done('Review restored.')
+}
+
+export async function setSettingAction(_p: ActionState, fd: FormData): Promise<ActionState> {
+  const key = text(fd, 'key', 60)
+  if (!(EDITABLE_SETTINGS as readonly string[]).includes(key))
+    return failed('That setting cannot be changed here.')
+  const g = await gate(ADMIN)
+  if ('state' in g) return g.state
+  let value: unknown
+  try {
+    value = JSON.parse(text(fd, 'value', 2000))
+  } catch {
+    return failed('The value must be a number, "text in quotes", or a JSON object.')
+  }
+  const sb = await createSupabaseServerClient()
+  const { error } = await sb.rpc('set_platform_setting', { p_key: key, p_value: value })
+  if (error) return dbFailed(error, 'That value was refused. Check the allowed range.')
+  revalidatePath('/admin/settings')
+  return done('Saved and recorded in the audit trail.')
 }

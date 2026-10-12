@@ -74,3 +74,11 @@ Real Android devices and screen readers; actual email deliverability (local sink
 - Unit: `signature.test.ts` (payload validation), `refund-provider.test.ts` (fake provider, fail-closed outside `local`).
 - e2e: `delivery.spec.ts` (recipient confirmation incl. empty/lone-dot signature, double click, expiry, rider has no control, support exception), `support.spec.ts` (refund journey with fake execution and reconciliation; report -> decision -> refund request; return flow), find-by-code added to `payments-fulfilment.spec.ts`, the rider journey now starts on placeholder terms. All run on mobile-360 and desktop with axe and an overflow check on each new page.
 - Convention: e2e tests that need approved rider terms install the synthetic fixture and always restore the placeholder (`afterEach`).
+
+## Batch 6 coverage
+
+- DB: `notifications.test.ts` (content, idempotent keys, failure isolation, ownership, preferences, outbox retry/dead/stale reclaim), `notification-concurrency.test.ts` (8 workers; duplicate completions; control removal), `reviews.test.ts` (eligibility matrix, authz, validation, immutability, caps, public view, reports, moderation), `admin.test.ts` (role-scoped overview, bounded lists, job functions), `security-regression.test.ts` (catalog-wide authorisation, forged claims, direct writes, append-only pins, boundedness pins), `failure-injection.test.ts` (injected database errors leave no partial state; audit failure blocks privileged change).
+- Unit: `endpoint-coverage.test.ts` (every API route authenticates; rate-limit floors).
+- e2e: `engagement.spec.ts` (notifications incl. keyboard use and local-sink opt-in, reviews and report and moderation, admin overview and job health, bounded filters, job routes incl. an end-to-end worker run, keyboard-only report/filter, settings) at mobile-360 and desktop, each page with axe and an overflow check.
+- Scripts: `pnpm db:restore-drill` (local backup -> scratch restore -> fingerprint comparison; see `docs/operations/recovery.md`). It is not part of `pnpm test:db`.
+- Convention: tests that inject faults do so inside the test transaction (DDL is transactional in Postgres) so nothing leaks to other tests.
