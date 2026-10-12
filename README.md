@@ -2,7 +2,7 @@
 
 A mobile-first campus marketplace and delivery platform for the approved community of the Air Force Institute of Technology (AFIT), Nigeria.
 
-> **Status: Batch 6 built (in-app notifications with a LOCAL-SINK outbox, reviews with moderation, role-scoped administration, security regression and recovery rehearsal), awaiting owner review.** The system is **not pilot-ready**: nothing schedules or monitors its jobs, no real notification channel exists, retention is undecided, real Paystack behaviour and background GPS are **unverified**, and no independent audit has happened (`docs/pilot-readiness.md`). **Not deployed; not for real users or real money.**
+> **Status: post-Batch 6 remediation done (settings allowlist + reasons, job-health detection, drill hardening, registers; `docs/reports/post-batch-6-remediation.md`). Batch 6 built (in-app notifications with a LOCAL-SINK outbox, reviews with moderation, role-scoped administration, security regression and recovery rehearsal), awaiting owner review.** The system is **not pilot-ready**: nothing schedules or monitors its jobs, no real notification channel exists, retention is undecided, real Paystack behaviour and background GPS are **unverified**, and no independent audit has happened (`docs/pilot-readiness.md`). **Not deployed; not for real users or real money.**
 
 **Status vocabulary:** _Planned_ (designed, not built) → _Implemented_ (code exists) → _Tested_ (automated/manual evidence recorded). _Unverified_ marks assumptions not yet checked. Full table: [`docs/requirements-checklist.md`](docs/requirements-checklist.md).
 
