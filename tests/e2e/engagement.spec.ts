@@ -348,3 +348,75 @@ test('settings: only administrators; invalid values are refused; a valid change 
     a.getByRole('group', { name: 'Setting settlement_policy' }).getByText('Not editable here'),
   ).toBeVisible()
 })
+
+test('job monitoring: the health endpoint needs the secret, reports problems until every job has run, and the local runner refuses non-local targets', async () => {
+  const base = 'http://127.0.0.1:3000/api/jobs'
+  expect((await fetch(`${base}/health`)).status).toBe(401)
+  expect(
+    (await fetch(`${base}/health`, { headers: { authorization: 'Bearer nope' } })).status,
+  ).toBe(401)
+  expect((await fetch(`${base}/health`, { method: 'POST' })).status).toBe(405)
+  const secret = process.env.JOBS_SECRET
+  test.skip(!secret, 'JOBS_SECRET not configured in this environment')
+
+  const { execFileSync, spawnSync } = await import('node:child_process')
+  // the runner calls every job once and then the health check; it must exit 0 only when all of that is clean
+  const out = execFileSync('node', ['scripts/run-jobs.mjs', 'once'], {
+    env: { ...process.env, JOBS_SECRET: secret },
+    encoding: 'utf8',
+  })
+  const lines = out
+    .trim()
+    .split('\n')
+    .map((l) => JSON.parse(l))
+  expect(lines.filter((l) => l.name).map((l) => [l.name, l.ok])).toEqual([
+    ['process-notifications', true],
+    ['expire-orders', true],
+    ['purge-location', true],
+  ])
+  expect(lines.at(-1).health).toMatchObject({ status: 200, ok: true, problems: [] })
+
+  const remote = spawnSync('node', ['scripts/run-jobs.mjs', 'check'], {
+    env: { ...process.env, JOBS_SECRET: secret, JOBS_BASE_URL: 'https://example.com' },
+    encoding: 'utf8',
+  })
+  expect(remote.status).toBe(2)
+  expect(remote.stderr).toMatch(/refusing/)
+})
+
+test('effective protection: every API route refuses an anonymous caller with a non-2xx answer (only /api/health is public)', async () => {
+  const { readdirSync, statSync } = await import('node:fs')
+  const { join } = await import('node:path')
+  const walk = (d: string): string[] =>
+    readdirSync(d).flatMap((f) =>
+      statSync(join(d, f)).isDirectory() ? walk(join(d, f)) : [join(d, f)],
+    )
+  const routes = walk('src/app/api')
+    .filter((f) => f.endsWith('route.ts'))
+    .map(
+      (f) =>
+        '/' +
+        f
+          .replace(/^src\/app\//, '')
+          .replace(/\/route\.ts$/, '')
+          .replace('[id]', '00000000-0000-4000-8000-000000000000'),
+    )
+  expect(routes.length).toBeGreaterThanOrEqual(8)
+  for (const path of routes) {
+    for (const method of ['GET', 'POST']) {
+      const res = await fetch(`http://127.0.0.1:3000${path}`, {
+        method,
+        redirect: 'manual',
+        body: method === 'POST' ? '{}' : undefined,
+      })
+      const publicByDesign = path === '/api/health' && method === 'GET'
+      if (publicByDesign) {
+        expect([200, 503], `${method} ${path}`).toContain(res.status)
+        expect(Object.keys(await res.json())).toEqual(['ok'])
+      } else {
+        expect(res.status, `${method} ${path}`).toBeGreaterThanOrEqual(300)
+        expect(res.status, `${method} ${path}`).not.toBe(500)
+      }
+    }
+  }
+})

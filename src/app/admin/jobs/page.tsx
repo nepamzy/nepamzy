@@ -14,6 +14,29 @@ export default async function Jobs() {
   return (
     <>
       <PageHeader title="Background jobs" subtitle={h.note} />
+      {h.problems.length === 0 ? (
+        <p
+          role="status"
+          className="mb-4 rounded-[var(--radius-control)] bg-success-50 px-3 py-2 font-medium text-success-700"
+        >
+          No problems detected: every job has succeeded within its expected window and no
+          notification work is piling up.
+        </p>
+      ) : (
+        <div
+          role="alert"
+          className="mb-4 rounded-[var(--radius-control)] bg-danger-50 px-3 py-2 text-danger-700"
+        >
+          <p className="font-bold">{h.problems.length} problem(s) detected</p>
+          <ul className="list-disc pl-5">
+            {h.problems.map((p, i) => (
+              <li key={i}>
+                {p.job}: {p.kind.replaceAll('_', ' ')}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="space-y-3">
         {h.jobs.map((j) => (
           <Card key={j.job} className="space-y-1">
@@ -30,6 +53,9 @@ export default async function Jobs() {
             <p className="text-sm">Last run: {when(j.last_run_at)}</p>
             <p className="text-sm">Last success: {when(j.last_ok_at)}</p>
             <p className="text-sm">Failures in the last 24 hours: {j.failures_24h}</p>
+            <p className="text-sm text-muted">
+              Counts as stale after {j.max_age_minutes} minutes without a success.
+            </p>
           </Card>
         ))}
       </div>

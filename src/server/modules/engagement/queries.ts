@@ -42,7 +42,9 @@ export type JobHealth = {
     last_ok_at: string | null
     last_run_ok: boolean | null
     failures_24h: number
+    max_age_minutes: number
   }[]
+  problems: { job: string; kind: string }[]
   notifications: Record<string, number | null>
   note: string
 }
