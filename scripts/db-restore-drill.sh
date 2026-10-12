@@ -44,7 +44,13 @@ docker exec "$C" pg_restore -U postgres --no-owner -d $SCRATCH /tmp/drill.dump 2
 ERRS=$({ grep -E "^pg_restore: error|^ERROR" "$OUT/restore-$STAMP.log" || true; } \
   | { grep -vE 'schema "public" already exists|permission denied to change default privileges' || true; } | wc -l | tr -d ' ')
 echo "    unexpected pg_restore errors: $ERRS (log: $OUT/restore-$STAMP.log)"
-[ "$ERRS" = "0" ] || { echo "RESULT: restore reported unexpected errors"; psqlc -d postgres -c "drop database $SCRATCH" >/dev/null; exit 1; }
+if [ "$ERRS" != "0" ]; then
+  if grep -q "violates foreign key" "$OUT/restore-$STAMP.log"; then
+    echo "    foreign-key errors: the source database holds orphan rows, which the DB test helpers can leave behind"
+    echo "    (replica-mode purge). Run 'pnpm db:reset' and create data through the app, then repeat."
+  fi
+  echo "RESULT: restore reported unexpected errors"; psqlc -d postgres -c "drop database $SCRATCH" >/dev/null; exit 1
+fi
 
 FP_SQL=$(cat <<'SQL'
 with t as (select c.relname, c.relrowsecurity rls from pg_class c join pg_namespace n on n.oid=c.relnamespace

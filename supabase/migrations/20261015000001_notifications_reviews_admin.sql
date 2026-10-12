@@ -402,8 +402,8 @@ as $$ insert into public.job_runs (job, ok, detail) values (p_job, p_ok, coalesc
 create function public.admin_job_health() returns jsonb
 language plpgsql security definer set search_path = ''
 as $$
-declare v_actor uuid := app_private.require_staff(array['platform_admin']::public.app_role[]);
 begin
+  perform app_private.require_staff(array['platform_admin']::public.app_role[]);
   return jsonb_build_object(
     'jobs', (select coalesce(jsonb_agg(jsonb_build_object(
         'job', j.job,
@@ -428,11 +428,11 @@ end $$;
 create function public.admin_overview() returns jsonb
 language plpgsql security definer set search_path = ''
 as $$
-declare v_actor uuid := app_private.require_staff(array['platform_admin', 'support_agent', 'finance_admin']::public.app_role[]);
-        v_out jsonb := '{}'::jsonb; v_admin boolean := app_private.has_role('platform_admin');
+declare v_out jsonb := '{}'::jsonb; v_admin boolean := app_private.has_role('platform_admin');
         v_support boolean := app_private.has_any_role(array['platform_admin', 'support_agent']::public.app_role[]);
         v_fin boolean := app_private.has_any_role(array['platform_admin', 'finance_admin']::public.app_role[]);
 begin
+  perform app_private.require_staff(array['platform_admin', 'support_agent', 'finance_admin']::public.app_role[]);
   if v_support then
     v_out := v_out || jsonb_build_object(
       'cases_open', (select count(*) from public.support_cases where status in ('open', 'under_review')),
@@ -546,9 +546,9 @@ end $$;
 create function public.staff_list_review_reports(p_status text default 'open', p_limit int default 25, p_offset int default 0) returns jsonb
 language plpgsql security definer set search_path = ''
 as $$
-declare v_actor uuid := app_private.require_staff(array['platform_admin', 'support_agent']::public.app_role[]);
-        v_limit int := least(greatest(coalesce(p_limit, 25), 1), 100); v_offset int := least(greatest(coalesce(p_offset, 0), 0), 10000);
+declare v_limit int := least(greatest(coalesce(p_limit, 25), 1), 100); v_offset int := least(greatest(coalesce(p_offset, 0), 0), 10000);
 begin
+  perform app_private.require_staff(array['platform_admin', 'support_agent']::public.app_role[]);
   if p_status is not null and p_status not in ('open', 'upheld', 'dismissed') then raise exception 'invalid value' using errcode = '22023'; end if;
   return jsonb_build_object(
     'total', (select count(*) from public.review_reports where p_status is null or status = p_status),
