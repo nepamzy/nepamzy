@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # LOCAL backup + restore rehearsal. Dumps the application schemas (public, app_private) from the local Supabase
-# database, restores them into a scratch database on the same local server, and compares a catalog + row-count
-# fingerprint of both. Nothing leaves this machine; no remote database is touched. The scratch database is dropped.
+# database, restores them into a scratch database on the same local server, and compares a catalog fingerprint and a
+# content hash of every row of both. Nothing leaves this machine; no remote database is touched. The scratch database is dropped.
 #
 # What this proves: the dump is complete enough to rebuild the application schema and data (tables, constraints,
 # functions, triggers, policies, grants, rows). What it does NOT prove: restoring a hosted Supabase project, point-in-time
 # recovery, auth.users/password-hash recovery, storage objects, or any production backup. See docs/operations/recovery.md.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+# Local only: refuse a Docker daemon that is not the local unix socket (for example DOCKER_HOST=tcp://... or ssh://...).
+if [ -n "${DOCKER_HOST:-}" ] && [[ "$DOCKER_HOST" != unix://* ]]; then
+  echo "refusing to run: DOCKER_HOST=$DOCKER_HOST is not a local socket. This drill is for the local stack only."; exit 2
+fi
 C="${DB_CONTAINER:-$(docker ps --format '{{.Names}}' | grep '^supabase_db_' | head -1)}"
 [ -n "$C" ] || { echo "local database container not running (pnpm db:start)"; exit 2; }
 SCRATCH=restore_check

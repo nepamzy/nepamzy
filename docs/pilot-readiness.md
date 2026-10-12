@@ -49,3 +49,25 @@ Status vocabulary: _Implemented_ · _Tested locally_ · _Verified externally_ ·
 ## Post-Batch 6 remediation status (see `docs/reports/post-batch-6-remediation.md`)
 
 Technically prepared to the extent demonstrated locally; **blocked from a pilot** by the prerequisites above that no code can supply: AFIT authorisation, approved places and terms, rider verification, privacy/retention and payment decisions, an accessible proof alternative, an independent security review, scheduling and monitoring that someone actually operates, backups and incident response, pilot scope. The full decision list is `docs/owner-decisions.md`. Nothing in this remediation authorises a pilot.
+
+## Evidence classification (post-Batch 6 verification, 2026-10-12)
+
+Categories: **I** Implemented · **L** Locally verified · **C** CI verified · **M** Manually reviewed by a person · **X** Externally verified · **O** Owner-approved · **A** Externally authorised · **B** Blocked.
+
+| Topic                                                                          | Status                                                                                                                                                                      |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Latest CI                                                                      | **C** for `3b91801` (run #33 success); the failed run #29 on `babd63a` stays on record                                                                                      |
+| Full local suite                                                               | **L** for `3b91801` (lint, typecheck, build, secrets, db lint, unit 264, DB 313, Playwright 176, restore drill), run in this verification; not repeated on any later commit |
+| Settings allowlist / reason / audit                                            | **I L C**                                                                                                                                                                   |
+| Job scheduling and alerts                                                      | **I L**, scheduling **B** (owner), alerting **B** (not built)                                                                                                               |
+| Dependency advisory (braces)                                                   | open; **B** (no patched release); production audit clean (**L C**)                                                                                                          |
+| Accessibility                                                                  | automated and scripted **L C**; person-led, screen-reader and real-device **B**; keyboard signature gap open                                                                |
+| Retention and review policy                                                    | defaults **I**; decisions **B** (owner/counsel)                                                                                                                             |
+| Paystack real behaviour                                                        | **B** (unverified)                                                                                                                                                          |
+| Android background GPS                                                         | **B** (unverified)                                                                                                                                                          |
+| AFIT branding / name / crest                                                   | **B** (not authorised); colours not sampled (**B**)                                                                                                                         |
+| Campus zones, rider/vendor terms and verification                              | **B**                                                                                                                                                                       |
+| Privacy, incident handling, payments/settlement, support staffing, pilot users | **B**                                                                                                                                                                       |
+| Visual audit                                                                   | **M** by the engineer only (screenshots reviewed in `docs/reports/afit-market-visual-audit.md`); owner review pending                                                       |
+
+Nothing here is a statement that the system is pilot-ready; it is not.

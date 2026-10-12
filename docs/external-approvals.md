@@ -51,3 +51,9 @@
 | 32  | Approval workflow for rider terms (today only direct database access can approve; the settings function is locked) | Owner + AFIT           | Any real rider onboarding                     |
 
 The complete list of decisions, with current defaults and pilot-blocking status, is in `docs/owner-decisions.md`.
+
+## Added after the visual audit (2026-10-12)
+
+| #   | Approval / confirmation                                                                                                                                                                          | From | Blocks                                     |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------ |
+| 33  | The official AFIT crest/logo file and any brand guide (colour values), so a palette can be sampled and recorded as official or estimated; the AFIT website could not be reached from the sandbox | AFIT | Any AFIT-coloured design; use of the crest |
