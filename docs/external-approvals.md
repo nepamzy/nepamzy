@@ -38,3 +38,16 @@
 | 24  | Backup storage, frequency, encryption, recovery targets; restore rehearsal on the chosen platform | Owner           | Any real data                                                   |
 | 25  | Incident response plan and support staffing/escalation                                            | Owner + AFIT    | Pilot                                                           |
 | 26  | Independent security review / penetration test                                                    | Owner           | Any claim of security assurance                                 |
+
+## Added in the post-Batch 6 remediation
+
+| #   | Approval / confirmation                                                                                            | From                   | Blocks                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------ | ---------------------- | --------------------------------------------- |
+| 27  | Review policy decisions (`docs/review-policy-register.md`)                                                         | Owner                  | Public reviews to real users                  |
+| 28  | Retention periods per data category (`docs/privacy/data-inventory.md`, retention register)                         | Owner + counsel        | Launch; any purge job                         |
+| 29  | An accessible, trustworthy alternative to the drawn signature; screen-reader and device accessibility review       | Owner + AFIT + counsel | Real deliveries to recipients who cannot draw |
+| 30  | Job scheduler, cadence, alert route and on-call owner (`docs/operations/jobs.md`)                                  | Owner                  | Any unattended operation                      |
+| 31  | Settings change-control standard (who may change fees/limits, reason quality, review)                              | Owner                  | Real pricing                                  |
+| 32  | Approval workflow for rider terms (today only direct database access can approve; the settings function is locked) | Owner + AFIT           | Any real rider onboarding                     |
+
+The complete list of decisions, with current defaults and pilot-blocking status, is in `docs/owner-decisions.md`.

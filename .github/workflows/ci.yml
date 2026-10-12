@@ -22,6 +22,8 @@ jobs:
       - run: pnpm build
       # Scans tracked files and the client bundle for secrets (no secrets are needed or provided here).
       - run: pnpm check:secrets
+      # Production dependencies must stay free of known advisories (the one open advisory is in a development-only chain, K62).
+      - run: pnpm audit --prod
   # Database + browser suites need Docker (local Supabase stack). Written in Batch 3; it has NOT been run on GitHub
   # yet - treat the first run as a trial (see docs/known-issues.md K23). Local runs are recorded in the batch reports.
   db-and-e2e:

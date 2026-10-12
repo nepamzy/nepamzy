@@ -3,7 +3,7 @@ import type { PoolClient } from 'pg'
 import { AAL2, PNG, failure, pool, as } from './helpers'
 import { completeDelivery, isoTx, journeyToArrival, orderStatus, proofBegin } from './rider-helpers'
 import { paidOrder, staff } from './refund-helpers'
-import { countRows } from './notif-helpers'
+import { act, countRows, paidPickup } from './notif-helpers'
 
 afterAll(async () => {
   await pool.end()
@@ -119,6 +119,25 @@ describe('failure injection: a database error part-way through leaves no partial
       )
       expect(e.message).toMatch(/injected failure/)
       expect(await read()).toEqual(before)
+    })
+  })
+
+  it('notifications exist only for committed events: a rolled-back business step leaves no notice and no outbox row', async () => {
+    await isoTx(async (c) => {
+      const o = await paidPickup(c)
+      const notes = () =>
+        countRows(
+          c,
+          `select count(*) n from public.notifications where user_id = any($1::uuid[])`,
+          [[o.cust, o.owner]],
+        )
+      const before = await notes()
+      await c.query('savepoint before_step')
+      await act(c, o.owner, o.order, 'accept')
+      expect(await notes()).toBeGreaterThan(before) // the event produced a notice inside its own transaction
+      await c.query('rollback to savepoint before_step')
+      expect(await notes()).toBe(before) // ...and the rollback took it away
+      expect(await orderStatus(c, o.order)).toBe('PAID')
     })
   })
 })

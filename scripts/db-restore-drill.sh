@@ -16,6 +16,14 @@ STAMP=$(date -u +%Y%m%dT%H%M%SZ)
 FILE="$OUT/afit-local-$STAMP.dump"
 psqlc() { docker exec -i "$C" psql -U postgres -v ON_ERROR_STOP=1 -qAt "$@"; }
 
+ORDERS=$(psqlc -d postgres -c "select count(*) from public.orders")
+USERS=$(psqlc -d postgres -c "select count(*) from auth.users")
+if [ "$ORDERS" = "0" ] || [ "$USERS" = "0" ]; then
+  echo "The local database holds no orders or no users, so restoring it would prove very little."
+  echo "Run 'pnpm db:reset', then create data through the app (for example the engagement e2e spec), then repeat."
+  exit 3
+fi
+echo "source: $USERS users, $ORDERS orders"
 echo "1/6 dump -> $FILE"
 docker exec "$C" pg_dump -U postgres -Fc -n public -n app_private -d postgres -f /tmp/drill.dump
 docker cp "$C:/tmp/drill.dump" "$FILE"
@@ -55,7 +63,7 @@ fi
 FP_SQL=$(cat <<'SQL'
 with t as (select c.relname, c.relrowsecurity rls from pg_class c join pg_namespace n on n.oid=c.relnamespace
             where n.nspname='public' and c.relkind='r'),
-rows as (select relname, (xpath('/row/n/text()', query_to_xml(format('select count(*) n from public.%I', relname), false, true, '')))[1]::text n from t)
+rows as (select relname, (xpath('/row/h/text()', query_to_xml(format('select count(*)::text || md5(coalesce(string_agg(x::text, %L order by x::text), %L)) h from public.%I x', ',', '', relname), false, true, '')))[1]::text n from t)
 select 'tables=' || (select count(*) from t)
   || ' rls_on=' || (select count(*) from t where rls)
   || ' constraints=' || (select count(*) from pg_constraint k join pg_namespace n on n.oid=k.connamespace where n.nspname in ('public','app_private'))
@@ -64,7 +72,7 @@ select 'tables=' || (select count(*) from t)
   || ' policies=' || (select count(*) from pg_policies where schemaname='public')
   || ' indexes=' || (select count(*) from pg_indexes where schemaname in ('public','app_private'))
   || ' fn_acl=' || (select md5(string_agg(p.proname || ':' || coalesce(p.proacl::text,''), ',' order by p.proname, p.oid::text)) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','app_private'))
-  || ' rows=' || (select md5(string_agg(relname || ':' || n, ',' order by relname)) from rows)
+  || ' content=' || (select md5(string_agg(relname || ':' || n, ',' order by relname)) from rows)
 SQL
 )
 echo "4/6 fingerprint (live)";    LIVE=$(psqlc -d postgres -c "$FP_SQL"); echo "    $LIVE"

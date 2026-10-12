@@ -99,7 +99,7 @@ export function SignaturePad({ label = 'Recipient signature' }: { label?: string
         onPointerUp={up}
         onPointerCancel={up}
       />
-      <p id="sig-hint" className="text-sm text-muted">
+      <p id="sig-hint" aria-live="polite" className="text-sm text-muted">
         Ask the recipient to sign with a finger or stylus.{' '}
         {signed ? 'Signature captured.' : 'Nothing signed yet.'}
       </p>

@@ -55,3 +55,51 @@ describe('rate limiting is present where users create content or trigger cost', 
     })
   }
 })
+
+// Server actions are public POST endpoints too. Every exported action must either gate access itself, delegate to a helper that
+// does (refundRpc / caseRpc both call gate()), or be one of the pinned pre-authentication / read-only flows.
+describe('every server action gates access', () => {
+  const PRE_AUTH_OR_SELF_CHECKED = new Set([
+    'signUpAction', // public sign-up (rate limited by IP and email hash)
+    'signInAction', // public sign-in (rate limited)
+    'signOutAction', // ends the caller's own session; needs no role
+    'startEnrollmentAction', // checks loadPrincipal() itself
+    'verifyEnrollmentAction', // checks loadPrincipal() itself
+    'verifySignInAction', // completes the challenge for the session that holds the pending factor
+    'typedSignatureEnabled', // read-only helper, returns a boolean
+  ])
+  const files = walk(join(root, 'src/server/modules')).filter((f) => /actions\.ts$/.test(f))
+  it('there are action files to check', () => expect(files.length).toBeGreaterThanOrEqual(8))
+  for (const file of files) {
+    const src = readFileSync(file, 'utf8')
+    const parts = src.split(/\nexport async function /).slice(1)
+    for (const part of parts) {
+      const name = part.split('(')[0]!
+      it(`${file.replace(root + '/', '')} :: ${name}`, () => {
+        if (PRE_AUTH_OR_SELF_CHECKED.has(name)) return
+        expect(
+          /\bgate(OrRedirect)?\(|checkAccess\(|\brefundRpc\(|\bcaseRpc\(|loadPrincipal\(/.test(
+            part,
+          ),
+          `${name} does not gate access`,
+        ).toBe(true)
+      })
+    }
+  }
+})
+
+// Job routes run unattended and their logs are kept: they may log names, counts, ids and database error codes, never message
+// bodies, links, tokens, signatures or coordinates.
+describe('job route logs stay free of sensitive fields', () => {
+  const routes = walk(join(root, 'src/app/api/jobs')).filter((f) => f.endsWith('route.ts'))
+  for (const file of routes) {
+    it(file.replace(root + '/', ''), () => {
+      const src = readFileSync(file, 'utf8')
+      const calls = src.match(/logger\.(info|warn|error)\([^)]*\)/g) ?? []
+      for (const c of calls)
+        expect(c, c).not.toMatch(
+          /\b(body|link|token|signature|lat|lng|latitude|longitude|secret|authorization)\b/i,
+        )
+    })
+  }
+})
