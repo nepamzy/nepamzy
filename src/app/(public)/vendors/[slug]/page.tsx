@@ -4,19 +4,33 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
+import { ReportReviewForm } from '@/components/domain/engagement-forms'
+import { Pager } from '@/components/ui/pager'
+import { pageParam, vendorReviews } from '@/server/modules/engagement/queries'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { WEEKDAYS, hoursByDay } from '@/server/modules/vendors-and-catalogue/hours'
 import { getMenu } from '@/server/modules/vendors-and-catalogue/public'
 
 export const metadata: Metadata = { title: 'Vendor' }
 
-export default async function VendorPage({ params }: { params: Promise<{ slug: string }> }) {
-  const menu = await getMenu((await params).slug)
+export default async function VendorPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ rpage?: string }>
+}) {
+  const slug = (await params).slug
+  const rpage = pageParam((await searchParams).rpage)
+  const menu = await getMenu(slug)
   if (!menu) notFound()
   const { vendor, products, hours } = menu
   const bySection = new Map<string, typeof products>()
   for (const p of products)
     bySection.set(p.section ?? 'Menu', [...(bySection.get(p.section ?? 'Menu') ?? []), p])
   const byDay = hoursByDay(hours)
+  const reviews = await vendorReviews(slug, rpage)
+  const signedIn = Boolean((await (await createSupabaseServerClient()).auth.getUser()).data.user)
   return (
     <>
       <p className="mb-2">
@@ -86,6 +100,43 @@ export default async function VendorPage({ params }: { params: Promise<{ slug: s
           </section>
         ))
       )}
+      <section aria-labelledby="reviews" className="mt-8">
+        <h2 id="reviews" className="mb-2 text-lg font-bold">
+          Reviews
+        </h2>
+        {!reviews || reviews.count === 0 ? (
+          <p className="text-muted">
+            No reviews yet. Only customers with a finished order can review.
+          </p>
+        ) : (
+          <>
+            <p className="mb-3">
+              <strong>{((reviews.average_tenths ?? 0) / 10).toFixed(1)} out of 5</strong> from{' '}
+              {reviews.count} {reviews.count === 1 ? 'review' : 'reviews'}
+            </p>
+            <ul className="space-y-3">
+              {reviews.reviews.map((r) => (
+                <li key={r.id}>
+                  <Card className="space-y-1 p-3 sm:p-3">
+                    <p aria-label={`${r.rating} out of 5`}>{'★'.repeat(r.rating)}</p>
+                    {r.comment && <p>{r.comment}</p>}
+                    <p className="text-xs text-muted">
+                      {new Date(r.created_at).toLocaleDateString('en-NG')}
+                    </p>
+                    {signedIn && <ReportReviewForm reviewId={r.id} />}
+                  </Card>
+                </li>
+              ))}
+            </ul>
+            <Pager
+              basePath={`/vendors/${slug}`}
+              page={rpage}
+              pageKey="rpage"
+              hasMore={rpage * 10 < reviews.count}
+            />
+          </>
+        )}
+      </section>
       <section aria-labelledby="hours" className="mt-8">
         <h2 id="hours" className="mb-2 text-lg font-bold">
           Opening hours

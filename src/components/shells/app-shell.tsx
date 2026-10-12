@@ -31,6 +31,12 @@ export function AppShell({
           </Link>
           <span className="hidden text-sm font-semibold text-muted md:inline">{area}</span>
           <form action={signOutAction} className="ml-auto flex items-center gap-3">
+            <Link
+              href="/notifications"
+              className="touch-target inline-flex items-center font-semibold text-brand-700 underline"
+            >
+              Notifications
+            </Link>
             {signedInAs && (
               <span
                 className="hidden max-w-48 truncate text-sm text-muted sm:inline"

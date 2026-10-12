@@ -5,7 +5,10 @@ import { Card, PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
 import { checkAccess } from '@/server/modules/identity-and-access/guard'
-import { staffListRefunds } from '@/server/modules/support/queries'
+import { ListFilter } from '@/components/ui/list-filter'
+import { Pager } from '@/components/ui/pager'
+import { pageParam } from '@/server/modules/engagement/queries'
+import { STAFF_PAGE, staffListRefunds } from '@/server/modules/support/queries'
 
 export const metadata: Metadata = { title: 'Refunds' }
 
@@ -20,8 +23,16 @@ const STATUS: Record<string, [string, Tone]> = {
   reconciliation_required: ['Needs reconciliation', 'warning'],
 }
 
-export default async function Refunds() {
-  const refunds = await staffListRefunds()
+export default async function Refunds({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; q?: string; page?: string }>
+}) {
+  const sp = await searchParams
+  const status = sp.status && sp.status in STATUS ? sp.status : undefined
+  const q = (sp.q ?? '').trim().slice(0, 40)
+  const page = pageParam(sp.page)
+  const refunds = await staffListRefunds(status, page, q)
   const { who } = await checkAccess({ roles: ['platform_admin', 'finance_admin'], aal: 'aal2' })
   const finance = who.roles.includes('platform_admin') || who.roles.includes('finance_admin')
   return (
@@ -30,6 +41,7 @@ export default async function Refunds() {
         title="Refunds"
         subtitle="Request, approval and execution are three separate steps. Only a FAKE provider exists: no real refund is sent anywhere."
       />
+      <ListFilter action="/admin/refunds" statuses={Object.keys(STATUS)} status={status} q={q} />
       {refunds.length === 0 ? (
         <EmptyState title="No refund requests">
           Customer and finance requests appear here.
@@ -83,6 +95,12 @@ export default async function Refunds() {
           })}
         </div>
       )}
+      <Pager
+        basePath="/admin/refunds"
+        page={page}
+        hasMore={refunds.length === STAFF_PAGE}
+        params={{ status, q }}
+      />
     </>
   )
 }

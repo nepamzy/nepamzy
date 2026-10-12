@@ -88,11 +88,22 @@ export const listReturns = async (order?: string) =>
 export const listMyCases = async () => (await rpc<CaseSummary[]>('list_my_cases')) ?? []
 export const getCase = (id: string) =>
   uuid.safeParse(id).success ? rpc<CaseView>('get_case', { p_case: id }) : null
-export const staffListCases = async (status?: string) =>
-  (await rpc<CaseSummary[]>('staff_list_cases', { p_status: status ?? null })) ?? []
+export const STAFF_PAGE = 25
+export const staffListCases = async (status?: string, page = 1, search?: string) =>
+  (await rpc<CaseSummary[]>('staff_list_cases', {
+    p_status: status ?? null,
+    p_limit: STAFF_PAGE,
+    p_offset: (page - 1) * STAFF_PAGE,
+    p_search: search || null,
+  })) ?? []
 export const staffCaseBundle = (id: string) =>
   uuid.safeParse(id).success
     ? rpc<Record<string, unknown>>('staff_case_bundle', { p_case: id })
     : null
-export const staffListRefunds = async (status?: string) =>
-  (await rpc<StaffRefund[]>('staff_list_refunds', { p_status: status ?? null })) ?? []
+export const staffListRefunds = async (status?: string, page = 1, search?: string) =>
+  (await rpc<StaffRefund[]>('staff_list_refunds', {
+    p_status: status ?? null,
+    p_limit: STAFF_PAGE,
+    p_offset: (page - 1) * STAFF_PAGE,
+    p_search: search || null,
+  })) ?? []

@@ -58,7 +58,7 @@ describe('admin_overview is scoped by role', () => {
       const o = await paidOrder(c)
       await requestRefund(c, o.cust, o.order, null)
       const after = (await callJson(c, AAL2(admin), `select public.admin_overview() r`)) as Overview
-      expect(after.refunds_requested).toBe(before.refunds_requested + 1)
+      expect(after.refunds_requested).toBe((before.refunds_requested ?? 0) + 1)
     })
   })
 })

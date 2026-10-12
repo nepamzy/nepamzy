@@ -13,7 +13,7 @@ import {
   withTx,
 } from './helpers'
 import { approve, requestRefund, staff, startFake } from './refund-helpers'
-import { completeDelivery, isoTx, journeyToArrival, proofBegin, rider } from './rider-helpers'
+import { completeDelivery, isoTx, journeyToArrival, proofBegin } from './rider-helpers'
 import {
   FORBIDDEN_IN_NOTIFICATION,
   act,

@@ -74,6 +74,18 @@ const MESSAGES: Record<string, string> = {
   'cannot review your own request': 'You cannot review a request you made yourself.',
   'cannot decide your own case': 'You cannot decide a report you opened yourself.',
   'cannot review your own case': 'You cannot review a report you opened yourself.',
+  review_not_eligible: 'Only the customer of a finished order can leave a review.',
+  review_exists: 'You already reviewed this order.',
+  review_own_shop: 'You cannot review your own shop.',
+  review_invalid_rating: 'Choose a rating from 1 to 5.',
+  review_invalid_comment: 'Keep the comment between 3 and 500 characters, or leave it empty.',
+  review_not_found: 'That review was not found.',
+  review_own_report: 'You cannot report your own review.',
+  too_many_reviews: 'You have posted many reviews today. Please try again tomorrow.',
+  too_many_reports: 'You have sent many reports today. Please try again tomorrow.',
+  report_exists: 'You already reported this review.',
+  report_already_resolved: 'That report has already been decided.',
+  'cannot moderate your own review or report': 'You cannot decide a review or report of your own.',
   'cannot execute your own request': 'You cannot execute a refund you requested yourself.',
 }
 

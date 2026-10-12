@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { Timeline } from '@/components/ui/timeline'
+import { ReviewForm } from '@/components/domain/engagement-forms'
+import { myOrderReview } from '@/server/modules/engagement/queries'
 import { ActionForm } from '@/components/forms/action-form'
 import { mockPaymentsAllowed, paystackConfig } from '@/lib/env'
 import { cancelOrderAction, mockPayAction } from '@/server/modules/cart-and-checkout/actions'
@@ -29,6 +31,9 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const paystack = paystackConfig() !== null
   const pickup = order.status === 'PICKUP_AWAITING_HANDOVER' ? await getPickupCode(order.id) : null
   const txns = await listPaymentTransactions(order.id)
+  const review = ['COMPLETED', 'PARTIALLY_REFUNDED'].includes(order.status)
+    ? await myOrderReview(order.id)
+    : null
   const hasReceipt = !['PENDING_PAYMENT', 'CANCELLED'].includes(order.status)
   const label = (c: string) => ORDER_STATES.find((s) => s.code === c)?.label ?? c
   return (
@@ -142,6 +147,20 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             />
           </Card>
         )}
+
+      {review?.can_review && (
+        <Card className="mb-5 space-y-2">
+          <h2 className="text-lg font-bold">Review this order</h2>
+          <ReviewForm orderId={order.id} />
+        </Card>
+      )}
+      {review?.review && (
+        <Card className="mb-5 space-y-1">
+          <h2 className="text-lg font-bold">Your review</h2>
+          <p aria-label={`${review.review.rating} out of 5`}>{'★'.repeat(review.review.rating)}</p>
+          {review.review.comment && <p>{review.review.comment}</p>}
+        </Card>
+      )}
 
       <div className="grid gap-5 md:grid-cols-2">
         <Card className="space-y-3">

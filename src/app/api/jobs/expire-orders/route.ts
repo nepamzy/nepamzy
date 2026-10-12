@@ -14,10 +14,13 @@ export async function POST(req: Request) {
   if (secret.length < 16 || a.length !== b.length || !timingSafeEqual(a, b)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
-  const { data, error } = await createSupabaseServiceClient().rpc('expire_unpaid_orders')
+  const sb = createSupabaseServiceClient()
+  const { data, error } = await sb.rpc('expire_unpaid_orders')
   if (error) {
     logger.error('expire_unpaid_orders failed', { code: error.code })
+    await sb.rpc('record_job_run', { p_job: 'expire-orders', p_ok: false, p_detail: {} })
     return NextResponse.json({ error: 'failed' }, { status: 500 })
   }
+  await sb.rpc('record_job_run', { p_job: 'expire-orders', p_ok: true, p_detail: {} })
   return NextResponse.json({ ok: true, expired: data })
 }
