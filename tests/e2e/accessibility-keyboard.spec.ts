@@ -23,11 +23,21 @@ test.afterEach(async () => {
   await restorePlaceholderTerms()
 })
 
-type Stop = { tag: string; name: string; visibleFocus: boolean; rect: boolean; order: number }
+type Stop = {
+  tag: string
+  name: string
+  visibleFocus: boolean
+  rect: boolean
+  order: number
+  inOrder: boolean
+}
 
 /** Tab through the page (up to `max` stops) and describe each place keyboard focus lands. */
 async function tabAudit(page: Page, max = 60): Promise<Stop[]> {
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  await page.evaluate(() => {
+    ;(window as unknown as { __prevStop?: HTMLElement }).__prevStop = undefined
+    ;(document.activeElement as HTMLElement | null)?.blur()
+  })
   const stops: Stop[] = []
   for (let i = 0; i < max; i++) {
     await page.keyboard.press('Tab')
@@ -47,9 +57,19 @@ async function tabAudit(page: Page, max = 60): Promise<Stop[]> {
         el.getAttribute('title') ||
         ''
       const r = el.getBoundingClientRect()
-      // document order index
+      // Compare with the previous stop by DOM position at the moment of the key press (robust against content that
+      // appears or disappears between presses, unlike a global index).
+      const w = window as unknown as { __prevStop?: HTMLElement }
+      const prev = w.__prevStop
+      const inOrder =
+        !prev ||
+        !prev.isConnected ||
+        prev === el ||
+        !!(prev.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING)
+      w.__prevStop = el
       const all = Array.from(document.querySelectorAll('*'))
       return {
+        inOrder,
         tag: el.tagName.toLowerCase(),
         name: name.trim().replace(/\s+/g, ' ').slice(0, 60),
         visibleFocus:
@@ -73,10 +93,7 @@ function expectGood(stops: Stop[], label: string) {
     expect(s.rect, `${label}: "${s.name}" is actually on screen`).toBe(true)
   }
   // logical order: focus never jumps backwards in the document (positive tabindex would break this)
-  for (let i = 1; i < stops.length; i++)
-    expect(stops[i]!.order, `${label}: focus order at "${stops[i]!.name}"`).toBeGreaterThanOrEqual(
-      stops[i - 1]!.order,
-    )
+  for (const st of stops) expect(st.inOrder, `${label}: focus order at "${st.name}"`).toBe(true)
 }
 /** 320 CSS px wide is what 400 % browser zoom gives a 1280 px window (WCAG 1.4.10). */
 async function reflowAt320(page: Page, label: string) {

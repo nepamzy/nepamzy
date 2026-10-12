@@ -1,5 +1,16 @@
 import { afterAll, describe, expect, it } from 'vitest'
-import { AAL1, AAL2, PRIV_DENIED, as, createUser, failure, giveRole, pool, withTx } from './helpers'
+import {
+  AAL1,
+  AAL2,
+  PRIV_DENIED,
+  as,
+  createUser,
+  failure,
+  giveRole,
+  pool,
+  svc,
+  withTx,
+} from './helpers'
 import { callFails, callJson } from './rider-helpers'
 import { staff } from './refund-helpers'
 
@@ -80,6 +91,24 @@ describe('set_platform_setting: authority, allowlist, reason and audit', () => {
       const e = await failure(
         c,
         `insert into public.platform_settings (key, value) values ('sneaky_flag', 'true'::jsonb)`,
+      )
+      expect(e.message).toMatch(/unknown_setting/)
+    })
+  })
+
+  it('the service role (used by the job routes and the e2e fixtures) can still upsert KNOWN keys, and is refused unknown ones', async () => {
+    await withTx(async (c) => {
+      await svc(c, async () => {
+        await c.query(
+          `insert into public.platform_settings (key, value) values ('delivery_fee_kobo', '50000'::jsonb)
+           on conflict (key) do update set value = excluded.value`,
+        )
+      })
+      const e = await svc(c, () =>
+        failure(
+          c,
+          `insert into public.platform_settings (key, value) values ('sneaky_flag', 'true'::jsonb)`,
+        ),
       )
       expect(e.message).toMatch(/unknown_setting/)
     })

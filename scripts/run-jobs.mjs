@@ -10,8 +10,13 @@
 import { readFileSync } from 'node:fs'
 
 const BASE = process.env.JOBS_BASE_URL ?? 'http://127.0.0.1:3000'
-if (!/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(BASE) && process.env.JOBS_ALLOW_REMOTE !== 'yes') {
-  console.error(`refusing to call ${BASE}: this runner is for the LOCAL app (set JOBS_ALLOW_REMOTE=yes only with owner approval)`)
+if (
+  !/^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(BASE) &&
+  process.env.JOBS_ALLOW_REMOTE !== 'yes'
+) {
+  console.error(
+    `refusing to call ${BASE}: this runner is for the LOCAL app (set JOBS_ALLOW_REMOTE=yes only with owner approval)`,
+  )
   process.exit(2)
 }
 function secret() {
@@ -37,7 +42,11 @@ async function run(name) {
   if (inFlight.has(name)) return { name, skipped: 'previous run still in progress' } // never overlap with itself
   inFlight.add(name)
   try {
-    const res = await fetch(`${BASE}/api/jobs/${name}`, { method: 'POST', headers: auth, signal: AbortSignal.timeout(60_000) })
+    const res = await fetch(`${BASE}/api/jobs/${name}`, {
+      method: 'POST',
+      headers: auth,
+      signal: AbortSignal.timeout(60_000),
+    })
     const body = await res.json().catch(() => ({}))
     return { name, status: res.status, ok: res.ok, result: body }
   } catch (e) {
@@ -47,7 +56,10 @@ async function run(name) {
   }
 }
 async function check() {
-  const res = await fetch(`${BASE}/api/jobs/health`, { headers: auth, signal: AbortSignal.timeout(30_000) })
+  const res = await fetch(`${BASE}/api/jobs/health`, {
+    headers: auth,
+    signal: AbortSignal.timeout(30_000),
+  })
   const body = await res.json().catch(() => ({}))
   return { status: res.status, ...body }
 }

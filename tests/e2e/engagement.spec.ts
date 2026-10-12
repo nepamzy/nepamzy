@@ -155,7 +155,7 @@ test('admin overview and job health are role scoped', async ({ browser }, info) 
   await admn.page.goto('/admin/jobs')
   await expect(admn.page.getByRole('heading', { name: 'Background jobs' })).toBeVisible()
   await expect(admn.page.getByText(/does not schedule these jobs/)).toBeVisible()
-  await expect(admn.page.getByText('process-notifications')).toBeVisible()
+  await expect(admn.page.getByText('process-notifications', { exact: true })).toBeVisible()
   await a11yClean(admn.page, '/admin/jobs')
 })
 

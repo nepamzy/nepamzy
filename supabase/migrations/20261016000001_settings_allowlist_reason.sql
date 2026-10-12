@@ -100,7 +100,7 @@ grant execute on function public.set_platform_setting(text, jsonb, text) to auth
 
 -- Table-level backstop: no code path (including the service role) can add a key that has no rule.
 create function app_private.settings_known_key() returns trigger
-language plpgsql set search_path = ''
+language plpgsql security definer set search_path = ''
 as $$
 begin
   if not exists (select 1 from app_private.setting_rule(new.key)) then
