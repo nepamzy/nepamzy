@@ -268,6 +268,24 @@ export async function purge(
   try {
     if (o.users?.length) {
       const own = `(select id from public.orders where customer_id = any($1::uuid[]))`
+      // Batch 6 tables (notifications and their outbox, reviews); replica mode skips cascades, so delete explicitly
+      const notes = `(select id from public.notifications where user_id = any($1::uuid[]))`
+      await c.query(
+        `delete from public.notification_deliveries where outbox_id in (select id from public.notification_outbox where notification_id in ${notes})`,
+        [o.users],
+      )
+      await c.query(`delete from public.notification_outbox where notification_id in ${notes}`, [
+        o.users,
+      ])
+      await c.query(`delete from public.notifications where user_id = any($1::uuid[])`, [o.users])
+      await c.query(`delete from public.notification_preferences where user_id = any($1::uuid[])`, [
+        o.users,
+      ])
+      await c.query(
+        `delete from public.review_reports where reporter_id = any($1::uuid[]) or review_id in (select id from public.reviews where customer_id = any($1::uuid[]))`,
+        [o.users],
+      )
+      await c.query(`delete from public.reviews where customer_id = any($1::uuid[])`, [o.users])
       // Batch 5 tables (refunds, returns, cases, delivery proof sessions)
       await c.query(
         `delete from public.refund_events where refund_id in (select id from public.refunds where order_id in ${own})`,
