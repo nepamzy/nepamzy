@@ -75,3 +75,7 @@ Nothing here is a statement that the system is pilot-ready; it is not.
 ## Next-stage planning (2026-10-13)
 
 No status above changed: this stage produced plans only, no new tests of the application, no external verification. The decision package and plans are `docs/reports/owner-review-and-next-steps.md`, `docs/reports/visual-improvement-plan.md` and `docs/reports/job-operations-plan.md`. The system is still not pilot-ready.
+
+## Decision-gate update (2026-10-13)
+
+No status changed. Decisions 28 to 31 remain **awaiting owner decision**; the implementation checklist, the work/blocker separation and the job-operations decision list are in `docs/reports/owner-review-and-next-steps.md` (sections 6 to 11). The system is still not pilot-ready.

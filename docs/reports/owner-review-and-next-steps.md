@@ -1,6 +1,6 @@
 # Owner review and next steps
 
-**Prepared 2026-10-13 from repository HEAD `f36871207b697c411315a329ed06051fa7b56a27`** (branch `claude/afit-market-phase-0-asm8xd`, clean working tree, identical to `origin`). This stage changed documentation only: no application code, test, token, layout, crest, policy, authorization or migration was touched. **Nothing here is an approval; every decision below is still the owner's.**
+**Prepared 2026-10-13 from repository HEAD `f36871207b697c411315a329ed06051fa7b56a27`; decision-gate update (sections 6 to 11) made on top of `645f9caa23a2b3a17a9da01e164825e2468cdbf2`** (branch `claude/afit-market-phase-0-asm8xd`, clean working tree, identical to `origin`). This stage changed documentation only: no application code, test, token, layout, crest, policy, authorization or migration was touched. **Nothing here is an approval; every decision below is still the owner's.**
 
 ## 1. Current state (evidence, not assumption)
 
@@ -106,3 +106,116 @@ No option is recommended before your decision; if you want a direction, the lowe
 **Work that can safely proceed after approval:** token-only colour change and before/after capture (28/29 approved, crest in hand if used); the five small fixes (30); the requeue tool and a scheduler proof of concept on free infrastructure (18 and the job plan); the accessible-proof option chosen in 31 with new DB/e2e tests.
 
 **External prerequisites and blocked tasks:** official crest and permission (blocks AFIT-coloured design and the crest); Paystack test credentials and approved procedure (blocks K19/K29/K30); real Android devices (K34); a scheduler/alert platform and recipient (blocks monitored jobs); an independent auditor (blocks any security-assurance claim); accessibility reviewers and devices; AFIT approvals for places, terms and authorisation; legal, privacy and payment review.
+
+---
+
+# Decision-gate update (2026-10-13, documentation only)
+
+Nothing below is an approval, and no application file was changed. Source facts were re-read for this update (`nav-config.ts`, `nav-links.tsx`, `app-shell.tsx`, `src/app/vendor/page.tsx`, `src/app/globals.css`, `src/app/rider/layout.tsx`, `src/app/(public)/page.tsx`).
+
+## 6. Repository verification
+
+Branch `claude/afit-market-phase-0-asm8xd`; HEAD at the start of this update `645f9caa23a2b3a17a9da01e164825e2468cdbf2`, identical to `origin/claude/afit-market-phase-0-asm8xd`; working tree clean. `645f9ca` is a documentation-only commit; only format and lint ran on it. CI evidence is per commit: #35 passed on `f368712`; #29 (`babd63a`) failed and stays on record; no CI result is recorded for `645f9ca` or this update. The full local suite was last run on `3b91801` (unit 264, DB 313, Playwright 176) and has **not** been rerun since.
+
+## 7. Task A: status of decisions 28 to 31
+
+The only owner-choice record in the repository is `docs/owner-decisions.md`. Its last change is `645f9ca`, which added only an engineering note (section "2026-10-13": items 28 to 31 "None is decided") and, in the register, the four rows. No owner message approving any option is stored in the repository. The record has **not** changed since the previous report (no new owner choice appeared).
+
+| #   | Decision                                  | Status                      | Evidence                                                           |
+| --- | ----------------------------------------- | --------------------------- | ------------------------------------------------------------------ |
+| 28  | Palette direction                         | **AWAITING OWNER DECISION** | `docs/owner-decisions.md` row 28 (current palette kept, unchanged) |
+| 29  | Official AFIT crest / brand specification | **AWAITING OWNER DECISION** | row 29; external approval #33 open                                 |
+| 30  | Five small fixes                          | **AWAITING OWNER DECISION** | row 30 ("Not changed"); no per-item approval exists                |
+| 31  | Accessible delivery-proof alternative     | **AWAITING OWNER DECISION** | row 31; drawn signature remains the only path                      |
+
+Consequence: none of the work in section 8 may start.
+
+## 8. Task B: implementation-ready checklist for the five Decision 30 fixes (not implemented)
+
+Common rules for all five: change only what is listed; no new permission, route removal or role-guard change; run `pnpm lint`, `pnpm typecheck`, `pnpm format:check`, `pnpm test`, `pnpm build`, the Playwright suite (axe, keyboard and 320 px specs) and a new audit capture into a **new** directory (the committed 186 screenshots stay as the "before" reference). Manual review by the owner on a phone-width and a desktop viewport after each fix. Rollback for each: revert the single commit; nothing else depends on it.
+
+### Fix 1: input and box border contrast
+
+- **Affected:** token `--color-line-strong` (`src/app/globals.css:13`, `#8c9a94`), used through `border-line-strong` in 12 files (inputs, selects, textareas and bordered boxes on every shell).
+- **Verified current behaviour:** WCAG contrast computed from the token: 2.93:1 on white cards, 2.70:1 on the page surface `#f5f6f2`; the target for control boundaries is 3:1.
+- **Minimal change:** change only the value of this one token; do not touch other colours. Candidate computed now: `#6f7f78` = 4.21:1 on white and 3.88:1 on the surface; the lightest tidy alternative that passes both is about `#7a8a83` (3.63 and 3.34). The owner picks the strength; either is a one-line change.
+- **Must keep working:** every form on every role (sign-in, checkout, vendor catalogue, admin filters, settings); focus ring unchanged (brand-600, 3 px).
+- **Checks:** mobile 360 and desktop 1440 captures of sign-in, checkout, vendor catalogue and admin settings before and after; recompute all text pairs (none may fall below 4.5:1).
+- **Tests to add/update:** a unit test that computes the contrast of the token against white and the surface and fails below 3:1; axe runs already exist.
+- **Dependency:** none on 28/29 if only this token changes. If 28 later changes the palette, this token is re-derived there (do not do both separately).
+
+### Fix 2: crowded phone header
+
+- **Affected:** `src/components/shells/app-shell.tsx` header (shared by every shell that uses `AppShell`).
+- **Verified current behaviour:** one flex row (`justify-between gap-3`, `px-4`) holds the wordmark link (shown below `md`), the `Notifications` link (added in Batch 6), the signed-in email (`hidden sm:inline`, so absent at 360 px) and the `Sign out` button. At 360 px the wordmark, the Notifications text link and the button compete for roughly 328 px; none has `whitespace-nowrap`, so the wordmark and the button label wrap (as captured in the audit).
+- **Minimal change:** keep every element; prevent wrapping (`whitespace-nowrap` on the wordmark and button), tighten the gap below `sm` (`gap-2`), and allow the wordmark to shrink its font size one step on phones. If it still does not fit at 320 px, let the header wrap as a whole (two tidy rows) rather than breaking words. Do **not** remove or hide Notifications.
+- **Must keep working:** sign-out form action, the Notifications link for all roles, tab order (wordmark, Notifications, Sign out), touch targets of at least 44 px, no horizontal scroll at 320 px.
+- **Checks:** 320, 360 and 390 px captures for each role; desktop unchanged.
+- **Tests:** a Playwright assertion at 360 px that the wordmark and the Sign out label each occupy one line (height equals one line) and no horizontal overflow; keep the focus-order spec.
+- **Dependency:** none (the wordmark text is not a crest).
+
+### Fix 3: inaccurate vendor sentence
+
+- **Affected:** `src/app/vendor/page.tsx`, the paragraph at about lines 82 to 85.
+- **Existing text (quoted):** "Order handling (accept, prepare, hand over) arrives in the next release. For now you can see incoming orders but not act on them."
+- **Verified:** vendor order actions exist (`src/app/vendor/orders/page.tsx`, with the Handover and Returns sections in the vendor navigation).
+- **Proposed replacement:** "Manage incoming orders on the Orders page: accept, prepare and hand over. Use Handover to confirm collection by a rider, and Returns for return requests." If the owner prefers brevity: "Manage your orders on the Orders page."
+- **Minimal change:** replace the paragraph text only; do not touch order logic, actions, or guards.
+- **Must keep working:** the pause/resume form above it; vendor home for approved and unapproved shops.
+- **Checks/tests:** text assertion in the vendor home e2e that the stale phrase "arrives in the next release" is absent and the new sentence present; search the repository for the same phrase elsewhere before changing.
+- **Dependency:** none.
+
+### Fix 4: admin and vendor mobile navigation
+
+- **Affected:** `BottomNav` in `src/components/shells/nav-links.tsx` (`items.slice(0, 5)`), fed by `nav-config.ts`; rider navigation is inline in `src/app/rider/layout.tsx` (4 items, fits).
+- **Verified current behaviour on phones:** customer 5 of 5 shown; rider 4 of 4; vendor 5 of 6 (**Returns hidden**); admin 5 of 14 (items 6 to 14, Payments onward, hidden).
+- **All destinations to keep reachable.** Admin (14 nav items): Home `/admin`, Applications `/admin/applications`, Vendors `/admin/vendors`, Riders `/admin/riders`, Rider issues `/admin/rider-issues`, Payments `/admin/payments`, Refunds `/admin/refunds`, Reports `/admin/cases`, Returns `/admin/returns`, Reviews `/admin/reviews`, Jobs `/admin/jobs`, Settings `/admin/settings`, Audit `/admin/audit`, Roles `/admin/roles`. Plus two destinations with **no navigation item**, reachable only from the `/admin` cards: Delivery points and Categories (their routes are listed in `docs/reports/afit-market-visual-audit/route-inventory.md`; the plan must add them to the menu list without changing their guards). Vendor (6): Home `/vendor`, Orders `/vendor/orders`, Catalogue `/vendor/catalogue`, Shop `/vendor/profile`, Handover `/vendor/handover`, Returns `/vendor/returns`.
+- **Proposed responsive pattern (do not implement):** below `md`, show the first four items plus a fifth **"More"** link. Preferred form: a real page (for example `/admin/menu`, `/vendor/menu`) listing every destination as ordinary links, because it needs no new dialog behaviour and works with keyboard and screen readers; a native `<details>` disclosure is the alternative. Apply only to shells whose item count exceeds five (admin, vendor). Customer and rider stay exactly as they are. Desktop sidebar unchanged.
+- **Constraints:** no route removed, no role-guard or permission change (server guards still decide; a link a role cannot open remains harmless); `aria-current` preserved; 44 px targets; no horizontal scroll at 320 px; `More` is active when the current page is not one of the four shown.
+- **Checks:** each admin role (platform admin, support agent, finance admin) and vendor on 360 px: every destination reachable in at most two taps; sidebar unchanged on desktop.
+- **Tests:** new unit/e2e test that for each nav config every item appears either in the bar or in the More list; keyboard reachability; the existing role-matrix specs must still pass.
+- **Dependency:** none on 28/29. Needs the owner's choice of pattern (More page versus disclosure).
+
+### Fix 5: empty desktop landing hero
+
+- **Affected:** the hero section of `src/app/(public)/page.tsx` (line ~19: a single `bg-brand-800` block with left-aligned content).
+- **Verified current behaviour:** on desktop the content occupies the left part and the right half is empty. No crest or imagery exists.
+- **Minimal change (once approved):** layout only, no brand asset: constrain text width and either centre the block or add a neutral, non-branded supporting element (for example a short three-step "how it works" list that already exists as content elsewhere on the page). **No crest, AFIT colour, logo or imagery.**
+- **Must keep working:** the call-to-action links, "open now" section below, mobile layout unchanged.
+- **Checks/tests:** desktop capture 1440; mobile capture identical in structure; axe and heading order unchanged.
+- **Dependency:** **blocked by 28 and 29.** If the owner will use a crest or an AFIT palette, the hero should be designed once with them; doing it earlier risks rework. Recommended: implement last, or only after the crest decision.
+
+### Recommended approval order (unchanged from section 3): 1, 3, 2; then 4; then 5 with 28/29.
+
+## 9. Task C: separation of work
+
+**A. Implementable after owner approval (code tasks; nothing starts before then)**
+
+1. Decision 30 fixes 1, 3, 2, 4 (independent of 28/29); fix 5 after 28/29.
+2. Palette token change and crest placement, only after 28 and 29 and AFIT authorisation.
+3. The accessible proof option chosen under 31, with new DB and e2e tests (option A needs only documentation and staffing; B, C, D change code and evidential meaning and need counsel).
+4. Explicitly approved job-operations implementation (section 10): scheduler proof of concept, local alert receiver, requeue function and admin action.
+
+**B. External blockers (code cannot close these)**
+
+AFIT written authorisation and the crest with permission terms; approved delivery points, zones and hours; vendor and rider terms and the rider verification process; live Paystack verification (owner credentials, approved procedure, then legal/financial approval); real-device Android background GPS; retention and privacy decisions (counsel); incident-response ownership; scheduler environment and alert recipient; independent security audit; person-led accessibility review (screen reader, real devices); pilot participants and acceptance criteria.
+
+## 10. Task D: minimum decisions before implementing job operations
+
+Source: `docs/reports/job-operations-plan.md`. No paid service, credential, live scheduler or real notification is part of any of these; `pnpm jobs:once` stays a local-only command.
+
+| Topic                          | Minimum owner decision needed                                                                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scheduling                     | Platform (hosting scheduler, GitHub Actions, `pg_cron`, other) and who owns the schedule and the `JOBS_SECRET` rotation; cadence per job                             |
+| Job-health alerts              | Who is alerted, by what channel, response time; whether a real channel is allowed at all (item 19); dedup rule (one alert per incident plus recovery)                |
+| Dead-letter monitoring         | Threshold that counts as an incident (for example any dead row) and who reviews it                                                                                   |
+| Controlled requeue             | Whether to build it; who may use it (platform admin at aal2 proposed); reason mandatory; minimum age before requeue (proposed 10 min); batch limit (proposed 20)     |
+| Retry limits / duplicates      | Confirm the existing limits (dead after 5 attempts, back-off 2^n minutes) or change them; confirm reset value on requeue (proposed 3); the unique delivery row stays |
+| Operational audit logging      | Confirm that every requeue and manual recovery writes an audit event; retention of those records                                                                     |
+| Recovery and incident handling | Recovery targets, who is on call, incident record location, breach-notification path                                                                                 |
+
+Local-only parts that could be built after approval with no external dependency: the requeue function and its tests, and a local alert receiver exercised by a loop runner.
+
+## 11. Task E: pilot-readiness summary
+
+No status in `docs/pilot-readiness.md` changed: this update produced documentation only and no new test or external evidence. The system is **not pilot-ready**. Open owner decisions: 28, 29, 30, 31 and the earlier register items. External evidence still absent: AFIT authorisation, real Paystack, real-device GPS, an independent audit, person-led accessibility review.
