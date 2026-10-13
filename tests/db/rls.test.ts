@@ -468,3 +468,25 @@ describe('service-role-only functions', () => {
     })
   })
 })
+
+describe('18+ declaration (self-declaration recorded at sign-up)', () => {
+  it('records when the sign-up carried the declaration, and nothing otherwise', async () => {
+    await withTx(async (c) => {
+      const declared = (
+        await c.query(
+          `insert into auth.users (id, email, raw_user_meta_data) values (gen_random_uuid(), 'adult-' || gen_random_uuid() || '@example.test', '{"adult_declared": true}') returning id`,
+        )
+      ).rows[0].id as string
+      const none = (
+        await c.query(
+          `insert into auth.users (id, email) values (gen_random_uuid(), 'plain-' || gen_random_uuid() || '@example.test') returning id`,
+        )
+      ).rows[0].id as string
+      const q = async (id: string) =>
+        (await c.query(`select adult_declared_at from public.profiles where id=$1`, [id])).rows[0]
+          .adult_declared_at as Date | null
+      expect(await q(declared)).not.toBeNull()
+      expect(await q(none)).toBeNull()
+    })
+  })
+})

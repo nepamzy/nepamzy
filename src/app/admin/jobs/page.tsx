@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/states'
-import { jobHealth } from '@/server/modules/engagement/queries'
+import { RequeueForm } from '@/components/domain/engagement-forms'
+import { deadNotifications, jobHealth } from '@/server/modules/engagement/queries'
 
 export const metadata: Metadata = { title: 'Background jobs' }
 
@@ -10,6 +11,7 @@ const when = (v: string | null) => (v ? new Date(v).toLocaleString('en-NG') : 'n
 
 export default async function Jobs() {
   const h = await jobHealth()
+  const dead = h ? await deadNotifications() : []
   if (!h) return <EmptyState title="Unavailable">Job health could not be loaded.</EmptyState>
   return (
     <>
@@ -70,6 +72,31 @@ export default async function Jobs() {
           ))}
         </dl>
       </Card>
+      <h2 className="mt-8 mb-2 text-lg font-bold">Failed notifications (dead)</h2>
+      {dead.length === 0 ? (
+        <p className="text-sm text-muted">No notification has run out of attempts.</p>
+      ) : (
+        <ul className="space-y-3">
+          {dead.map((d) => (
+            <li key={d.id}>
+              <Card className="space-y-2">
+                <p className="text-sm">
+                  <span className="font-bold">{d.kind}</span> notification, {d.attempts} attempts,
+                  last error: {d.last_error ?? 'none recorded'}. Previously requeued {d.requeues} of
+                  2 times.
+                </p>
+                {d.eligible ? (
+                  <RequeueForm outboxId={d.id} />
+                ) : (
+                  <p className="text-sm text-muted">
+                    Cannot be requeued: {(d.blocked_by ?? '').replaceAll('_', ' ')}.
+                  </p>
+                )}
+              </Card>
+            </li>
+          ))}
+        </ul>
+      )}
     </>
   )
 }

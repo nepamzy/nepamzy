@@ -1,0 +1,8 @@
+# Account closure and personal-data request procedures (draft)
+
+> **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
+> Prepared by the engineering team from the behaviour of the application as of 2026-10-13 (HEAD `daee8a4` plus this stage). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
+
+Requests: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. **Today no self-service export or deletion tool exists; this describes the manual procedure the owner would have to staff.** [OWNER/COUNSEL: approve.]
+
+1. **Receive and log** the request (date, requester, type). 2. **Verify identity** (sign-in confirmation through the account email; no extra documents requested unless needed). 3. **Respond within** [STATUTORY TIME: COUNSEL]. 4. **Access/export:** a platform administrator with a recorded purpose extracts the person's data from the categories in the privacy policy. 5. **Correction:** display name can be changed by the user; other corrections by staff with a log entry. 6. **Deletion/closure:** accounts can be closed; **money, audit and dispute records are append-only and may have to be kept for a legal period [COUNSEL]**; personal fields that can be removed without breaking those records are anonymised [DESIGN NOT BUILT]. Rider location and other short-lived data are removed under the retention schedule once approved. 7. **Tell the person** what was done and what was kept, and why. 8. **Complaints:** the person may complain to the Nigeria Data Protection Commission. 9. **Record the outcome.**

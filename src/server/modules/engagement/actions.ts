@@ -120,6 +120,27 @@ export async function unhideReviewAction(_p: ActionState, fd: FormData): Promise
   return done('Review restored.')
 }
 
+export async function requeueNotificationAction(
+  _p: ActionState,
+  fd: FormData,
+): Promise<ActionState> {
+  const id = text(fd, 'outboxId', 40)
+  if (!uuid.safeParse(id).success) return failed('That notification was not found.')
+  const g = await gate(ADMIN)
+  if ('state' in g) return g.state
+  const sb = await createSupabaseServerClient()
+  const { data, error } = await sb.rpc('admin_requeue_notification', {
+    p_outbox: id,
+    p_reason: text(fd, 'reason', 500),
+  })
+  if (error) return dbFailed(error, 'Give a reason of at least 10 characters.')
+  revalidatePath('/admin/jobs')
+  const r = data as { requeued?: boolean; blocked_by?: string } | null
+  if (!r?.requeued)
+    return failed(`Not requeued: ${(r?.blocked_by ?? 'not eligible').replaceAll('_', ' ')}.`)
+  return done('Requeued. It will be retried by the next notification job run.')
+}
+
 export async function setSettingAction(_p: ActionState, fd: FormData): Promise<ActionState> {
   const key = text(fd, 'key', 60)
   if (!(EDITABLE_SETTINGS as readonly string[]).includes(key))

@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/fields'
+import { Checkbox, Input } from '@/components/ui/fields'
 import {
   signInAction,
   signUpAction,
@@ -97,6 +97,7 @@ export function SignUpForm() {
         autoComplete="new-password"
         required
       />
+      <Checkbox name="adult" label="I confirm that I am 18 years old or older." required />
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? 'Creating account…' : 'Create account'}
       </Button>

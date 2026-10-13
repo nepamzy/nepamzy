@@ -79,3 +79,75 @@ Who schedules and on what platform (item 18); who is alerted and how (items 18, 
 ## 10. What is not claimed
 
 The jobs are not scheduled, monitored by anyone, or alerted on; a green `/admin/jobs` means only that recent runs succeeded when someone looked.
+
+---
+
+# Update 2026-10-13 (Master Prompt 1, Part 5): architecture review, scheduler decision, notification channels, recovery
+
+## 11. Job-management architecture: what exists, what is a gap
+
+| Requirement                       | Status in the code today                                                                                                                                                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Registered job types              | Exists: three jobs, constrained by a `check` on `job_runs.job` and `app_private.job_expectations()`.                                                                                            |
+| Explicit job states               | Partial: outbox items have explicit states (`pending, processing, sent, dead, suppressed`); the three jobs record only `ok` true/false per run in append-only `job_runs`.                       |
+| Scheduled execution               | **Missing** (decision pending, section 12).                                                                                                                                                     |
+| Bounded retries and backoff       | Exists for notifications (2^attempts minutes, dead after 5). Order expiry and location purge are naturally re-run by the next call.                                                             |
+| Idempotency / duplicate execution | Exists per unit of work (conditional per-order cancel; unique delivery row; no-op deletes), tested with overlapping runners. There is no job-level lease, so two runners both execute (safely). |
+| Leases / concurrency              | Notification claim uses `for update skip locked` and a 5-minute stale reclaim. No lease for expiry/purge (not needed for correctness; a lease would only save duplicate work).                  |
+| Timeouts                          | **Missing** at job level (the HTTP routes rely on platform request limits).                                                                                                                     |
+| Failure classification            | Partial: run failures are `ok=false` with a `detail`; notification errors are a short text. No transient/permanent classification.                                                              |
+| Dead-letter handling              | Exists (`dead`), **and now controlled recovery exists** (section 14).                                                                                                                           |
+| Audit events                      | Exists for the requeue (new) and settings; job runs are append-only records.                                                                                                                    |
+| Health checks / monitoring        | Exists: `job_health_check()`, `GET /api/jobs/health`, `/admin/jobs` (never run, stale, failed, repeated failures, dead, stuck, backlog, write errors).                                          |
+| Operational metrics               | Partial: counts only; no run durations or throughput history.                                                                                                                                   |
+| Local vs production separation    | Exists: `scripts/run-jobs.mjs` refuses non-local base URLs; the sink is local only; `APP_ENV` fails closed.                                                                                     |
+
+Not built in this stage (design only, to be built after the scheduler decision): a job-level lease (`pg_try_advisory_lock` per job name inside the job function so a second concurrent invocation returns "already running" and is recorded as skipped), run duration in `job_runs.detail`, and a transient/permanent failure class on notification errors. None changes existing behaviour.
+
+## 12. Scheduler decision (investigation only; nothing scheduled, nothing enabled)
+
+Sources: web search results quoting Supabase documentation pages (the documentation site itself could not be fetched from this environment, so **every detail below is unverified against the primary pages** and must be re-checked against the owner's actual plan before relying on it):
+
+- Supabase hosted projects offer **Supabase Cron**, a dashboard layer over the Postgres `pg_cron` extension; jobs can run SQL, call database functions, or call Edge Functions/webhooks, with schedules in cron syntax (and, per the module page, intervals down to seconds).
+- Calling an HTTP endpoint from `pg_cron` uses the `pg_net` extension (`net.http_post`); the docs recommend keeping the project URL and tokens in **Supabase Vault**.
+- Third-party guides disagree on whether `pg_cron` is enabled by default on every plan. **Plan, quota and extension availability are unconfirmed**; do not assume it is free or available.
+- Not available in the local sandbox stack (the plan for this project already noted that); local testing stays with `scripts/run-jobs.mjs`.
+
+**Candidate (needs owner approval):** `pg_cron` in the hosted project calling (a) the expiry and location-purge **SQL directly** where possible (no HTTP, no secret), and (b) the notification-processing route over HTTP via `pg_net` with the bearer secret read from Vault (the sink delivery happens in the application, so this job must go through the app). Required: the two extensions enabled in the hosted project, a Vault secret, a monitor that notices "the scheduler stopped" (the existing health check already reports `stale` and `never_run`), a documented rotation procedure for `JOBS_SECRET`, and an alert recipient (section 13). If the scheduler stops, jobs go stale; `/api/jobs/health` returns 503 and `/admin/jobs` shows the problem, but **nobody is alerted until a recipient and an external check exist**. Duplicate executions are safe by the per-unit idempotency above; a lease (section 11) would only avoid wasted work. Do **not** create a live scheduled job against any real project until the target environment, plan, secret handling and operating procedure are approved.
+
+## 13. Notification channels
+
+| Channel                     | What it is                                                                                                      | Status here                                                                                      | Notes / honest limits                                                                                                                                                                                                                                                                                                                                                       |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| In-app notification         | A row shown in the Notifications page while signed in, with an unread count                                     | Implemented                                                                                      | Seen only when the user opens the app.                                                                                                                                                                                                                                                                                                                                      |
+| Dashboard alert             | A banner or counter inside a staff dashboard (for example `/admin/jobs` problems, `/admin` counters)            | Implemented for jobs and counters                                                                | Staff see it only while looking at the console; nobody is pushed.                                                                                                                                                                                                                                                                                                           |
+| Browser/system notification | A pop-up from the browser or operating system via the Notification/Push API with the user's explicit permission | **Not implemented**; proposal only (needs a service worker push subscription and a push service) | Works only where the browser supports it and the user allowed it; behaviour with the app closed differs by browser, Android vendor battery settings, and network. **Not guaranteed on every Android device.** Web Push uses the browsers' own push services (no per-message fee), but a server key pair and storage of subscriptions (personal data) need a privacy review. |
+| Email                       | A message to the user's address                                                                                 | Local sink only (writes a delivery row); real provider **not configured**                        | The owner has a Brevo account; **no credentials were added and no email was sent**. Needs consent (already opt-in per user), a verified sender, an unsubscribe/consent path and a privacy review. Delivery to an inbox is never guaranteed.                                                                                                                                 |
+| WhatsApp / paid SMS         | -                                                                                                               | Not added                                                                                        | Excluded by the owner unless approved.                                                                                                                                                                                                                                                                                                                                      |
+
+Messages stay generic (no money, codes, tokens or locations), as the existing tests enforce. All external delivery remains disabled.
+
+## 14. Dead-notification recovery: implemented (local sink only)
+
+Migration `20261017000001_notification_requeue.sql`, `tests/db/requeue.test.ts` (7 tests), admin UI section on `/admin/jobs`.
+
+- **Who:** platform administrator at aal2 only (`require_staff`), for listing and requeueing; support, finance, customers, aal1 and anonymous are refused (tested).
+- **Reason:** mandatory, 10 to 500 characters.
+- **Eligibility (re-checked fresh on every call):** item is `dead` (under a row lock, so a second call is refused); at least 10 minutes old; the notification is less than 7 days old; no delivery already recorded; recipient still exists and still has the optional channel enabled; fewer than 2 earlier requeues. A refusal is recorded in the audit trail with the blocking reason and nothing changes.
+- **Effect:** the item returns to `pending` with `attempts = 3` (at most two more tries) and `next_attempt_at = now()`; the normal worker, back-off and the unique delivery row apply (a requeued item is delivered at most once; tested).
+- **Records:** append-only `notification_requeues` (actor, reason, prior status, attempts and error, time) and an `audit_events` row. Dead rows are never deleted. Message text is never returned by the listing or logged.
+- **No bulk operation:** one item per call; the listing is capped at 20.
+- **Not covered:** the 10-minute, 7-day and 2-requeue limits are engineering defaults chosen for safety, **not owner-approved policy**; the owner may change them.
+
+## 15. Proposed operating procedure (placeholders; nothing here is assigned to a person)
+
+| Topic              | Proposal                                                                                                                            | Owner input needed               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Alert recipient    | `[ALERT RECIPIENT: TO BE PROVIDED]` (a role mailbox, not a person's own address)                                                    | Who and which channel            |
+| First responder    | `[ROLE: TO BE ASSIGNED]` checks `/admin/jobs` when alerted, within `[RESPONSE TIME: TO BE DECIDED]`                                 | Role and hours                   |
+| Who may requeue    | Platform administrators only (as built); high-impact or repeated recovery needs a second administrator's approval `[TO BE DECIDED]` | Approval rule                    |
+| Retry limits       | 5 attempts then dead; at most 2 requeues; changes need owner approval                                                               | Confirm or change                |
+| Escalation         | A job stale or failing for more than `[THRESHOLD: TO BE DECIDED]` becomes an incident                                               | Threshold and escalation contact |
+| Incident recording | Record in an incident log (date, jobs affected, cause, action, who) kept with the audit trail                                       | Location of the log              |
+| Safe recovery      | Run the job again (idempotent); requeue only after the cause is fixed; never edit rows by hand                                      | Approve                          |
+| Periodic review    | Weekly look at `/admin/jobs`, dead items and requeue history while in pilot                                                         | Who and how often                |

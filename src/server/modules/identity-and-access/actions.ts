@@ -24,7 +24,12 @@ const passwordSchema = z
   .regex(/[0-9]/, 'Include a number.')
 
 const signUpSchema = z
-  .object({ email: emailSchema, password: passwordSchema, confirm: z.string() })
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    confirm: z.string(),
+    adult: z.literal('on', { error: 'Confirm that you are 18 years old or older to register.' }),
+  })
   .refine((v) => v.password === v.confirm, {
     message: 'Passwords do not match.',
     path: ['confirm'],
@@ -37,6 +42,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     email: formData.get('email'),
     password: formData.get('password'),
     confirm: formData.get('confirm'),
+    adult: formData.get('adult'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check your details.' }
   const { email, password } = parsed.data
@@ -51,7 +57,10 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: `${serverEnv().SITE_URL}/auth/confirm` },
+    options: {
+      emailRedirectTo: `${serverEnv().SITE_URL}/auth/confirm`,
+      data: { adult_declared: true },
+    },
   })
   if (error && error.status && error.status < 500 && error.code !== 'weak_password') {
     logger.warn('signup rejected', { code: error.code })

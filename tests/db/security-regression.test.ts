@@ -162,6 +162,7 @@ describe('append-only records', () => {
           "job_runs:UD",
           "ledger_entries:UD",
           "notification_errors:UD",
+          "notification_requeues:UD",
           "order_items:--",
           "order_status_history:UD",
           "payment_attempts:UD",

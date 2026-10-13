@@ -99,6 +99,20 @@ export const listReviewReports = async (status: string | null, page = 1) =>
 export const adminOverview = () => rpc<Record<string, number>>('admin_overview')
 export const jobHealth = () => rpc<JobHealth>('admin_job_health')
 
+export type DeadNotification = {
+  id: string
+  kind: string
+  attempts: number
+  last_error: string | null
+  created_at: string
+  requeues: number
+  eligible: boolean
+  blocked_by: string | null
+}
+/** Dead notification items (ids, counts and the system-written error only: never the message text). */
+export const deadNotifications = async () =>
+  (await rpc<DeadNotification[]>('admin_list_dead_notifications', { p_limit: 20 })) ?? []
+
 /** Settings an administrator may change here. The database validates each value again and refuses locked keys. */
 export const EDITABLE_SETTINGS = [
   'delivery_fee_kobo',

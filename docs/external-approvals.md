@@ -57,3 +57,15 @@ The complete list of decisions, with current defaults and pilot-blocking status,
 | #   | Approval / confirmation                                                                                                                                                                          | From | Blocks                                     |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | ------------------------------------------ |
 | 33  | The official AFIT crest/logo file and any brand guide (colour values), so a palette can be sampled and recorded as official or estimated; the AFIT website could not be reached from the sandbox | AFIT | Any AFIT-coloured design; use of the crest |
+
+## Added in Master Prompt 1 (2026-10-13)
+
+| #   | Approval / confirmation                                                                                                                 | Who             |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| 34  | NOBS AGENT registration and verified legal details (name, number, address) for the legal documents                                      | Owner           |
+| 35  | Legal review of `docs/legal-drafts/` by a qualified Nigerian legal professional                                                         | Owner + counsel |
+| 36  | Dedicated support email address to replace the placeholder                                                                              | Owner           |
+| 37  | Alert recipient and on-call role for job and notification failures                                                                      | Owner           |
+| 38  | Confirmation of Supabase plan features (scheduler extensions) for the chosen hosted project, and of the hosting region                  | Owner           |
+| 39  | Authorised Paystack test credentials supplied through a secure local file (never pasted in a conversation) to run real test-mode checks | Owner           |
+| 40  | NDPC position on registration of a data controller of major importance and on a DPO                                                     | Owner + counsel |

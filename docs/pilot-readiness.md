@@ -79,3 +79,7 @@ No status above changed: this stage produced plans only, no new tests of the app
 ## Decision-gate update (2026-10-13)
 
 No status changed. Decisions 28 to 31 remain **awaiting owner decision**; the implementation checklist, the work/blocker separation and the job-operations decision list are in `docs/reports/owner-review-and-next-steps.md` (sections 6 to 11). The system is still not pilot-ready.
+
+## Master Prompt 1 update (2026-10-13)
+
+Status changes backed by new evidence: row 16 (job monitoring, alerting) gains a **locally tested controlled requeue for dead notifications** (`tests/db/requeue.test.ts`); nothing watches it and nobody is alerted, so the status stays "Partial". A self-declared 18+ confirmation is now recorded at sign-up (a declaration, not verification). **No row was closed and the system is not pilot-ready.** New open items: commission mechanics (decision 32, K70), rider payment (33), verification model (34), legal drafts awaiting counsel (39, K73), scheduler platform (38). See `docs/reports/master-prompt-1-implementation-report.md`.

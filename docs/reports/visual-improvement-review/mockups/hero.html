@@ -1,0 +1,99 @@
+<!doctype html><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><link
+  rel="stylesheet"
+  href="_tokens.css"
+/><title>Hero mockup</title>
+<style>
+  .wrap {
+    padding: 24px;
+  }
+  .hero {
+    border-radius: 14px;
+    background: var(--brand-800);
+    color: #fff;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 24px;
+    align-items: center;
+    min-height: 300px;
+  }
+  .hero h1 {
+    font: 800 38px/1.1 system-ui;
+    margin: 0;
+    max-width: 520px;
+  }
+  .hero p {
+    color: var(--brand-100);
+    font-size: 18px;
+    max-width: 520px;
+  }
+  .search {
+    background: #fff;
+    color: var(--ink);
+    border-radius: 14px;
+    padding: 14px;
+    max-width: 520px;
+    margin-top: 20px;
+  }
+  .cur {
+    display: block;
+  }
+  .art {
+    height: 260px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(#cde5e3, #e8f3f2);
+  }
+  .art i {
+    position: absolute;
+    bottom: 0;
+    background: var(--brand-700);
+    opacity: 0.9;
+  }
+  .pill {
+    display: inline-block;
+    background: #fff;
+    color: var(--brand-800);
+    font: 700 12px system-ui;
+    padding: 4px 10px;
+    border-radius: 99px;
+  }
+  .b .art {
+    background: linear-gradient(135deg, #1f3a73 0, #2c4f9e 55%, #c9a227 100%);
+  }
+  .crest {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 130px;
+    height: 130px;
+    border: 3px dashed #fff;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    font: 700 13px system-ui;
+    text-align: center;
+    padding: 10px;
+  }
+</style>
+<div class="label" id="lab"></div>
+<div class="wrap" id="root"></div>
+<script>
+  const v = new URLSearchParams(location.search).get('v') || 'cur'
+  const L = {
+    cur: 'CURRENT hero: content on the left half only (as audited)',
+    a: 'CONCEPT A (no crest): architecture-inspired block shapes, existing teal palette; shapes are generic, colours provisional',
+    b: 'CONCEPT B (CONDITIONAL on AFIT permission): institutional treatment. Blue/gold values are ILLUSTRATIVE, not official. The dashed circle is a PLACEHOLDER; no crest is used.',
+  }
+  document.getElementById('lab').textContent = 'MOCKUP (static HTML, not the application): ' + L[v]
+  const art =
+    v === 'a'
+      ? `<div class=art aria-hidden=true><i style="left:6%;width:14%;height:55%"></i><i style="left:24%;width:20%;height:80%"></i><i style="left:48%;width:12%;height:45%"></i><i style="left:64%;width:26%;height:68%"></i></div>`
+      : v === 'b'
+        ? `<div class=art aria-hidden=true><div class=crest>CREST PLACEHOLDER<br>(not used)</div></div>`
+        : ''
+  document.getElementById('root').innerHTML =
+    `<section class="hero ${v}" style="${v === 'cur' ? 'display:block' : ''}"><div><span class=pill>${v === 'b' ? 'PROPOSAL ONLY' : 'Mockup'}</span><h1>Campus food and shops, one tap away.</h1><p>Order from approved AFIT community vendors. Collect it yourself or have it delivered.</p><div class=search><b>Search food, shops and services</b></div></div>${art}</section>`
+</script>
