@@ -34,6 +34,10 @@ test('customer: sign up -> confirm email -> sign in -> MFA required for orders -
   // the 18+ declaration is required: without it nothing is sent
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(alertIn(page)).toContainText(/18 years old or older/i)
+  // a submitted React form is reset after the action, so fill it in again
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+  await page.getByLabel('Confirm password').fill(PASSWORD)
   await page.getByLabel(/18 years old or older/i).check()
   await page.getByRole('button', { name: 'Create account' }).click()
   await expect(statusIn(page)).toContainText(/check your email/i)
