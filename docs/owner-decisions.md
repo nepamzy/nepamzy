@@ -50,3 +50,5 @@ Already decided and preserved (not reopened): support refund-approval limit **â‚
 - **Need legal / privacy / payment review (with the owner):** 4, 6, 7 (payments and settlement), 8 (refunds), 9 (returns), 10, 12 (signature storage), 13 (retention and data-subject requests), 31.
 - **Need operations or infrastructure approval:** 18, 20 (backups and recovery targets), 25 (independent security review).
 - **Resolved with evidence:** none of the 31 is resolved; the preserved rules at the top of this file were decided earlier by the owner.
+
+> 2026-10-13: items 28 to 31 are presented with options and trade-offs in `docs/reports/owner-review-and-next-steps.md` (item 30 lists five fixes, not four). None is decided.

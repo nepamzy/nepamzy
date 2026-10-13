@@ -71,3 +71,7 @@ Categories: **I** Implemented · **L** Locally verified · **C** CI verified · 
 | Visual audit                                                                   | **M** by the engineer only (screenshots reviewed in `docs/reports/afit-market-visual-audit.md`); owner review pending                                                       |
 
 Nothing here is a statement that the system is pilot-ready; it is not.
+
+## Next-stage planning (2026-10-13)
+
+No status above changed: this stage produced plans only, no new tests of the application, no external verification. The decision package and plans are `docs/reports/owner-review-and-next-steps.md`, `docs/reports/visual-improvement-plan.md` and `docs/reports/job-operations-plan.md`. The system is still not pilot-ready.
