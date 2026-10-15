@@ -28,7 +28,7 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
   browser,
 }, info) => {
   test.setTimeout(240000)
-  await fixPricing(50000, 500)
+  await fixPricing(50000)
   const t = tag()
   const shop = `Suya Spot ${t}`
   const item = `Suya ${t}`
@@ -125,9 +125,9 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
   await expect(anon.page).toHaveURL(/\/checkout$/)
 
   // 6. Checkout shows server-calculated totals for both choices.
-  await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦3,780') // 3600 + 180 service fee, pickup
+  await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦3,600') // 3600, no customer service fee, pickup
   await anon.page.getByRole('radio', { name: /Delivery/ }).check()
-  await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦4,280') // + 500 delivery
+  await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦4,100') // + 500 delivery
   await anon.page.getByLabel('Delivery point').selectOption({ index: 1 })
   await clickAndWait(anon.page, () =>
     anon.page.getByRole('button', { name: 'Place order' }).click(),
@@ -303,7 +303,7 @@ test('checkout stays blocked with clear messages when the vendor is closed or an
 
 test('double submission of the same checkout creates a single order', async ({ browser }, info) => {
   test.setTimeout(120000)
-  await fixPricing(50000, 500)
+  await fixPricing(50000)
   const buyer = await openSession(browser, info, 'double')
   const b = buyer.page
   await b.goto('/vendors/sample-print-shop')

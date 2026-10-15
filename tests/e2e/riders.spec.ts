@@ -44,7 +44,7 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   browser,
 }, info) => {
   test.setTimeout(420000)
-  await fixPricing(50000, 500)
+  await fixPricing(50000)
   const productName = `Rice ${tag()}`
   const vendor = await openSession(browser, info, 'rv', ['vendor_owner'])
   const shop = await makeShopWithPoint(vendor.user.id, productName)

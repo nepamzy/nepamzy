@@ -132,7 +132,7 @@ export async function deliveryOrder(
 }
 
 export async function mkShop(c: PoolClient) {
-  await fixPricing(c, { delivery: 50000, bps: 500 })
+  await fixPricing(c, { delivery: 50000 })
   const owner = await createUser(c, 'owner')
   const v = await mkVendor(c, { owner })
   const product = await mkProduct(c, v.id, { price: 150000, stock: 100 })

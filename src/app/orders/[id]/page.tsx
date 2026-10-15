@@ -194,12 +194,14 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 <Money kobo={order.delivery_fee_kobo} />
               </dd>
             </div>
-            <div className="flex justify-between">
-              <dt>Service fee</dt>
-              <dd>
-                <Money kobo={order.platform_fee_kobo} />
-              </dd>
-            </div>
+            {order.platform_fee_kobo > 0 && (
+              <div className="flex justify-between">
+                <dt>Service fee (charged on earlier orders; no longer applied)</dt>
+                <dd>
+                  <Money kobo={order.platform_fee_kobo} />
+                </dd>
+              </div>
+            )}
             <div className="flex justify-between text-lg font-bold">
               <dt>Total</dt>
               <dd>

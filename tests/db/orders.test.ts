@@ -28,7 +28,7 @@ afterAll(async () => {
 
 /** One vendor (open, with stock-tracked product), one customer, one delivery point, known pricing. */
 async function shop(c: PoolClient, o: { stock?: number | null; price?: number } = {}) {
-  await fixPricing(c, { delivery: 50000, bps: 500 })
+  await fixPricing(c, { delivery: 50000 })
   const owner = await createUser(c, 'owner')
   const cust = await createUser(c, 'cust')
   const v = await mkVendor(c, { owner })
@@ -54,39 +54,38 @@ const stock = async (c: PoolClient, p: string) =>
   (await c.query(`select stock_quantity s from public.products where id=$1`, [p])).rows[0].s as
     number | null
 
-describe('platform fee arithmetic', () => {
+describe('the customer platform fee is retired; commission arithmetic is integer half-up', () => {
+  it('platform_fee is 0 whatever the inputs (the customer is never charged a service fee)', async () => {
+    const r = await pool.query(
+      `select app_private.platform_fee(500000, 500) a, app_private.platform_fee(99999, 3000) b, app_private.platform_fee(0, 0) c`,
+    )
+    expect(r.rows[0]).toEqual({ a: '0', b: '0', c: '0' })
+  })
   it.each([
-    [0, 500, 0],
-    [1, 500, 0],
-    [9, 500, 0],
-    [10, 500, 1],
-    [333, 500, 17],
-    [500000, 500, 25000],
-    [390000, 500, 19500],
-    [199, 500, 10],
+    [0, 450, 0],
+    [1, 450, 0],
+    [11, 450, 0],
+    [12, 450, 1],
+    [500000, 450, 22500],
+    [500000, 300, 15000],
+    [500000, 150, 7500],
+    [333, 450, 15],
+    [99999, 450, 4500],
     [1000, 0, 0],
-    [100000, 3000, 30000],
-    [99999, 333, 3330],
-  ])('fee(%s kobo, %s bps) = %s (half up)', async (items, bps, fee) => {
-    const r = await pool.query(`select app_private.platform_fee($1::bigint, $2::bigint) as f`, [
-      items,
+  ])('round_bps(%s kobo, %s bps) = %s (half up)', async (amount, bps, out) => {
+    const r = await pool.query(`select app_private.round_bps($1::bigint, $2::bigint) as f`, [
+      amount,
       bps,
     ])
-    expect(Number(r.rows[0].f)).toBe(fee)
+    expect(Number(r.rows[0].f)).toBe(out)
   })
-  it('rejects negative inputs by returning NULL, never a negative fee', async () => {
-    const r = await pool.query(
-      `select app_private.platform_fee(-1, 500) a, app_private.platform_fee(100, -5) b`,
-    )
-    expect(r.rows[0]).toEqual({ a: null, b: null })
-  })
-  it('matches an independent BigInt implementation on 300 random inputs, including huge values', async () => {
+  it('round_bps matches an independent BigInt implementation on 300 random inputs, including huge values', async () => {
     const rnd = (max: bigint) => BigInt(Math.floor(Math.random() * Number(max)))
     for (let i = 0; i < 300; i++) {
       const items = i % 10 === 0 ? 100000000n * 100n * 30n - rnd(1000n) : rnd(1000000000000n)
-      const bps = rnd(3001n)
+      const bps = rnd(2001n)
       const r = await pool.query(
-        `select app_private.platform_fee($1::bigint, $2::bigint)::text as f`,
+        `select app_private.round_bps($1::bigint, $2::bigint)::text as f`,
         [items.toString(), bps.toString()],
       )
       expect(r.rows[0].f, `${items} @ ${bps}`).toBe(((items * bps + 5000n) / 10000n).toString())
@@ -111,19 +110,19 @@ describe('cart and quote', () => {
       await addToCart(c, AAL2(s.cust), s.p, 2)
       await addToCart(c, AAL2(s.cust), withOpt, 3, [optionIds[1]!])
       const pick = await quote(c, AAL2(s.cust), 'pickup')
-      // 2 x 250000 + 3 x 130000 = 890000 ; fee = (890000*500+5000)/10000 = 44500
+      // 2 x 250000 + 3 x 130000 = 890000 ; no customer fee
       expect(pick).toMatchObject({
         items_total_kobo: 890000,
         delivery_fee_kobo: 0,
-        platform_fee_kobo: 44500,
-        total_kobo: 934500,
+        platform_fee_kobo: 0,
+        total_kobo: 890000,
         problems: [],
       })
       expect(pick.lines.map((l: { unit_price_kobo: number }) => l.unit_price_kobo)).toEqual([
         250000, 130000,
       ])
       const del = await quote(c, AAL2(s.cust), 'delivery', s.point)
-      expect(del).toMatchObject({ delivery_fee_kobo: 50000, total_kobo: 984500, problems: [] })
+      expect(del).toMatchObject({ delivery_fee_kobo: 50000, total_kobo: 940000, problems: [] })
       const noPoint = await quote(c, AAL2(s.cust), 'delivery', null)
       expect(noPoint.problems.map((p: { code: string }) => p.code)).toContain(
         'delivery_point_invalid',
@@ -380,14 +379,14 @@ describe('create_order', () => {
       await addToCart(c, AAL2(s.cust), s.p, 3, [g.optionIds[0]!])
       const id = await createOrderAs(c, AAL2(s.cust), 'delivery', s.point)
       const o = (await c.query(`select * from public.orders where id=$1`, [id])).rows[0]
-      // unit 300000 x 3 = 900000 ; fee 45000 ; delivery 50000 ; total 995000
+      // unit 300000 x 3 = 900000 ; no customer fee ; delivery 50000 ; total 950000
       expect([
         o.items_total_kobo,
         o.delivery_fee_kobo,
         o.platform_fee_kobo,
         o.discount_kobo,
         o.total_kobo,
-      ]).toEqual(['900000', '50000', '45000', '0', '995000'])
+      ]).toEqual(['900000', '50000', '0', '0', '950000'])
       expect(o).toMatchObject({
         status: 'PENDING_PAYMENT',
         fulfilment: 'delivery',
@@ -453,7 +452,7 @@ describe('create_order', () => {
         o.delivery_point_label,
         o.delivery_fee_kobo,
         o.total_kobo,
-      ]).toEqual(['pickup', null, null, '0', '262500'])
+      ]).toEqual(['pickup', null, null, '0', '250000'])
       expect(o.pickup_location_snapshot).toMatch(/Sample pickup/)
       expect(o.prep_minutes_snapshot).toBe(15)
       for (const sql of [
@@ -846,7 +845,7 @@ describe('mock payment (fails closed) and cancellation', () => {
             [id],
           )
         ).rows,
-      ).toEqual([{ provider: 'mock', amount_kobo: '262500', status: 'succeeded' }])
+      ).toEqual([{ provider: 'mock', amount_kobo: '250000', status: 'succeeded' }])
       expect(
         (
           await c.query(
@@ -993,7 +992,9 @@ describe('configuration', () => {
             [k, JSON.stringify(v)],
           ),
         )
-      expect((await set('platform_fee_bps', 3001)).message).toMatch(/out of range/)
+      expect((await set('platform_fee_bps', 1)).message).toMatch(/out of range/) // retired: pinned to 0
+      expect((await set('vendor_commission_bps', 2001)).message).toMatch(/out of range/)
+      expect((await set('commission_afit_bps', 2001)).message).toMatch(/out of range/)
       expect((await set('platform_fee_bps', -1)).message).toMatch(/invalid value/)
       expect((await set('platform_fee_bps', 5.5)).message).toMatch(/invalid value/)
       expect((await set('platform_fee_bps', '500')).message).toMatch(/invalid value/)
@@ -1002,20 +1003,23 @@ describe('configuration', () => {
       expect((await set('max_cart_item_quantity', 0)).message).toMatch(/out of range/)
       await as(c, AAL2(admin), () =>
         c.query(
-          `select public.set_platform_setting('platform_fee_bps', '750'::jsonb, 'Fixture reason for this test')`,
+          `select public.set_platform_setting('vendor_commission_bps', '600'::jsonb, 'Fixture reason for this test')`,
         ),
       )
       expect(
-        (await c.query(`select value from public.platform_settings where key='platform_fee_bps'`))
-          .rows[0].value,
-      ).toBe(750)
+        (
+          await c.query(
+            `select value from public.platform_settings where key='vendor_commission_bps'`,
+          )
+        ).rows[0].value,
+      ).toBe(600)
       const cust = await createUser(c)
       expect(
         (
           await as(c, AAL2(cust), () =>
             failure(
               c,
-              `select public.set_platform_setting('platform_fee_bps','1'::jsonb, 'Fixture reason for this test')`,
+              `select public.set_platform_setting('vendor_commission_bps','1'::jsonb, 'Fixture reason for this test')`,
             ),
           )
         ).message,

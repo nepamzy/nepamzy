@@ -126,12 +126,6 @@ export function CheckoutForm({
               <Money kobo={q.delivery_fee_kobo} />
             </dd>
           </div>
-          <div className="flex justify-between">
-            <dt>Service fee</dt>
-            <dd>
-              <Money kobo={q.platform_fee_kobo} />
-            </dd>
-          </div>
           <div className="flex justify-between text-lg font-bold">
             <dt>Total</dt>
             <dd data-testid="checkout-total">

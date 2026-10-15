@@ -21,6 +21,11 @@ const CARDS = [
     'Refunds',
     'Review, approve and (fake-)execute refund requests. Approval and execution are separate.',
   ],
+  [
+    '/admin/settlements',
+    'Settlements',
+    'Vendor commission and calculated amounts due (finance and administrators; nothing is paid out).',
+  ],
   ['/admin/cases', 'Reports', 'Customer reports and disputes (support).'],
   ['/admin/returns', 'Returns', 'Decide return requests (support).'],
   ['/admin/reviews', 'Review reports', 'Decide reports about customer reviews (support).'],

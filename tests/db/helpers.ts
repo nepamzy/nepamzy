@@ -207,9 +207,11 @@ export async function setSetting(c: Q, key: string, value: unknown) {
 }
 
 /** Fixed, known pricing configuration so calculations are deterministic in tests. */
-export async function fixPricing(c: Q, o: { delivery?: number; bps?: number } = {}) {
+export async function fixPricing(c: Q, o: { delivery?: number } = {}) {
   await setSetting(c, 'delivery_fee_kobo', o.delivery ?? 50000)
-  await setSetting(c, 'platform_fee_bps', o.bps ?? 500)
+  await setSetting(c, 'platform_fee_bps', 0) // retired: the customer pays no platform fee
+  await setSetting(c, 'vendor_commission_bps', 450)
+  await setSetting(c, 'commission_afit_bps', 300)
 }
 
 export const AAL2 = (id: string): Principal => ({ id, aal: 'aal2' })

@@ -42,7 +42,7 @@ const auditCount = async (c: Parameters<typeof read>[0], key: string) =>
 describe('set_platform_setting: authority, allowlist, reason and audit', () => {
   it('only a platform administrator at aal2 can call it; every other caller fails and nothing changes', async () => {
     await withTx(async (c) => {
-      const before = await read(c, 'platform_fee_bps')
+      const before = await read(c, 'vendor_commission_bps')
       const admin = await staff(c, 'platform_admin')
       const others = [
         ['anon', null],
@@ -52,11 +52,11 @@ describe('set_platform_setting: authority, allowlist, reason and audit', () => {
         ['admin at aal1', AAL1(admin)],
       ] as const
       for (const [label, who] of others) {
-        const e = await callFails(c, who, ...set('platform_fee_bps', 700))
+        const e = await callFails(c, who, ...set('vendor_commission_bps', 700))
         expect(e.code, label).toBe(PRIV_DENIED)
       }
-      expect(await read(c, 'platform_fee_bps')).toEqual(before)
-      expect(await auditCount(c, 'platform_fee_bps')).toBe(0)
+      expect(await read(c, 'vendor_commission_bps')).toEqual(before)
+      expect(await auditCount(c, 'vendor_commission_bps')).toBe(0)
     })
   })
 
@@ -134,12 +134,12 @@ describe('set_platform_setting: authority, allowlist, reason and audit', () => {
     await withTx(async (c) => {
       const admin = AAL2(await staff(c, 'platform_admin'))
       const cases: [string, unknown, RegExp][] = [
-        ['platform_fee_bps', '500', /invalid value/],
-        ['platform_fee_bps', 5.5, /invalid value/],
-        ['platform_fee_bps', -1, /invalid value/],
-        ['platform_fee_bps', null, /invalid value/],
-        ['platform_fee_bps', 3001, /out of range/],
-        ['platform_fee_bps', { a: 1 }, /invalid value/],
+        ['vendor_commission_bps', '500', /invalid value/],
+        ['vendor_commission_bps', 5.5, /invalid value/],
+        ['vendor_commission_bps', -1, /invalid value/],
+        ['vendor_commission_bps', null, /invalid value/],
+        ['vendor_commission_bps', 2001, /out of range/],
+        ['vendor_commission_bps', { a: 1 }, /invalid value/],
         ['delivery_fee_kobo', 1000001, /out of range/],
         ['refund_support_approval_limit_kobo', 100000001, /out of range/],
         ['typed_signature_enabled', 'yes', /invalid value/],
@@ -162,36 +162,40 @@ describe('set_platform_setting: authority, allowlist, reason and audit', () => {
         expect(e.message, `${k}=${JSON.stringify(v)}`).toMatch(re)
         expect(await read(c, k)).toEqual(before)
       }
-      expect(await auditCount(c, 'platform_fee_bps')).toBe(0)
+      expect(await auditCount(c, 'vendor_commission_bps')).toBe(0)
     })
   })
 
   it('a reason is required: missing, null, empty, blank, too short and too long are all refused', async () => {
     await withTx(async (c) => {
       const admin = AAL2(await staff(c, 'platform_admin'))
-      const before = await read(c, 'platform_fee_bps')
+      const before = await read(c, 'vendor_commission_bps')
       for (const r of [null, '', '   ', 'short', '          \n\t  ', 'x'.repeat(501)]) {
-        const e = await callFails(c, admin, ...set('platform_fee_bps', 700, r))
+        const e = await callFails(c, admin, ...set('vendor_commission_bps', 700, r))
         expect(e.message, JSON.stringify(r)?.slice(0, 20)).toMatch(/setting_reason_required/)
       }
-      expect(await read(c, 'platform_fee_bps')).toEqual(before)
-      expect(await auditCount(c, 'platform_fee_bps')).toBe(0)
+      expect(await read(c, 'vendor_commission_bps')).toEqual(before)
+      expect(await auditCount(c, 'vendor_commission_bps')).toBe(0)
     })
   })
 
   it('a valid change by an administrator succeeds and the audit record holds actor, old and new value and the reason', async () => {
     await withTx(async (c) => {
       const adminId = await staff(c, 'platform_admin')
-      const before = await read(c, 'platform_fee_bps')
+      const before = await read(c, 'vendor_commission_bps')
       await callJson(
         c,
         AAL2(adminId),
-        ...set('platform_fee_bps', 750, '  Raising the placeholder fee\u0007 for the rehearsal  '),
+        ...set(
+          'vendor_commission_bps',
+          750,
+          '  Raising the placeholder fee\u0007 for the rehearsal  ',
+        ),
       )
-      expect(await read(c, 'platform_fee_bps')).toBe(750)
+      expect(await read(c, 'vendor_commission_bps')).toBe(750)
       const a = (
         await c.query(
-          `select actor_id, entity_type, details from public.audit_events where action='setting.changed' and entity_id='platform_fee_bps'`,
+          `select actor_id, entity_type, details from public.audit_events where action='setting.changed' and entity_id='vendor_commission_bps'`,
         )
       ).rows
       expect(a).toHaveLength(1)
@@ -206,7 +210,7 @@ describe('set_platform_setting: authority, allowlist, reason and audit', () => {
       // records can not be altered afterwards
       const e = await failure(
         c,
-        `update public.audit_events set details = '{}'::jsonb where entity_id='platform_fee_bps'`,
+        `update public.audit_events set details = '{}'::jsonb where entity_id='vendor_commission_bps'`,
       )
       expect(e.message).toBeTruthy()
     })
@@ -249,7 +253,7 @@ describe('set_platform_setting: authority, allowlist, reason and audit', () => {
       const e = await callFails(
         c,
         admin,
-        `select public.set_platform_setting('platform_fee_bps', '700'::jsonb) r`,
+        `select public.set_platform_setting('vendor_commission_bps', '700'::jsonb) r`,
       )
       expect(e.message).toMatch(/does not exist/)
     })
@@ -258,15 +262,15 @@ describe('set_platform_setting: authority, allowlist, reason and audit', () => {
   it('a refused change leaves no partial update and no success audit record', async () => {
     await withTx(async (c) => {
       const admin = AAL2(await staff(c, 'platform_admin'))
-      await callFails(c, admin, ...set('platform_fee_bps', 99999))
-      await callFails(c, admin, ...set('platform_fee_bps', 700, 'no'))
-      expect(await auditCount(c, 'platform_fee_bps')).toBe(0)
+      await callFails(c, admin, ...set('vendor_commission_bps', 99999))
+      await callFails(c, admin, ...set('vendor_commission_bps', 700, 'no'))
+      expect(await auditCount(c, 'vendor_commission_bps')).toBe(0)
     })
     await withTx(async (c) => {
       // an ordinary customer with a forged admin claim is no administrator
       const u = await createUser(c, 'forger')
       await giveRole(c, u, 'customer')
-      const e = await as(c, AAL2(u), () => failure(c, ...set('platform_fee_bps', 700)))
+      const e = await as(c, AAL2(u), () => failure(c, ...set('vendor_commission_bps', 700)))
       expect(e.code).toBe(PRIV_DENIED)
     })
   })

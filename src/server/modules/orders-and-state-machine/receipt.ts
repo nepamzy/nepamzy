@@ -61,7 +61,8 @@ export async function buildReceiptPdf(a: {
   y -= 6
   row('Items', ngn(a.order.items_total_kobo))
   row('Delivery', ngn(a.order.delivery_fee_kobo))
-  row('Service fee', ngn(a.order.platform_fee_kobo))
+  if (a.order.platform_fee_kobo > 0)
+    row('Service fee (earlier order)', ngn(a.order.platform_fee_kobo))
   row('Total', ngn(a.order.total_kobo), true)
   y -= 10
   line(`Status: ${a.order.status}`, { gap: 20 })

@@ -14,6 +14,7 @@ export const VENDOR_NAV: NavItem[] = [
   { href: '/vendor/profile', label: 'Shop', icon: '🏪' },
   { href: '/vendor/handover', label: 'Handover', icon: '🤝' },
   { href: '/vendor/returns', label: 'Returns', icon: '↩️' },
+  { href: '/vendor/earnings', label: 'Earnings', icon: '💰' },
 ]
 export const ADMIN_NAV: NavItem[] = [
   { href: '/admin', label: 'Home', icon: '🏠' },
@@ -25,6 +26,7 @@ export const ADMIN_NAV: NavItem[] = [
   { href: '/admin/refunds', label: 'Refunds', icon: '💸' },
   { href: '/admin/cases', label: 'Reports', icon: '📣' },
   { href: '/admin/returns', label: 'Returns', icon: '↩️' },
+  { href: '/admin/settlements', label: 'Settlements', icon: '💰' },
   { href: '/admin/reviews', label: 'Reviews', icon: '⭐' },
   { href: '/admin/jobs', label: 'Jobs', icon: '⚙️' },
   { href: '/admin/settings', label: 'Settings', icon: '🎛' },

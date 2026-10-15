@@ -96,8 +96,8 @@ export default async function CartPage() {
           <Money kobo={q.items_total_kobo} className="font-bold" />
         </p>
         <p className="text-sm text-muted">
-          Delivery and service fees are added at checkout, where you choose pickup or delivery.
-          Prices are checked again when you place the order.
+          The delivery fee (if you choose delivery) is added at checkout. There is no other service
+          fee. Prices are checked again when you place the order.
         </p>
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <ButtonLink href="/checkout">Go to checkout</ButtonLink>

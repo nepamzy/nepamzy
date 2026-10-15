@@ -29,7 +29,7 @@ afterAll(async () => {
 })
 
 async function unpaidOrder(c: PoolClient) {
-  await fixPricing(c, { delivery: 50000, bps: 500 })
+  await fixPricing(c, { delivery: 50000 })
   const owner = await createUser(c, 'owner')
   const cust = await createUser(c, 'cust')
   const v = await mkVendor(c, { owner })
@@ -362,7 +362,7 @@ describe('concurrency', () => {
     let points: string[] = []
     try {
       await setup.query('begin')
-      await fixPricing(setup, { delivery: 50000, bps: 500 })
+      await fixPricing(setup, { delivery: 50000 })
       const owner = await createUser(setup, 'owner')
       const cust = await createUser(setup, 'cust')
       const v = await mkVendor(setup, { owner })

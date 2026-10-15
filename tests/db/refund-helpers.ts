@@ -16,7 +16,7 @@ export { callFails, callJson }
 
 /** A paid PICKUP order with three lines (1000, 1500 and 500 naira) forced to the given finished status. */
 export async function paidOrder(c: PoolClient, o: { status?: string; discountKobo?: number } = {}) {
-  await fixPricing(c, { delivery: 0, bps: 500 })
+  await fixPricing(c, { delivery: 0 })
   const owner = await createUser(c, 'owner')
   const vendor = await mkVendor(c, { owner })
   const prices = [100000, 150000, 50000]

@@ -97,7 +97,7 @@ test('Paystack test payment -> vendor accepts, prepares, readies -> pickup code 
   browser,
 }, info) => {
   test.setTimeout(240000)
-  await fixPricing(50000, 500)
+  await fixPricing(50000)
   const name = `Plantain ${tag()}`
   const vendorUser = await openSession(browser, info, 'vowner', ['vendor_owner'])
   const shop = await makeShop(vendorUser.user.id, name)
@@ -197,7 +197,7 @@ test('failed payment leaves the order unpaid and payable; webhook signature, rep
   browser,
 }, info) => {
   test.setTimeout(180000)
-  await fixPricing(50000, 500)
+  await fixPricing(50000)
   const name = `Bun ${tag()}`
   const owner = await createUser('vown2', ['vendor_owner'])
   const shop = await makeShop(owner.id, name)
@@ -267,7 +267,7 @@ test('a vendor who rejects a paid order raises a refund flag that finance resolv
   browser,
 }, info) => {
   test.setTimeout(180000)
-  await fixPricing(50000, 500)
+  await fixPricing(50000)
   const name = `Cake ${tag()}`
   const vendorUser = await openSession(browser, info, 'vown3', ['vendor_owner'])
   const shop = await makeShop(vendorUser.user.id, name, { stock: 5 })

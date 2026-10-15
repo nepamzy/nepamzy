@@ -148,8 +148,8 @@ export const randIp = () =>
   `10.${100 + Math.floor(Math.random() * 100)}.${Math.floor(Math.random() * 250)}.${1 + Math.floor(Math.random() * 250)}`
 export const tag = () => Math.random().toString(36).slice(2, 8)
 
-/** Known fee configuration so totals are deterministic (N500 delivery, 5.00% service fee). */
-export async function fixPricing(deliveryKobo = 50000, bps = 500) {
+/** Known fee configuration so totals are deterministic (N500 delivery; the customer platform fee is retired and pinned to 0). */
+export async function fixPricing(deliveryKobo = 50000, bps = 0) {
   const { error } = await admin()
     .from('platform_settings')
     .upsert([

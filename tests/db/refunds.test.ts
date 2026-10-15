@@ -77,7 +77,7 @@ describe('refund requests: who, when and how much', () => {
     })
   })
 
-  it('discounts are shared proportionally and the service-fee share follows the owner setting (integer kobo, floor)', async () => {
+  it('discounts are shared proportionally; the retired service fee adds nothing on new orders even if the old policy is set (integer kobo, floor)', async () => {
     await withTx(async (c) => {
       const o = await paidOrder(c, { discountKobo: 10000 })
       const mid = o.items.find((i) => i.unit_price_kobo === 150000)!
@@ -88,8 +88,8 @@ describe('refund requests: who, when and how much', () => {
       await c.query(
         `update public.platform_settings set value='"proportional_service_fee"'::jsonb where key='refund_fee_policy'`,
       )
-      // service fee 15000 shared by net value: floor(15000 * 145000 / 290000) = 7500
-      expect(await amt()).toBe(152500)
+      // new orders carry no service fee (platform_fee_kobo = 0), so nothing is added; old orders keep their stored fee
+      expect(await amt()).toBe(145000)
       expect(Number.isInteger(await amt())).toBe(true)
     })
   })

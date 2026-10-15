@@ -116,7 +116,8 @@ export const deadNotifications = async () =>
 /** Settings an administrator may change here. The database validates each value again and refuses locked keys. */
 export const EDITABLE_SETTINGS = [
   'delivery_fee_kobo',
-  'platform_fee_bps',
+  'vendor_commission_bps',
+  'commission_afit_bps',
   'unpaid_order_expiry_minutes',
   'max_cart_item_quantity',
   'handover_token_ttl_minutes',

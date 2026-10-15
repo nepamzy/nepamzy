@@ -164,6 +164,8 @@ describe('append-only records', () => {
           "notification_errors:UD",
           "notification_requeues:UD",
           "order_items:--",
+          "order_settlement_adjustments:UD",
+          "order_settlement_lines:UD",
           "order_status_history:UD",
           "payment_attempts:UD",
           "payment_events:UD",

@@ -31,7 +31,7 @@ afterAll(async () => {
 
 type Fulfilment = 'pickup' | 'delivery'
 async function paidOrder(c: PoolClient, fulfilment: Fulfilment = 'pickup') {
-  await fixPricing(c, { delivery: 50000, bps: 500 })
+  await fixPricing(c, { delivery: 50000 })
   const owner = await createUser(c, 'owner')
   const cust = await createUser(c, 'cust')
   const v = await mkVendor(c, { owner })
