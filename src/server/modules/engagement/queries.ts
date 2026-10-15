@@ -96,6 +96,14 @@ export const listReviewReports = async (status: string | null, page = 1) =>
     p_offset: (page - 1) * PAGE_SIZE,
   })) ?? { total: 0, rows: [] }
 
+export type DeliverySummary = {
+  queued: number
+  delivered_to_test_sink: number
+  failed: number
+  not_requested: number
+}
+export const myDeliverySummary = () => rpc<DeliverySummary>('my_notification_delivery_summary')
+
 export const adminOverview = () => rpc<Record<string, number>>('admin_overview')
 export const jobHealth = () => rpc<JobHealth>('admin_job_health')
 

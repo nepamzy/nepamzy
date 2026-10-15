@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: 'Sell on AFIT Market' }
 
 export default async function ApplyPage() {
   const sb = await createSupabaseServerClient()
-  const [{ data: apps }, cats, { data: mine }] = await Promise.all([
+  const [{ data: apps }, cats, { data: mine }, { data: terms }] = await Promise.all([
     sb
       .from('vendor_applications')
       .select('id, business_name, status, decision_reason, created_at')
@@ -17,14 +17,13 @@ export default async function ApplyPage() {
       .limit(5),
     listCategories(),
     sb.rpc('my_vendor'),
+    sb.rpc('vendor_commission_terms'),
   ])
+  const commissionBps = Number((terms as { commission_bps?: number } | null)?.commission_bps ?? 450)
   const pending = (apps ?? []).find((a) => a.status === 'pending')
   return (
     <>
-      <PageHeader
-        title="Sell on AFIT Market"
-        subtitle="Apply to become an approved campus vendor"
-      />
+      <PageHeader title="Sell on AFIT Market" subtitle="Apply to sell on AFIT Market" />
       {mine ? (
         <Card>
           <p>
@@ -46,7 +45,7 @@ export default async function ApplyPage() {
         </Card>
       ) : (
         <Card className="max-w-xl">
-          <ApplicationForm categories={cats} />
+          <ApplicationForm categories={cats} commissionBps={commissionBps} />
         </Card>
       )}
       {(apps ?? []).filter((a) => a.status !== 'pending').length > 0 && (

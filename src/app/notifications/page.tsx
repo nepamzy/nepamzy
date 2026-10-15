@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui/states'
 import {
   PAGE_SIZE,
   getNotificationPreferences,
+  myDeliverySummary,
   listNotifications,
   pageParam,
 } from '@/server/modules/engagement/queries'
@@ -20,7 +21,11 @@ export default async function Notifications({
   searchParams: Promise<{ page?: string }>
 }) {
   const page = pageParam((await searchParams).page)
-  const [data, prefs] = await Promise.all([listNotifications(page), getNotificationPreferences()])
+  const [data, prefs, summary] = await Promise.all([
+    listNotifications(page),
+    getNotificationPreferences(),
+    myDeliverySummary(),
+  ])
   const items = data?.items ?? []
   return (
     <>
@@ -71,8 +76,24 @@ export default async function Notifications({
         <h2 id="prefs" className="mb-2 text-lg font-bold">
           Copies
         </h2>
-        <Card>
+        <Card className="space-y-3">
           <PreferenceForm emailEnabled={prefs.email_enabled} />
+          {summary && (
+            <div>
+              <h3 className="font-semibold">Status of your optional copies (last 30 days)</h3>
+              <ul className="mt-1 list-disc pl-5 text-sm">
+                <li>Waiting to be processed: {summary.queued}</li>
+                <li>
+                  Written to the test sink (not a real email): {summary.delivered_to_test_sink}
+                </li>
+                <li>Failed after several tries: {summary.failed}</li>
+              </ul>
+              <p className="mt-1 text-sm text-muted">
+                Waiting is not delivered. Messages shown at the top of this page are always in your
+                account. No real email, SMS or push message is sent yet.
+              </p>
+            </div>
+          )}
         </Card>
       </section>
     </>

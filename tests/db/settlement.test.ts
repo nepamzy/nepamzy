@@ -357,3 +357,50 @@ describe('who can read settlement data, and what they see', () => {
     })
   })
 })
+
+describe('vendor commission terms and notification delivery summary', () => {
+  it('any signed-in user at aal2 can read the rate they would accept; anonymous cannot', async () => {
+    await withTx(async (c) => {
+      const u = await createUser(c, 'applicant')
+      const r = (await callJson(c, AAL2(u), `select public.vendor_commission_terms() r`)) as {
+        commission_bps: number
+      }
+      expect(r.commission_bps).toBe(450)
+      expect((await callFails(c, null, `select public.vendor_commission_terms() r`)).code).toBe(
+        PRIV_DENIED,
+      )
+    })
+  })
+  it('the delivery summary counts only the caller own optional copies and distinguishes queued from delivered', async () => {
+    await withTx(async (c) => {
+      const u = await createUser(c, 'notified')
+      const other = await createUser(c, 'other')
+      await c.query(
+        `insert into public.notification_preferences (user_id, email_enabled) values ($1, true), ($2, true)`,
+        [u, other],
+      )
+      await c.query(
+        `select app_private.notify($1,'order','Order update','Open your order.','/orders/x','sum-1')`,
+        [u],
+      )
+      await c.query(
+        `select app_private.notify($1,'order','Order update','Open your order.','/orders/x','sum-2')`,
+        [u],
+      )
+      await c.query(
+        `select app_private.notify($1,'order','Order update','Open your order.','/orders/x','sum-3')`,
+        [other],
+      )
+      await c.query(
+        `update public.notification_outbox set status='sent', sent_at=now() where id = (select o.id from public.notification_outbox o join public.notifications n on n.id=o.notification_id where n.user_id=$1 limit 1)`,
+        [u],
+      )
+      const s = (await callJson(
+        c,
+        AAL2(u),
+        `select public.my_notification_delivery_summary() r`,
+      )) as Record<string, number>
+      expect(s).toEqual({ queued: 1, delivered_to_test_sink: 1, failed: 0, not_requested: 0 })
+    })
+  })
+})

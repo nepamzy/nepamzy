@@ -12,7 +12,7 @@ export default async function Settings() {
     <>
       <PageHeader
         title="Settings"
-        subtitle="Fees, limits and policies. Values shown are development PLACEHOLDERS awaiting owner decisions. Every change is validated by the database and written to the audit trail."
+        subtitle="Fees, limits and policies. The vendor commission rates are owner-approved; other values (for example the delivery fee and refund limits) are still development placeholders awaiting owner decisions. The old customer platform fee is retired and fixed at 0. Every change is validated by the database and written to the audit trail."
       />
       <div className="space-y-3">
         {rows.map((r) => {
