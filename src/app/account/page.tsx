@@ -41,6 +41,11 @@ export default async function AccountPage() {
             Security and authenticators
           </Link>
         </p>
+        <p>
+          <Link className="font-semibold text-brand-700 underline" href="/account/data-requests">
+            Your data and account closure
+          </Link>
+        </p>
       </Card>
     </>
   )

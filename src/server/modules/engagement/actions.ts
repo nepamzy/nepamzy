@@ -169,3 +169,46 @@ export async function setSettingAction(_p: ActionState, fd: FormData): Promise<A
   revalidatePath('/admin/settings')
   return done('Saved and recorded in the audit trail.')
 }
+
+const DATA_KINDS = ['access', 'correction', 'deletion', 'closure', 'other'] as const
+
+export async function submitDataRequestAction(_p: ActionState, fd: FormData): Promise<ActionState> {
+  const kind = text(fd, 'kind', 20)
+  if (!(DATA_KINDS as readonly string[]).includes(kind))
+    return failed('Choose what you are asking for.')
+  const g = await gate(ANY_USER)
+  if ('state' in g) return g.state
+  const sb = await createSupabaseServerClient()
+  const { data, error } = await sb.rpc('submit_data_request', {
+    p_kind: kind,
+    p_detail: text(fd, 'detail', 500) || null,
+  })
+  if (error) return dbFailed(error, 'Could not record your request.')
+  revalidatePath('/account/data-requests')
+  const r = data as { created?: boolean } | null
+  return r?.created
+    ? done('Your request was recorded. A person will review it; nothing is changed automatically.')
+    : failed('You already have an open request of this kind.')
+}
+
+export async function resolveDataRequestAction(
+  _p: ActionState,
+  fd: FormData,
+): Promise<ActionState> {
+  const id = text(fd, 'requestId', 40)
+  if (!uuid.safeParse(id).success) return failed('That request was not found.')
+  const status = text(fd, 'status', 20)
+  if (!['in_progress', 'completed', 'declined'].includes(status))
+    return failed('Choose an outcome.')
+  const g = await gate(ADMIN)
+  if ('state' in g) return g.state
+  const sb = await createSupabaseServerClient()
+  const { error } = await sb.rpc('admin_resolve_data_request', {
+    p_id: id,
+    p_status: status,
+    p_note: text(fd, 'note', 500),
+  })
+  if (error) return dbFailed(error, 'Give a note of at least 10 characters.')
+  revalidatePath('/admin/data-requests')
+  return done('Recorded.')
+}

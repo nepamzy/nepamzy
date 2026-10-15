@@ -10,6 +10,8 @@ import {
   setSettingAction,
   unhideReviewAction,
   requeueNotificationAction,
+  submitDataRequestAction,
+  resolveDataRequestAction,
 } from '@/server/modules/engagement/actions'
 
 export function ReviewForm({ orderId }: { orderId: string }) {
@@ -172,6 +174,56 @@ export function RequeueForm({ outboxId }: { outboxId: string }) {
       <Textarea
         label="Reason for requeueing (at least 10 characters)"
         name="reason"
+        required
+        minLength={10}
+        maxLength={500}
+      />
+    </ActionForm>
+  )
+}
+
+export function DataRequestForm() {
+  return (
+    <ActionForm action={submitDataRequestAction} submitLabel="Send request" pendingLabel="Sending…">
+      <Select label="What do you need?" name="kind" required defaultValue="">
+        <option value="" disabled>
+          Choose…
+        </option>
+        <option value="access">A copy of my personal data</option>
+        <option value="correction">Correct something about me</option>
+        <option value="deletion">Delete my personal data</option>
+        <option value="closure">Close my account</option>
+        <option value="other">Something else</option>
+      </Select>
+      <Textarea
+        label="Details (optional, please do not include passwords or codes)"
+        name="detail"
+        maxLength={500}
+      />
+    </ActionForm>
+  )
+}
+
+export function ResolveDataRequestForm({ requestId }: { requestId: string }) {
+  return (
+    <ActionForm
+      action={resolveDataRequestAction}
+      submitLabel="Record outcome"
+      pendingLabel="Saving…"
+      className="space-y-2"
+    >
+      <input type="hidden" name="requestId" value={requestId} />
+      <Select label="Outcome" name="status" required defaultValue="">
+        <option value="" disabled>
+          Choose…
+        </option>
+        <option value="in_progress">In progress</option>
+        <option value="completed">Completed (done by hand)</option>
+        <option value="declined">Declined (explain why)</option>
+      </Select>
+      <Textarea
+        label="Note to the person (at least 10 characters)"
+        name="note"
         required
         minLength={10}
         maxLength={500}

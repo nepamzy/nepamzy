@@ -157,3 +157,16 @@ export const listSettings = async (): Promise<SettingRow[]> => {
     .order('key')
   return (data ?? []) as SettingRow[]
 }
+
+export type DataRequest = {
+  id: string
+  kind: 'access' | 'correction' | 'deletion' | 'closure' | 'other'
+  status: 'open' | 'in_progress' | 'completed' | 'declined'
+  response_note: string | null
+  created_at: string
+  handled_at: string | null
+}
+export type AdminDataRequest = DataRequest & { detail: string | null; requester: string | null }
+export const myDataRequests = async () => (await rpc<DataRequest[]>('my_data_requests')) ?? []
+export const adminDataRequests = async () =>
+  (await rpc<AdminDataRequest[]>('admin_list_data_requests', { p_status: null })) ?? []

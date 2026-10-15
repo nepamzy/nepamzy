@@ -35,6 +35,11 @@ const CARDS = [
     'Settings',
     'Fees, limits and policies (administrators only). Every change is recorded.',
   ],
+  [
+    '/admin/data-requests',
+    'Data requests',
+    'Account closure and personal-data requests (administrators only).',
+  ],
   ['/admin/audit', 'Audit trail', 'Read-only record of important actions.'],
   ['/admin/roles', 'Roles', 'Grant or revoke roles (administrators only).'],
 ]
