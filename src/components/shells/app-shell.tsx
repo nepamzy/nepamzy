@@ -7,11 +7,14 @@ import { Button } from '@/components/ui/button'
 export function AppShell({
   area,
   items,
+  moreHref,
   children,
   signedInAs,
 }: {
   area: string
   items: NavItem[]
+  /** Page listing every destination; used by the phone bar when there are more than five. */
+  moreHref?: string
   children: ReactNode
   signedInAs?: string
 }) {
@@ -25,15 +28,18 @@ export function AppShell({
         <SidebarNav items={items} />
       </aside>
       <div className="min-w-0">
-        <header className="flex items-center justify-between gap-3 border-b border-line bg-card px-4 py-3">
-          <Link href="/" className="text-lg font-extrabold text-brand-800 md:hidden">
+        <header className="flex items-center justify-between gap-2 border-b border-line bg-card px-4 py-3 sm:gap-3">
+          <Link
+            href="/"
+            className="text-base font-extrabold whitespace-nowrap text-brand-800 sm:text-lg md:hidden"
+          >
             AFIT Market
           </Link>
           <span className="hidden text-sm font-semibold text-muted md:inline">{area}</span>
-          <form action={signOutAction} className="ml-auto flex items-center gap-3">
+          <form action={signOutAction} className="ml-auto flex items-center gap-2 sm:gap-3">
             <Link
               href="/notifications"
-              className="touch-target inline-flex items-center font-semibold text-brand-700 underline"
+              className="touch-target inline-flex items-center text-sm font-semibold whitespace-nowrap text-brand-700 underline sm:text-base"
             >
               Notifications
             </Link>
@@ -45,7 +51,11 @@ export function AppShell({
                 {signedInAs}
               </span>
             )}
-            <Button type="submit" variant="secondary" className="py-1.5">
+            <Button
+              type="submit"
+              variant="secondary"
+              className="px-3 py-1.5 text-sm whitespace-nowrap sm:px-4 sm:text-base"
+            >
               Sign out
             </Button>
           </form>
@@ -54,7 +64,7 @@ export function AppShell({
           {children}
         </main>
       </div>
-      <BottomNav items={items} />
+      <BottomNav items={items} moreHref={moreHref} />
     </div>
   )
 }

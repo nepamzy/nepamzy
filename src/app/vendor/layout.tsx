@@ -16,6 +16,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
       area={vendor ? `Vendor · ${vendor.name}` : 'Vendor'}
       signedInAs={data.user?.email}
       items={VENDOR_NAV}
+      moreHref="/vendor/menu"
     >
       {vendor?.status === 'suspended' && (
         <p

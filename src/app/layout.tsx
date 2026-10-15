@@ -8,7 +8,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: { default: 'AFIT Market', template: '%s | AFIT Market' },
-  description: 'Order from approved campus vendors for pickup or delivery.',
+  description: 'Order from vendors for pickup or delivery.',
   manifest: '/manifest.webmanifest',
   applicationName: 'AFIT Market',
   robots: { index: false, follow: false }, // pre-launch: not for search engines

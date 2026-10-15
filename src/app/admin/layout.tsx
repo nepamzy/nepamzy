@@ -9,7 +9,12 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase.auth.getUser()
   return (
-    <AppShell area="Administration" signedInAs={data.user?.email} items={ADMIN_NAV}>
+    <AppShell
+      area="Administration"
+      signedInAs={data.user?.email}
+      items={ADMIN_NAV}
+      moreHref="/admin/menu"
+    >
       {children}
     </AppShell>
   )

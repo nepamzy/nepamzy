@@ -32,4 +32,6 @@ export const ADMIN_NAV: NavItem[] = [
   { href: '/admin/settings', label: 'Settings', icon: '🎛' },
   { href: '/admin/audit', label: 'Audit', icon: '🧾' },
   { href: '/admin/roles', label: 'Roles', icon: '🔑' },
+  { href: '/admin/delivery-points', label: 'Delivery points', icon: '📍' },
+  { href: '/admin/categories', label: 'Categories', icon: '🗂' },
 ]

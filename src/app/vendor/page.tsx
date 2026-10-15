@@ -80,8 +80,8 @@ export default async function VendorHome() {
           </Button>
         </form>
         <p className="text-sm text-muted">
-          Order handling (accept, prepare, hand over) arrives in the next release. For now you can
-          see incoming orders but not act on them.
+          Manage incoming orders on the Orders page: accept, prepare and mark them ready. Use
+          Handover to confirm collection and Returns to respond to return requests.
         </p>
       </Card>
     </>
