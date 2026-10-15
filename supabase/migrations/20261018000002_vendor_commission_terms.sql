@@ -1,7 +1,12 @@
 -- The rate a vendor is shown (and accepts) when applying. Read from the same setting that is copied into each settlement line.
 create function public.vendor_commission_terms() returns jsonb
-language sql stable security definer set search_path = ''
-as $$ select jsonb_build_object('commission_bps', app_private.setting_int('vendor_commission_bps', 450)) $$;
+language plpgsql stable security definer set search_path = ''
+as $$
+begin
+  if (select auth.uid()) is null then raise exception 'authentication required' using errcode = '28000'; end if;
+  if not app_private.is_aal2() then raise exception 'MFA (aal2) required' using errcode = '42501'; end if;
+  return jsonb_build_object('commission_bps', app_private.setting_int('vendor_commission_bps', 450));
+end $$;
 revoke all on function public.vendor_commission_terms() from public, anon;
 grant execute on function public.vendor_commission_terms() to authenticated, service_role;
 

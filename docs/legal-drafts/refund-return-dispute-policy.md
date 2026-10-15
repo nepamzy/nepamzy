@@ -9,7 +9,7 @@ Support: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. Nothing here removes an
 
 - A customer can request a refund or open a case for an eligible order; vendors and customers can add statements; staff review and decide; every step is logged and cannot be edited afterwards.
 - A refund is limited to the money actually received for the order, and refunds together can never exceed it.
-- By default a refund covers **item prices (after any order discount)**; the **delivery fee is not refunded by default**; an option exists to also refund a proportional share of a customer service fee. [OWNER: chosen policy `refund_fee_policy` is "none" today and is a placeholder.]
+- By default a refund covers **item prices (after any order discount)**; the **delivery fee is not refunded by default**; a customer service fee no longer exists for new orders (the older option to refund a share of it is irrelevant for them). When a refund succeeds, the vendor commission on the refunded product value is returned to the vendor.
 - Support staff cannot approve a refund above a limit that is currently **₦0**; larger or all refunds need a finance administrator. [OWNER: limit undecided.] The person who requests a refund cannot also approve it.
 - Refunds are only executed against a **local fake provider** today. No real refunds have been made.
 - Returns: the customer arranges any return; there is no automatic restock or automatic refund and no rider return task. [OWNER: per-category return rules undecided; default is case by case.]

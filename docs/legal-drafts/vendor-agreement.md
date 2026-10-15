@@ -23,7 +23,7 @@ The vendor accepts, prepares and marks orders ready and hands over to the custom
 
 ## 5. Commission and what you receive
 
-**[OWNER DECISION PENDING — see `docs/reports/commission-and-settlement-analysis.md`.]** The owner has confirmed an intended commission of **5% of the eligible product subtotal** of a completed order, **excluding delivery charges**, reversed in proportion to refunds. The current application instead charges the **customer** a 5% service fee and has no vendor settlement. This clause must not be published until the owner chooses how the 5% is applied. The final clause will state: the rate, the base (product subtotal after any discount [TBC]), rounding to the kobo (half up), refund reversal, provider fees [WHO BEARS: TBC], and an example.
+AFIT Market keeps a commission of **4.5% of the product value of each completed order** (the order's product subtotal after any product discount). **Delivery fees are not part of the commission base.** The commission is shown to you per order on your Earnings page before and after refunds. If part of an order is refunded, the commission on that part is returned to you; amounts are calculated in whole kobo, rounding half up. The rate in force when an order completes is saved with that order and does not change for it later. Of the commission, AFIT Market allocates 3% to itself and 1.5% as an internal budgeting allowance toward payment-provider charges; **the allowance is not a statement of what the provider charges, and AFIT Market pays the actual provider charges.** The customer pays no extra platform fee. [COUNSEL: confirm wording, whether the split should be disclosed to vendors at all, and treatment of VAT or other taxes.]
 
 ## 6. Delivery fees
 

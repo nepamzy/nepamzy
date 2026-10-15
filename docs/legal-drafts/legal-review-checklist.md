@@ -7,11 +7,11 @@ Prepared for the qualified Nigerian legal professional. Support contact: [AFIT M
 
 ## A. Business assumptions (from the owner, to be confirmed)
 
-Operator: NOBS AGENT (not yet registered; do not rely on a legal name). Marketplace for AFIT Kaduna, expandable to other Air Force locations and authorised communities. Customers, vendors, riders, support, finance and administrators. 5% vendor commission on eligible product subtotal (delivery excluded). Customers pay delivery through the app. Riders may use public transport; cars not compulsory. Registration open to adults 18+ including non-AFIT people. Delivery proof is a drawn signature (kept pending accessibility work). AFIT authorisation, crest permission and official brand specification are pending.
+Operator: NOBS AGENT (not yet registered; do not rely on a legal name). Marketplace for AFIT Kaduna, expandable to other Air Force locations and authorised communities. Customers, vendors, riders, support, finance and administrators. 4.5% vendor commission on the eligible product subtotal after product discounts (delivery excluded; 3% AFIT Market allocation + 1.5% Paystack-cost budgeting allowance, not an official tariff); no customer platform fee. Customers pay delivery through the app. Riders may use public transport; cars not compulsory. Registration open to adults 18+ including non-AFIT people. Delivery proof is a drawn signature (kept pending accessibility work). AFIT authorisation, crest permission and official brand specification are pending.
 
 ## B. Unresolved owner decisions that change the drafts
 
-Commission mechanics versus the existing customer-paid 5% fee; settlement and payouts; rider payment formula; retention periods; refund fee policy and support approval limit; per-category returns; pickup-code reissue; signature retention and accessible alternative; staff access rules; support email; alert recipient; zones, hours and campus rules; AFIT authorisation; hosting region.
+Settlement and payouts (commission mechanics are decided); rider payment formula; retention periods; refund fee policy and support approval limit; per-category returns; pickup-code reissue; signature retention and accessible alternative; staff access rules; support email; alert recipient; zones, hours and campus rules; AFIT authorisation; hosting region.
 
 ## C. Provisions that must match the code (verified from migrations, 2026-10-13)
 
@@ -19,7 +19,7 @@ Minimum age declaration recorded at sign-up only; unpaid order expiry 30 minutes
 
 ## D. Potentially conflicting provisions
 
-(1) Vendor agreement 5% commission versus built customer service fee. (2) Customer terms promise of refund versus placeholder refund policy. (3) Privacy policy retention versus an unscheduled purge. (4) Delivery-proof reliance versus keyboard inaccessibility and unconfirmed evidentiary value. (5) "Approved vendors" wording on the landing page versus pending AFIT authorisation.
+(1) Vendor agreement 4.5% commission: confirm the wording about the internal split and provider charges. (2) Customer terms promise of refund versus placeholder refund policy. (3) Privacy policy retention versus an unscheduled purge. (4) Delivery-proof reliance versus keyboard inaccessibility and unconfirmed evidentiary value. (5) "Approved vendors" wording on the landing page versus pending AFIT authorisation.
 
 ## E. Questions requiring legal advice
 

@@ -22,7 +22,7 @@ Products are offered by independent vendors. Listings, prices and availability a
 ## 4. Orders and payment
 
 4.1 You pay through the app. An order is created, then must be paid within **[30] minutes** [current placeholder `unpaid_order_expiry_minutes`] or it is cancelled and reserved stock released.
-4.2 Checkout shows the product subtotal, the delivery fee (separately) and any other disclosed charge before you pay. [OWNER: whether any customer service fee exists is undecided: see the Payment, Commission and Settlement Disclosure.]
+4.2 Checkout shows the product subtotal, the delivery fee (separately) and the total before you pay. **There is no platform or service fee for customers.**
 4.3 Payments are processed by [PAYMENT PROVIDER, TBC; Paystack is the intended provider and has not been verified in live use]. We do not see or store your card details.
 4.4 An order is not confirmed to the vendor until payment is verified by us with the provider; a message from your browser alone is never treated as proof of payment.
 

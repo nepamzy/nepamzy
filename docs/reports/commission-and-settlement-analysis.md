@@ -1,4 +1,6 @@
-# Commission, settlement and rider-payment analysis (Gate D: STOPPED, conflict reported)
+# Commission, settlement and rider-payment analysis (RESOLVED 2026-10-15: see `docs/financial-model.md`)
+
+> **Update 2026-10-15:** the owner resolved the conflict described below: no customer platform fee; a 4.5% vendor commission (3% AFIT allocation + 1.5% Paystack-cost budgeting allowance, not a verified tariff). It is implemented; this file is kept as the history of the conflict. The rider-payment options in §5 remain open.
 
 Prepared 2026-10-13 against HEAD `daee8a4`. **No financial behaviour was changed in this stage.** The owner confirmed a 5% vendor commission on the eligible product subtotal. Inspecting the existing accounting model shows that the request is **not ambiguous in intent but conflicts with what is already built**, so implementation was stopped as Master Prompt 1 Gate D requires.
 

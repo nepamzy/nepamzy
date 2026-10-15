@@ -83,3 +83,7 @@ No status changed. Decisions 28 to 31 remain **awaiting owner decision**; the im
 ## Master Prompt 1 update (2026-10-13)
 
 Status changes backed by new evidence: row 16 (job monitoring, alerting) gains a **locally tested controlled requeue for dead notifications** (`tests/db/requeue.test.ts`); nothing watches it and nobody is alerted, so the status stays "Partial". A self-declared 18+ confirmation is now recorded at sign-up (a declaration, not verification). **No row was closed and the system is not pilot-ready.** New open items: commission mechanics (decision 32, K70), rider payment (33), verification model (34), legal drafts awaiting counsel (39, K73), scheduler platform (38). See `docs/reports/master-prompt-1-implementation-report.md`.
+
+## Master Prompt 2 update (2026-10-15)
+
+Implemented locally: customer platform fee removed; 4.5% vendor commission model with immutable settlement and refund adjustments; vendor earnings and administrator settlement views; commission disclosure to applicants; account closure and data requests; delivery-state clarity for notification copies; the five visual and navigation fixes (neutral hero); removal of the "approved AFIT vendors" claim. **No row above was closed**: payouts, rider payment, real Paystack, real notifications, scheduling, AFIT authorisation, delivery zones, legal approval, privacy decisions, security audit and accessibility review are still open. The system is **not pilot-ready**. See `docs/reports/master-prompt-2-implementation-report.md` and `docs/reports/placeholder-inventory.md`.
