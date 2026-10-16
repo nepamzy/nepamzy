@@ -6,7 +6,7 @@ Implementation is complete to the extent possible under the current decisions. T
 
 ## 2. Repository and Git state
 
-Repository `nepamzy/nepamzy`, branch `claude/afit-market-phase-0-asm8xd`, draft PR #1. Starting commit `68a6e07`. Commits this stage: `2b78c6b` (fee removal and settlement), visual/navigation fixes, commission disclosure, data requests, `9b2179e` (docs), `e3587e1` (snapshot pin), `e2189e9` (e2e fixes), plus the commit holding this report. Verified working tree clean and equal to origin at `e2189e9` before this report. CI: runs on `2b78c6b`, `9b2179e` and `e3587e1` **failed** (settlement tests and two snapshot/e2e expectations that were then fixed; the `e3587e1` failure was the four e2e cases fixed in `e2189e9`); no result for `e2189e9` or later was available when this was written.
+Repository `nepamzy/nepamzy`, branch `claude/afit-market-phase-0-asm8xd`, draft PR #1. Starting commit `68a6e07`. Commits this stage: `2b78c6b` (fee removal and settlement), visual/navigation fixes, commission disclosure, data requests, `9b2179e` (docs), `e3587e1` (snapshot pin), `e2189e9` (e2e fixes), plus the commit holding this report. Verified working tree clean and equal to origin at `e2189e9` before this report. CI: runs on `2b78c6b`, `9b2179e`, `e3587e1` and `e2189e9` **failed** (settlement tests and two snapshot/e2e expectations that were then fixed; the `e3587e1` failure was the four e2e cases fixed in `e2189e9`; the `e2189e9` failure was a real defect in my header change: on the CI fonts the no-wrap header overflowed sideways by 21 px at 320 px, caught by the existing reflow test, and fixed by letting the header wrap to a second row); no result for `e2189e9` or later was available when this was written.
 
 ## 3. Implemented functionality
 

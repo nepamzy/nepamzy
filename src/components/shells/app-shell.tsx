@@ -28,7 +28,7 @@ export function AppShell({
         <SidebarNav items={items} />
       </aside>
       <div className="min-w-0">
-        <header className="flex items-center justify-between gap-2 border-b border-line bg-card px-4 py-3 sm:gap-3">
+        <header className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-line bg-card px-4 py-3 sm:gap-x-3">
           <Link
             href="/"
             className="text-base font-extrabold whitespace-nowrap text-brand-800 sm:text-lg md:hidden"

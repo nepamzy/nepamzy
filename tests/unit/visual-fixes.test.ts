@@ -80,3 +80,11 @@ describe('copy that must not make claims we cannot support', () => {
     )
   })
 })
+
+describe('mobile header cannot overflow sideways', () => {
+  it('keeps words whole but lets the header wrap to a second row instead of scrolling', () => {
+    const src = readFileSync('src/components/shells/app-shell.tsx', 'utf8')
+    expect(src).toMatch(/<header className="flex flex-wrap /)
+    expect(src).toMatch(/whitespace-nowrap/)
+  })
+})
