@@ -490,3 +490,57 @@ describe('18+ declaration (self-declaration recorded at sign-up)', () => {
     })
   })
 })
+
+describe('sign-up age gate (database level)', () => {
+  // The Auth service role cannot be assumed from the test connection, so the rule is tested as a function over inserted rows;
+  // the trigger wiring and the Auth API paths are exercised end to end by tests/e2e/age-gate-api.spec.ts.
+  const mk = async (c: import('pg').PoolClient, meta: string, cols = '', vals = '') =>
+    (
+      await c.query(
+        `insert into auth.users (id, email, raw_user_meta_data ${cols}) values (gen_random_uuid(), 'gate-' || gen_random_uuid() || '@example.test', $1::jsonb ${vals}) returning id`,
+        [meta],
+      )
+    ).rows[0].id as string
+  const ok = async (c: import('pg').PoolClient, id: string) =>
+    (await c.query(`select app_private.signup_declaration_ok($1) ok`, [id])).rows[0].ok as boolean
+
+  it('an unconfirmed, non-invited account needs adult_declared = true (boolean)', async () => {
+    await withTx(async (c) => {
+      for (const meta of [
+        '{}',
+        '{"adult_declared": false}',
+        '{"adult_declared": "yes"}',
+        '{"adult_declared": 1}',
+      ])
+        expect(await ok(c, await mk(c, meta)), meta).toBe(false)
+      expect(await ok(c, await mk(c, '{"adult_declared": true}'))).toBe(true)
+    })
+  })
+
+  it('confirmed accounts and invitations pass without it', async () => {
+    await withTx(async (c) => {
+      expect(await ok(c, await mk(c, '{}', ', email_confirmed_at', ', now()'))).toBe(true)
+      expect(await ok(c, await mk(c, '{}', ', invited_at', ', now()'))).toBe(true)
+    })
+  })
+
+  it('the function is not callable by API roles, and the trigger is deferred and attached to auth.users', async () => {
+    await withTx(async (c) => {
+      const u = await createUser(c, 'gate')
+      for (const fn of ['signup_declaration_ok($1)', 'signup_age_gate()'])
+        expect(
+          (
+            await as(c, { id: u, aal: 'aal2' }, () =>
+              failure(c, `select app_private.${fn}`, fn.includes('$1') ? [u] : []),
+            )
+          ).code,
+        ).toBe(PRIV_DENIED)
+      const t = (
+        await c.query(
+          `select tgdeferrable, tginitdeferred from pg_trigger where tgname='a_signup_age_gate' and tgrelid='auth.users'::regclass`,
+        )
+      ).rows
+      expect(t).toEqual([{ tgdeferrable: true, tginitdeferred: true }])
+    })
+  })
+})
