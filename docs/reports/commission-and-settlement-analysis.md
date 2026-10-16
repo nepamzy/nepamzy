@@ -1,6 +1,6 @@
 # Commission, settlement and rider-payment analysis (RESOLVED 2026-10-15: see `docs/financial-model.md`)
 
-> **Update 2026-10-15:** the owner resolved the conflict described below: no customer platform fee; a 4.5% vendor commission (3% AFIT allocation + 1.5% Paystack-cost budgeting allowance, not a verified tariff). It is implemented; this file is kept as the history of the conflict. The rider-payment options in §5 remain open.
+> **Update 2026-10-15:** the owner resolved the conflict described below: no customer platform fee; a 4.5% vendor commission (3% AFIT allocation + 1.5% Paystack-cost budgeting allowance, not a verified tariff). It is implemented; this file is kept as the history of the conflict. **Rider payment is also decided (§5): riders use AFIT Market free of charge with no rider commission, and a delivery fee not collected through Paystack is paid by the customer directly to the rider by bank transfer.**
 
 Prepared 2026-10-13 against HEAD `daee8a4`. **No financial behaviour was changed in this stage.** The owner confirmed a 5% vendor commission on the eligible product subtotal. Inspecting the existing accounting model shows that the request is **not ambiguous in intent but conflicts with what is already built**, so implementation was stopped as Master Prompt 1 Gate D requires.
 
@@ -41,18 +41,39 @@ Append-only table `order_settlement_lines` (one row per order, created once when
 
 Tests required when approved: rounding (including 1 kobo cases), deterministic repeat, duplicate-completion idempotency, partial and cumulative refunds never exceeding received, commission reversal proportionality, delivery fee excluded, concurrent completion/refund, authorization (vendors see only their own lines), and migration of existing orders (no retroactive lines unless the owner approves).
 
-## 5. Rider payment: options for owner review (nothing invented)
+## 5. Rider payment: current arrangement (owner-decided; implemented in the Final Implementation Completion stage)
 
-No rider payment amount, timing or cancellation treatment is defined in the repository. Options:
+### 5.1 Current arrangement
 
-| Option                                | Description                                                                               | Pros                                                     | Cons / risks                                                        |
-| ------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------- |
-| R1: flat share of the delivery fee    | Rider earns a fixed percentage of the customer-paid delivery fee; platform keeps the rest | Simple, matches "customers pay delivery through the app" | Percentage still to be chosen; low fees may under-reward long trips |
-| R2: fixed amount per delivery         | Fixed kobo per completed delivery                                                         | Predictable for riders                                   | Platform bears the difference if the fee differs                    |
-| R3: zone or distance tiers            | Amount by approved zone                                                                   | Fairer for variable distance                             | Needs approved zones (external prerequisite) and more configuration |
-| R4: platform keeps fee, pays by shift | Not recommended before legal advice on classification                                     | n/a                                                      | Worker-classification implications                                  |
+- **Riders use AFIT Market free of charge.** No rider commission exists. The rider dashboard says "Rider earnings: Free of charge." and "Delivery commission features: Coming Soon". **No future commission rate or date has been decided or is implied.**
+- **Checkout is unchanged**: customers pay through Paystack (test mode only; no live use). The vendor commission and settlement (§1–§4, `docs/financial-model.md`) are unchanged and exclude delivery.
+- **Direct bank transfer, only when the fee was not collected through Paystack.** An order carries an explicit, immutable marker (`delivery_fee_collection`). Every existing and new order is `paystack` by default. Only an order explicitly marked `direct_to_rider`, whose payable total excludes the delivery fee, can ask the customer to pay the rider. If the records are inconsistent (for example money received exceeds the payable total, or no fee is recorded) the order is treated as **ambiguous: the customer is not asked to pay** and an administrator sees it. No current checkout creates `direct_to_rider` orders; the capability is dormant until an owner-approved checkout mode sets the marker.
+- **Process**: the rider keeps bank details (secure, never public); when a payment is opened the customer sees a **snapshot** of them, so later edits never redirect an existing order. The customer reports the transfer; the **rider independently confirms or disputes**; only then is one official digital receipt issued (unique number, QR/verification link). A dispute is never silently overwritten: only a platform or finance administrator can resolve it, with a written reason, and every step is audited. A receipt can be voided (reason recorded) but is never deleted.
+- **What is NOT verified**: AFIT Market has **no independent bank-verification provider** (none has been approved), cannot see a personal bank account, and **does not move, hold or pay out any money for riders**. "Confirmed by both" means two parties' statements, not bank verification; the public receipt page says this explicitly.
+- **No real rider transfers or payouts exist.** No live Paystack use occurred or is authorised.
 
-Also undecided: timing (per delivery, daily, weekly), cancellation and failed-delivery treatment, tips, who bears provider fees, minimum payout, dispute holds. A rider agreement must not classify riders (employee, contractor, agent) without qualified advice. **No real rider payments, transfers or live Paystack use occurred or are authorised.**
+### 5.2 Historical options R1–R4 (superseded; kept for the record)
+
+These were the options put to the owner before the decision above. **They are not the current arrangement and none is implemented.**
+
+| Option                                | Description                                                                               | Why not current                                      |
+| ------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| R1: flat share of the delivery fee    | Rider earns a fixed percentage of the customer-paid delivery fee; platform keeps the rest | Not chosen: no rider commission or fee share         |
+| R2: fixed amount per delivery         | Fixed kobo per completed delivery                                                         | Not chosen                                           |
+| R3: zone or distance tiers            | Amount by approved zone                                                                   | Not chosen                                           |
+| R4: platform keeps fee, pays by shift | Flagged as raising worker-classification questions                                        | Not chosen; classification advice still not obtained |
+
+Payout minimums and provider-fee questions belonged to a platform-pays-riders model. Because the platform does not pay riders, **they are not active settings or open design items.**
+
+### 5.3 Genuinely unresolved matters
+
+1. **Cancellation and failed-delivery handling**: whether and how a delivery fee is owed (or returned) when an order is cancelled, refused or fails after pickup.
+2. **Tips**: not supported; no rule decided.
+3. **Dispute resolution and escalation**: who decides, what evidence is considered, time limits, and what happens to repeat disputes. Today a platform/finance administrator records a written decision; no policy defines the standard of proof.
+4. **Evidence requirements**: optional private evidence upload is **not built** (no private file storage exists yet). Any future evidence would be supporting only and never auto-verify a payment.
+5. **Ambiguous or disputed transfers**: the process for contacting parties, how long to wait, and what to do when records are ambiguous is operational, not defined.
+6. **Legal and contractual rider relationship**: classification, the rider agreement (a draft only), tax and consumer-law treatment of a customer paying a rider's personal account, and any duty to the customer when a rider's account details are wrong. Needs qualified Nigerian legal advice.
+7. **When a `direct_to_rider` checkout mode will be offered**, if ever: the marker exists but no approved flow sets it.
 
 ## 6. Paystack test-mode status
 
