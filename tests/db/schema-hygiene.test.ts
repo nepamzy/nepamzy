@@ -29,6 +29,7 @@ describe('schema hygiene (asserted from the catalog)', () => {
     'public.get_product',
     'public.search_products',
     'public.get_vendor_reviews', // Batch 6: published reviews only, no customer identity or order data
+    'public.verify_delivery_fee_receipt', // FIC: unguessable-token receipt check; minimal non-personal result
   ]
   it('no function in public/app_private is executable by PUBLIC or anon, except the public read allowlist', async () => {
     const r = await pool.query(`

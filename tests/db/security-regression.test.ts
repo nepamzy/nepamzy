@@ -58,6 +58,8 @@ const NO_IDENTITY_CHECK = [
   'get_vendor_reviews',
   'list_categories',
   'search_products',
+  // Batch FIC: public receipt verification. Takes an unguessable 192-bit token; returns only a minimal, non-personal result.
+  'verify_delivery_fee_receipt',
 ]
 // Identity read-backs that are deliberately usable before the second factor (the sign-in flow needs them).
 // The cart is deliberately usable at aal1 for plain customers (route policy for /cart); checkout and everything after needs aal2.
@@ -130,6 +132,7 @@ describe('catalogue-wide authorisation regression', () => {
           "list_my_notifications",
           "list_returns",
           "my_data_requests",
+          "my_delivery_fee_payments",
           "my_notification_delivery_summary",
           "my_roles",
           "my_vendor",
@@ -137,6 +140,7 @@ describe('catalogue-wide authorisation regression', () => {
           "search_products",
           "vendor_commission_terms",
           "vendor_pending_rider_pickups",
+          "verify_delivery_fee_receipt",
         ]
       `)
     })
@@ -161,6 +165,7 @@ describe('append-only records', () => {
           "audit_events:UD",
           "case_events:UD",
           "case_statements:UD",
+          "delivery_fee_payment_events:UD",
           "handover_evidence:UD",
           "job_runs:UD",
           "ledger_entries:UD",
