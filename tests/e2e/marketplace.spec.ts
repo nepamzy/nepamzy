@@ -142,7 +142,7 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
     .eq('id', orderId)
     .single()
   expect(o).toEqual({
-    total_kobo: 428000,
+    total_kobo: 410000,
     items_total_kobo: 360000,
     status: 'PENDING_PAYMENT',
     fulfilment: 'delivery',

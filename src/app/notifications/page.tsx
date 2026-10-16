@@ -90,7 +90,7 @@ export default async function Notifications({
               </ul>
               <p className="mt-1 text-sm text-muted">
                 Waiting is not delivered. Messages shown at the top of this page are always in your
-                account. No real email, SMS or push message is sent yet.
+                account. Nothing on this page has been sent as a real email, SMS or push message.
               </p>
             </div>
           )}
