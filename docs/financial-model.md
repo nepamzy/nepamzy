@@ -41,3 +41,9 @@ Payouts: **none** (`settlement_policy` stays code-locked to `DISABLED`; the dash
 ## 7. Needs approval before real money moves
 
 Counsel and Paystack confirmation of the funds flow (whether AFIT Market may hold funds, split payments, settlement timing); a payout design (approval, payment and failure states); who bears provider fees on refunds; rider payment policy; tax treatment.
+
+## Rider delivery fee: direct bank transfer (added in the Final Implementation Completion stage)
+
+- Riders pay **no commission**; the platform takes no share of the delivery fee. The vendor commission above is unchanged and still excludes delivery.
+- Checkout remains Paystack (test mode). A delivery fee is paid directly to the rider by bank transfer **only** when the order is explicitly marked `direct_to_rider` (fee outside the Paystack total). All existing and new orders are `paystack` by default; ambiguous records never charge the customer.
+- AFIT Market holds none of this money, pays no riders and cannot verify a transfer. The customer's report and the rider's confirmation produce a receipt; a dispute is resolved only by an audited administrator decision. See `docs/reports/commission-and-settlement-analysis.md` §5 and `docs/reports/final-implementation-completion-report.md`.

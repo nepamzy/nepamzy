@@ -124,11 +124,17 @@ describe('outbox workers never share an item', () => {
   })
 
   it('CONTROL REMOVAL 2: with the row lock REMOVED (and the window widened) workers DO receive the same item', async () => {
-    await seed(6)
     await mutate((d) => NO_LOCK(SLEEP(d)))
-    const sets = await Promise.all(Array.from({ length: 6 }, () => claim(6)))
-    const all = sets.flat()
-    expect(all.length).toBeGreaterThan(new Set(all).size)
+    // A race is probabilistic: a loaded CI runner can serialise the six workers by chance. The claim being tested is that the
+    // duplication CAN happen without the lock, so allow a few fresh attempts; the assertion itself is unchanged.
+    let duplicated = false
+    for (let attempt = 0; attempt < 5 && !duplicated; attempt++) {
+      await seed(6)
+      const sets = await Promise.all(Array.from({ length: 6 }, () => claim(6)))
+      const all = sets.flat()
+      duplicated = all.length > new Set(all).size
+    }
+    expect(duplicated).toBe(true)
   })
 
   it('everything is restored after the mutations', async () => {
