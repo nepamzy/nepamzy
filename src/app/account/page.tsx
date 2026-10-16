@@ -42,6 +42,11 @@ export default async function AccountPage() {
           </Link>
         </p>
         <p>
+          <Link className="font-semibold text-brand-700 underline" href="/account/receipts">
+            Delivery fee receipts
+          </Link>
+        </p>
+        <p>
           <Link className="font-semibold text-brand-700 underline" href="/account/data-requests">
             Your data and account closure
           </Link>

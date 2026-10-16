@@ -143,3 +143,21 @@ describe('safeNextPath', () => {
     ['/auth/confirm', '/'],
   ])('%s -> %s', (input, out) => expect(safeNextPath(input as string | null)).toBe(out))
 })
+
+describe('delivery-fee payment routes', () => {
+  it('the admin page is for finance and platform administrators at aal2 only', () => {
+    const p = policyFor('/admin/delivery-fee-payments')
+    expect(p?.requirement).toEqual({ roles: ['platform_admin', 'finance_admin'], aal: 'aal2' })
+    expect(decideAccess(p!.requirement, who(['support_agent'], 'aal2'))).toMatchObject({
+      allow: false,
+      action: 'forbidden',
+    })
+    expect(decideAccess(p!.requirement, who(['finance_admin'], 'aal2')).allow).toBe(true)
+  })
+  it('rider payments and the customer pay screen need their own roles; receipt verification is public', () => {
+    expect(policyFor('/rider/payments')?.requirement.roles).toEqual(['rider'])
+    expect(policyFor('/orders/abc/delivery-fee')?.requirement.roles).toEqual(['customer'])
+    expect(policyFor('/account/receipts')?.requirement.aal).toBe('aal2')
+    expect(policyFor('/receipts/' + 'a'.repeat(48))).toBeNull()
+  })
+})

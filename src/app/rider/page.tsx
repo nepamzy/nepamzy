@@ -19,6 +19,16 @@ export default async function RiderHome() {
   return (
     <>
       <PageHeader title="Rider home" subtitle={me.full_name} />
+      <Card className="mb-5 max-w-xl space-y-1">
+        <p className="font-semibold">Rider earnings: Free of charge.</p>
+        <p className="font-semibold">Delivery commission features: Coming Soon</p>
+        <p className="text-sm text-muted">
+          AFIT Market takes no commission from riders.{' '}
+          <Link className="font-semibold text-brand-700 underline" href="/rider/payments">
+            Bank details and delivery fee payments
+          </Link>
+        </p>
+      </Card>
       <Card className="max-w-xl space-y-4">
         <p className="flex items-center gap-2 text-lg font-semibold">
           Status:{' '}

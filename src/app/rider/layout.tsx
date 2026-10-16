@@ -14,6 +14,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
       items={[
         { href: '/rider', label: 'Home', icon: '🏍' },
         { href: '/rider/jobs', label: 'Jobs', icon: '📋' },
+        { href: '/rider/payments', label: 'Payments', icon: '💳' },
         { href: '/rider/profile', label: 'Profile', icon: '👤' },
         { href: '/account', label: 'Account', icon: '🔐' },
       ]}

@@ -11,6 +11,7 @@ import { Money } from '@/components/ui/money'
 import { Timeline } from '@/components/ui/timeline'
 import { ReviewForm } from '@/components/domain/engagement-forms'
 import { myOrderReview } from '@/server/modules/engagement/queries'
+import { deliveryFeeForOrder } from '@/server/modules/delivery-fee/queries'
 import { ActionForm } from '@/components/forms/action-form'
 import { mockPaymentsAllowed, paystackConfig } from '@/lib/env'
 import { cancelOrderAction, mockPayAction } from '@/server/modules/cart-and-checkout/actions'
@@ -34,6 +35,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const review = ['COMPLETED', 'PARTIALLY_REFUNDED'].includes(order.status)
     ? await myOrderReview(order.id)
     : null
+  const dfp = order.fulfilment === 'delivery' ? await deliveryFeeForOrder(order.id) : null
   const hasReceipt = !['PENDING_PAYMENT', 'CANCELLED'].includes(order.status)
   const label = (c: string) => ORDER_STATES.find((s) => s.code === c)?.label ?? c
   return (
@@ -99,6 +101,25 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               in a later release.
             </p>
           )}
+        </Card>
+      )}
+
+      {dfp && dfp.state !== 'not_applicable' && (
+        <Card className="mb-5 space-y-2 border-brand-700">
+          <h2 className="text-lg font-bold">Delivery fee</h2>
+          <p>
+            {dfp.state === 'payment'
+              ? 'You pay this delivery fee directly to your rider by bank transfer.'
+              : dfp.state === 'ready_to_open'
+                ? 'The delivery fee was not part of your online payment. You pay it to your rider by bank transfer.'
+                : 'Details about the delivery fee will appear here when they are available.'}
+          </p>
+          <Link
+            href={`/orders/${order.id}/delivery-fee`}
+            className="font-semibold text-brand-700 underline"
+          >
+            Pay Delivery Fee
+          </Link>
         </Card>
       )}
 

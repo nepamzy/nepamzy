@@ -26,6 +26,11 @@ const CARDS = [
     'Settlements',
     'Vendor commission and calculated amounts due (finance and administrators; nothing is paid out).',
   ],
+  [
+    '/admin/delivery-fee-payments',
+    'Delivery fee payments',
+    'Direct rider payments: disputes and receipts (finance and administrators).',
+  ],
   ['/admin/cases', 'Reports', 'Customer reports and disputes (support).'],
   ['/admin/returns', 'Returns', 'Decide return requests (support).'],
   ['/admin/reviews', 'Review reports', 'Decide reports about customer reviews (support).'],
