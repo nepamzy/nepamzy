@@ -1,6 +1,6 @@
 # Final platform completion report
 
-Prepared 2026-10-17. Branch `claude/afit-market-phase-0-asm8xd`, draft PR #1. Final implementation commit: `@@COMMIT@@` (the commit holding this report follows it). Starting point: `dfb296a`, working tree clean.
+Prepared 2026-10-17. Branch `claude/afit-market-phase-0-asm8xd`, draft PR #1. Final implementation commit: `0e1f24d` (the commit holding this report follows it). Starting point: `dfb296a`, working tree clean.
 
 Status words used below: **COMPLETE AND VERIFIED**, **IMPLEMENTED BUT NOT FULLY VERIFIED**, **BLOCKED BY EXTERNAL DEPENDENCY**, **REQUIRES OWNER DECISION**, **NOT COMPLETE**.
 
@@ -12,20 +12,20 @@ Everything in this campaign that could be completed safely within the existing a
 
 ## 2. Branch and commit
 
-`claude/afit-market-phase-0-asm8xd`, HEAD at the time of the test runs below: `@@COMMIT@@`. New migrations (all additive, none destructive): `20261020000001_delivery_fee_collection_decision`, `20261020000002_age_gate_strict`, `20261020000003_bank_encryption`, `20261020000004_account_erasure`.
+`claude/afit-market-phase-0-asm8xd`, HEAD at the time of the test runs below: `0e1f24d`. New migrations (all additive, none destructive): `20261020000001_delivery_fee_collection_decision`, `20261020000002_age_gate_strict`, `20261020000003_bank_encryption`, `20261020000004_account_erasure`.
 
 ## 3. Features completed
 
-| Item | Status |
-| --- | --- |
-| Trusted checkout decision for delivery-fee collection (`direct_to_rider`) | COMPLETE AND VERIFIED (locally; OFF by default) |
-| Duplicate delivery-charge prevention | COMPLETE AND VERIFIED |
-| Strict 18+ declaration on public sign-up | COMPLETE AND VERIFIED (self-declaration only; age is not verified) |
-| Rider bank-number encryption at rest, backfill and rotation tooling | COMPLETE AND VERIFIED locally; key custody REQUIRES OWNER DECISION |
-| Account erasure that keeps financial records | COMPLETE AND VERIFIED; retention periods REQUIRE LEGAL ADVICE |
-| Rate limiting of the public receipt check | COMPLETE AND VERIFIED (shared database limiter) |
-| Colour system (provisional) applied via tokens, contrast-tested | COMPLETE AND VERIFIED |
-| Full-platform screenshots, inventory, gallery, PDF | COMPLETE AND VERIFIED |
+| Item                                                                      | Status                                                             |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Trusted checkout decision for delivery-fee collection (`direct_to_rider`) | COMPLETE AND VERIFIED (locally; OFF by default)                    |
+| Duplicate delivery-charge prevention                                      | COMPLETE AND VERIFIED                                              |
+| Strict 18+ declaration on public sign-up                                  | COMPLETE AND VERIFIED (self-declaration only; age is not verified) |
+| Rider bank-number encryption at rest, backfill and rotation tooling       | COMPLETE AND VERIFIED locally; key custody REQUIRES OWNER DECISION |
+| Account erasure that keeps financial records                              | COMPLETE AND VERIFIED; retention periods REQUIRE LEGAL ADVICE      |
+| Rate limiting of the public receipt check                                 | COMPLETE AND VERIFIED (shared database limiter)                    |
+| Colour system (provisional) applied via tokens, contrast-tested           | COMPLETE AND VERIFIED                                              |
+| Full-platform screenshots, inventory, gallery, PDF                        | COMPLETE AND VERIFIED                                              |
 
 ## 4. Rider-payment activation
 
@@ -79,11 +79,18 @@ See `artifacts/afit-market-ui-audit/page-inventory.md` (generated from the captu
 
 ## 15. Test results (exact, final code)
 
-@@TESTS@@
+| Suite                                                                   | Passed                                     | Failed | Skipped / blocked  |
+| ----------------------------------------------------------------------- | ------------------------------------------ | ------ | ------------------ |
+| Unit (`pnpm test`)                                                      | 301 (18 files)                             | 0      | 0                  |
+| Database (`pnpm test:db`, fresh reset)                                  | 371 (31 files)                             | 0      | 0                  |
+| Playwright, full suite, both projects (mobile 360 and desktop), one run | 196                                        | 0      | 0 skipped, 0 flaky |
+| format:check, lint, typecheck, build, check:secrets, `audit --prod`     | clean (run locally; see section 16 for CI) |        |                    |
+
+New in this stage: 7 crypto unit tests plus interop and palette tests; DB tests for the collection mode lifecycle (9), erasure (6) and updated payment, snapshot and age-gate tests; e2e `delivery-fee-checkout` (checkout integration through the real settings page, rate limit), extended `age-gate-api` and `delivery-fee`. One test defect (three-valued logic in the strict age gate) and one fixture assumption (order status for eligibility) were found by the tests and fixed in code, not by weakening assertions. The first DB run after a failed run can show a leftover-row failure in `notifications.test.ts`; always reset the database first (documented convention). Not run, not claimed: real Paystack, real notifications, real-device GPS, assistive-technology review, independent audit, restore drill on the new schema.
 
 ## 16. CI
 
-@@CI@@
+Checked from GitHub for the actual commits. `c31a45d` (all new functionality, colours, runbooks): both jobs **success** (checks, and db-and-e2e with the full database and Playwright suites). `cd7bea6`: job `db-and-e2e` **success** (full DB and Playwright suites on the code used for this report); job `checks` **failed at `format:check`** because the draft of this report was not Prettier-formatted, so the later steps of that job did not run in CI; I ran lint, typecheck, unit tests, build, secret scan and audit locally (all clean). That formatting defect is fixed in the commit that carries this report. The result for that commit is reported in the hand-over summary because it cannot be known inside the commit itself. Branch protection and CI settings were not touched; the only workflow edit is a stale comment.
 
 ## 17. Remaining external dependencies
 
