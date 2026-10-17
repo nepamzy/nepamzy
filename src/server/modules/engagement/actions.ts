@@ -191,6 +191,33 @@ export async function submitDataRequestAction(_p: ActionState, fd: FormData): Pr
     : failed('You already have an open request of this kind.')
 }
 
+export async function eraseAccountAction(_p: ActionState, fd: FormData): Promise<ActionState> {
+  const user = text(fd, 'userId', 40)
+  const request = text(fd, 'requestId', 40)
+  if (!uuid.safeParse(user).success) return failed('That account was not found.')
+  if (request && !uuid.safeParse(request).success) return failed('That request was not found.')
+  if (text(fd, 'confirm', 5) !== 'on')
+    return failed('Tick the box to confirm that you understand erasure cannot be undone.')
+  const g = await gate(ADMIN)
+  if ('state' in g) return g.state
+  const sb = await createSupabaseServerClient()
+  const { data, error } = await sb.rpc('admin_erase_account', {
+    p_user: user,
+    p_reason: text(fd, 'reason', 500),
+    p_data_request: request || null,
+  })
+  if (error) return dbFailed(error, 'Give a reason of at least 10 characters.')
+  revalidatePath('/admin/data-requests')
+  const r = data as { erased: boolean; blockers?: string[]; already_erased?: boolean }
+  if (!r.erased)
+    return failed(`Not erased yet. Unfinished business: ${(r.blockers ?? []).join(', ')}.`)
+  return done(
+    r.already_erased
+      ? 'Already erased earlier; nothing changed.'
+      : 'Account erased. Financial records were kept without personal details.',
+  )
+}
+
 export async function resolveDataRequestAction(
   _p: ActionState,
   fd: FormData,

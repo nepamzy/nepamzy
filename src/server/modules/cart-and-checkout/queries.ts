@@ -25,6 +25,8 @@ export type Quote = {
   platform_fee_kobo: number
   discount_kobo: number
   total_kobo: number
+  delivery_fee_collection?: 'paystack' | 'direct_to_rider'
+  delivery_fee_to_rider_kobo?: number
 }
 export type DeliveryPoint = { id: string; label: string; instructions: string | null }
 

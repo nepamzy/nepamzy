@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { FieldCryptoError, encryptField } from '@/server/security/field-crypto'
+import { logger } from '@/lib/logger'
 import { rateLimit } from '@/server/modules/identity-and-access/security'
 import type { AccessRequirement } from '@/server/modules/identity-and-access/policy'
 import {
@@ -28,17 +30,26 @@ export async function saveRiderBankDetailsAction(
   if ('state' in g) return g.state
   if (!(await rateLimit(`bank:${g.who.userId}`, 3600, 10)))
     return failed('Too many requests. Please try again later.')
+  const number = text(fd, 'account_number', 20).replace(/\s/g, '')
+  if (!/^[0-9]{10}$/.test(number)) return failed('The account number must be exactly 10 digits.')
+  let cipher: string
+  try {
+    cipher = encryptField(number)
+  } catch (e) {
+    // Fail closed: without a configured key the number is never stored in plain text.
+    logger.error('bank details not saved: encryption unavailable', {
+      code: e instanceof FieldCryptoError ? e.code : 'unknown',
+    })
+    return failed('Bank details cannot be saved right now. Please try again later.')
+  }
   const sb = await createSupabaseServerClient()
   const { error } = await sb.rpc('rider_set_bank_details', {
     p_bank: text(fd, 'bank_name', 60),
-    p_number: text(fd, 'account_number', 20),
+    p_cipher: cipher,
+    p_last4: number.slice(-4),
     p_name: text(fd, 'account_name', 80),
   })
-  if (error)
-    return dbFailed(
-      error,
-      'Check the bank name, the 10-digit account number and the account name, then try again.',
-    )
+  if (error) return dbFailed(error, 'Check the bank name and the account name, then try again.')
   revalidatePath('/rider/payments')
   return done(
     'Saved. Deliveries you have already completed keep the details they were opened with.',

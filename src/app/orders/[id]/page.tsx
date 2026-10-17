@@ -210,7 +210,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt>Delivery</dt>
+              <dt>
+                Delivery
+                {order.delivery_fee_collection === 'direct_to_rider' &&
+                  ' (paid directly to your rider, not part of the total below)'}
+              </dt>
               <dd>
                 <Money kobo={order.delivery_fee_kobo} />
               </dd>
@@ -224,7 +228,11 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
             <div className="flex justify-between text-lg font-bold">
-              <dt>Total</dt>
+              <dt>
+                {order.delivery_fee_collection === 'direct_to_rider'
+                  ? 'Total paid online'
+                  : 'Total'}
+              </dt>
               <dd>
                 <Money kobo={order.total_kobo} />
               </dd>

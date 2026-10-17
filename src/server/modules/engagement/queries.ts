@@ -140,6 +140,7 @@ export const EDITABLE_SETTINGS = [
   'delivery_proof_ttl_minutes',
   'refund_support_approval_limit_kobo',
   'refund_fee_policy',
+  'delivery_fee_collection_mode',
   'return_policy',
 ] as const
 
@@ -166,7 +167,15 @@ export type DataRequest = {
   created_at: string
   handled_at: string | null
 }
-export type AdminDataRequest = DataRequest & { detail: string | null; requester: string | null }
+export type AdminDataRequest = DataRequest & {
+  detail: string | null
+  requester: string | null
+  user_id: string
+  erased: boolean
+}
+export type ErasurePreview = { erased: boolean; blockers: string[] }
+export const erasurePreview = async (userId: string) =>
+  await rpc<ErasurePreview>('admin_erasure_preview', { p_user: userId })
 export const myDataRequests = async () => (await rpc<DataRequest[]>('my_data_requests')) ?? []
 export const adminDataRequests = async () =>
   (await rpc<AdminDataRequest[]>('admin_list_data_requests', { p_status: null })) ?? []

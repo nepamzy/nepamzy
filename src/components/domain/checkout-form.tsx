@@ -121,13 +121,21 @@ export function CheckoutForm({
             </dd>
           </div>
           <div className="flex justify-between">
-            <dt>Delivery</dt>
+            <dt>
+              Delivery
+              {q.delivery_fee_collection === 'direct_to_rider' &&
+                ' (you pay this to your rider by bank transfer after delivery; it is not part of the payment below)'}
+            </dt>
             <dd>
               <Money kobo={q.delivery_fee_kobo} />
             </dd>
           </div>
           <div className="flex justify-between text-lg font-bold">
-            <dt>Total</dt>
+            <dt>
+              {q.delivery_fee_collection === 'direct_to_rider'
+                ? 'Total to pay online now'
+                : 'Total'}
+            </dt>
             <dd data-testid="checkout-total">
               <Money kobo={q.total_kobo} />
             </dd>

@@ -12,6 +12,16 @@ export const metadata: Metadata = {
 
 export default async function VerifyReceipt({ params }: { params: Promise<{ token: string }> }) {
   const r = await verifyReceipt((await params).token)
+  if ('limited' in r)
+    return (
+      <div className="mx-auto max-w-xl px-4 py-8">
+        <PageHeader title="Check a receipt" />
+        <Card role="status">
+          <p className="font-semibold">Too many checks from this connection.</p>
+          <p className="text-sm text-muted">Please wait a few minutes and try again.</p>
+        </Card>
+      </div>
+    )
   return (
     <div className="mx-auto max-w-xl px-4 py-8">
       <PageHeader title="Check a receipt" />

@@ -49,7 +49,8 @@ export default async function AdminDeliveryFeePayments() {
                   <StatusBadge status={p.status} />
                 </p>
                 <p className="text-sm">
-                  {p.customer_name} → {p.rider_name} · {p.bank_name} · {p.account_number}
+                  {p.customer_name} → {p.rider_name} · {p.bank_name} ·{' '}
+                  {p.account_masked ?? '(erased)'}
                 </p>
                 <p className="text-sm text-muted">{DFP_STATUS[p.status].help}</p>
                 {p.customer_note && <p className="text-sm">Customer note: “{p.customer_note}”</p>}

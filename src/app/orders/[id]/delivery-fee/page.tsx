@@ -53,10 +53,18 @@ export default async function PayDeliveryFee({ params }: { params: Promise<{ id:
               <dt className="font-semibold">Account name</dt>
               <dd>{v.account_name}</dd>
               <dt className="font-semibold">Account number</dt>
-              <dd className="text-xl font-bold tracking-wider">{v.account_number}</dd>
+              <dd className="text-xl font-bold tracking-wider">
+                {v.account_number ?? (
+                  <span className="text-base font-medium text-warning-700">
+                    Not available right now. Please try again later or contact support.
+                  </span>
+                )}
+              </dd>
             </dl>
             <p className="flex flex-wrap items-center gap-2">
-              <CopyButton value={v.account_number} label="Copy account number" />
+              {v.account_number && (
+                <CopyButton value={v.account_number} label="Copy account number" />
+              )}
             </p>
             <p className="text-sm text-muted">
               Rider photo: not available yet. Payment evidence upload: not available yet; only your

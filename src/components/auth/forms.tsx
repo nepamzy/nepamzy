@@ -98,6 +98,11 @@ export function SignUpForm() {
         required
       />
       <Checkbox name="adult" label="I confirm that I am 18 years old or older." required />
+      <p className="text-sm text-muted">
+        AFIT Market is only for people aged 18 and over. This is your own confirmation: we record
+        that you made it, but we do not check your age or identity. The terms and privacy notice are
+        drafts awaiting review and are not published yet.
+      </p>
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? 'Creating account…' : 'Create account'}
       </Button>

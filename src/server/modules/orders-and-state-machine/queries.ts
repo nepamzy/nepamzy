@@ -19,6 +19,7 @@ export type OrderRow = {
   status: string
   items_total_kobo: number
   delivery_fee_kobo: number
+  delivery_fee_collection: 'paystack' | 'direct_to_rider'
   platform_fee_kobo: number
   discount_kobo: number
   total_kobo: number
@@ -42,7 +43,7 @@ export type HistoryRow = {
 }
 
 const COLS =
-  'id, order_number, customer_id, vendor_id, vendor_name, fulfilment, delivery_point_label, pickup_location_snapshot, prep_minutes_snapshot, status, items_total_kobo, delivery_fee_kobo, platform_fee_kobo, discount_kobo, total_kobo, expires_at, created_at'
+  'id, order_number, customer_id, vendor_id, vendor_name, fulfilment, delivery_point_label, pickup_location_snapshot, prep_minutes_snapshot, status, items_total_kobo, delivery_fee_kobo, delivery_fee_collection, platform_fee_kobo, discount_kobo, total_kobo, expires_at, created_at'
 
 /** RLS decides what is visible: a customer gets their own orders; a vendor member its vendor's; staff all. */
 export async function listOrders(

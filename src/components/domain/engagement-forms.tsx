@@ -12,6 +12,7 @@ import {
   requeueNotificationAction,
   submitDataRequestAction,
   resolveDataRequestAction,
+  eraseAccountAction,
 } from '@/server/modules/engagement/actions'
 
 export function ReviewForm({ orderId }: { orderId: string }) {
@@ -227,6 +228,33 @@ export function ResolveDataRequestForm({ requestId }: { requestId: string }) {
         required
         minLength={10}
         maxLength={500}
+      />
+    </ActionForm>
+  )
+}
+
+export function EraseAccountForm({ userId, requestId }: { userId: string; requestId: string }) {
+  return (
+    <ActionForm
+      action={eraseAccountAction}
+      submitLabel="Erase this account"
+      pendingLabel="Erasing…"
+      className="space-y-2 border-t border-line pt-3"
+    >
+      <input type="hidden" name="userId" value={userId} />
+      <input type="hidden" name="requestId" value={requestId} />
+      <Textarea
+        label="Reason for erasing (at least 10 characters, recorded)"
+        name="reason"
+        required
+        minLength={10}
+        maxLength={500}
+        rows={2}
+      />
+      <Checkbox
+        name="confirm"
+        label="I understand: personal details are removed, the person can never sign in again, and payment and order records are kept without their details. This cannot be undone."
+        required
       />
     </ActionForm>
   )

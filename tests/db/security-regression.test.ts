@@ -162,6 +162,7 @@ describe('append-only records', () => {
       ).rows.map((r) => `${r.relname}:${r.blocks_update ? 'U' : '-'}${r.blocks_delete ? 'D' : '-'}`)
       expect(rows).toMatchInlineSnapshot(`
         [
+          "account_erasures:UD",
           "audit_events:UD",
           "case_events:UD",
           "case_statements:UD",

@@ -41,6 +41,8 @@ async function directOrder(c: PoolClient, o: { complete?: boolean; marker?: bool
     await c.query(`alter table public.orders enable trigger orders_collection_guard`)
   }
   await payOrder(c, AAL2(cust), order)
+  if (o.complete !== false)
+    await c.query(`update public.orders set status='COMPLETED' where id=$1`, [order])
   const rider = await mkRider(c)
   await c.query(`update public.profiles set display_name='Ada Customer' where id=$1`, [cust])
   const assignment = (
@@ -57,10 +59,13 @@ async function directOrder(c: PoolClient, o: { complete?: boolean; marker?: bool
   return { ...shop, cust, order, rider: rider.id, assignment }
 }
 
-const bank = (c: PoolClient, who: string, name = 'Zenith Bank', number = '0123456789') =>
-  callJson(c, AAL2(who), `select public.rider_set_bank_details($1,$2,$3) r`, [
+/** Opaque cipher strings in the real format (the database never decrypts; encryption is the app's job). */
+const cipherOf = (tag: string) => `v1.t1.AAAAAAAAAAAAAAAA.${tag.padEnd(30, 'x').slice(0, 30)}`
+const bank = (c: PoolClient, who: string, name = 'Zenith Bank', tag = 'first', last4 = '6789') =>
+  callJson(c, AAL2(who), `select public.rider_set_bank_details($1,$2,$3,$4) r`, [
     name,
-    number,
+    cipherOf(tag),
+    last4,
     'Test Rider',
   ])
 const open = (c: PoolClient, who: string, order: string) =>
@@ -83,23 +88,46 @@ describe('rider bank details', () => {
       for (const who of [AAL2(plain), AAL1(r.id), null])
         expect(
           (
-            await callFails(c, who, `select public.rider_set_bank_details($1,$2,$3) r`, [
+            await callFails(c, who, `select public.rider_set_bank_details($1,$2,$3,$4) r`, [
               'Zenith Bank',
-              '0123456789',
+              cipherOf('x'),
+              '6789',
               'X Name',
             ])
           ).code,
         ).toBe(PRIV_DENIED)
-      for (const bad of ['123', '12345678901', 'abcdefghij', '0123-45678'])
+      // the database refuses anything that is not a cipher string (a plain account number can never be stored through the API)
+      for (const bad of ['0123456789', '123', 'v1.t1.short.abc', 'plain text'])
         expect(
           (
-            await callFails(c, AAL2(r.id), `select public.rider_set_bank_details($1,$2,$3) r`, [
+            await callFails(c, AAL2(r.id), `select public.rider_set_bank_details($1,$2,$3,$4) r`, [
               'Zenith Bank',
               bad,
+              '6789',
               'Test Rider',
             ])
           ).code,
         ).toBe('22023')
+      expect(
+        (
+          await callFails(c, AAL2(r.id), `select public.rider_set_bank_details($1,$2,$3,$4) r`, [
+            'Zenith Bank',
+            cipherOf('x'),
+            '67890',
+            'Test Rider',
+          ])
+        ).code,
+      ).toBe('22023')
+      // the old plaintext function no longer exists
+      expect(
+        (
+          await callFails(c, AAL2(r.id), `select public.rider_set_bank_details($1,$2,$3) r`, [
+            'Zenith Bank',
+            '0123456789',
+            'Test Rider',
+          ])
+        ).code,
+      ).toBe('42883')
     })
   })
 
@@ -136,22 +164,24 @@ describe('opening the payment: only when records establish the fee was excluded 
       await bank(c, o.rider)
       const p = (await open(c, o.cust, o.order)) as {
         id: string
-        account_number: string
+        account_cipher: string
+        account_masked: string
         amount_kobo: number
         status: string
       }
       expect(p).toMatchObject({
         status: 'awaiting_transfer',
-        account_number: '0123456789',
+        account_cipher: cipherOf('first'),
+        account_masked: '******6789',
         amount_kobo: 50000,
       })
       expect(((await open(c, o.cust, o.order)) as { id: string }).id).toBe(p.id)
-      await bank(c, o.rider, 'Other Bank', '9999999999')
+      await bank(c, o.rider, 'Other Bank', 'second', '1111')
       const again = (await view(c, o.cust, o.order)) as {
         bank_name: string
-        account_number: string
+        account_cipher: string
       }
-      expect(again).toMatchObject({ bank_name: 'Zenith Bank', account_number: '0123456789' })
+      expect(again).toMatchObject({ bank_name: 'Zenith Bank', account_cipher: cipherOf('first') })
       expect(
         await count(c, `select count(*) n from public.delivery_fee_payments where order_id=$1`, [
           o.order,
@@ -202,6 +232,7 @@ describe('opening the payment: only when records establish the fee was excluded 
         `update public.delivery_assignments set status='completed', completed_at=now() where id=$1`,
         [o.assignment],
       )
+      await c.query(`update public.orders set status='COMPLETED' where id=$1`, [o.order])
       await c.query(`delete from public.rider_bank_accounts where rider_id=$1`, [o.rider])
       expect(await view(c, o.cust, o.order)).toMatchObject({ state: 'rider_details_missing' })
       expect(await open(c, o.cust, o.order)).toEqual({
@@ -529,9 +560,10 @@ describe('existing money paths are unchanged', () => {
       await bank(c, o.rider)
       await open(c, o.cust, o.order)
       const admin = await staff(c, 'support_agent')
-      const v = (await view(c, admin, o.order)) as { account_number: string; viewer: string }
+      const v = (await view(c, admin, o.order)) as { account_masked: string; viewer: string }
       expect(v.viewer).toBe('staff')
-      expect(v.account_number).toBe('******6789')
+      expect(v.account_masked).toBe('******6789')
+      expect(JSON.stringify(v)).not.toContain(cipherOf('first'))
       const other = await createUser(c, 'o')
       expect(
         (

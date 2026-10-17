@@ -3,12 +3,22 @@ import { ResolveDataRequestForm } from '@/components/domain/engagement-forms'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/states'
-import { adminDataRequests } from '@/server/modules/engagement/queries'
+import { EraseAccountForm } from '@/components/domain/engagement-forms'
+import { adminDataRequests, erasurePreview } from '@/server/modules/engagement/queries'
 
 export const metadata: Metadata = { title: 'Data requests' }
 
 export default async function AdminDataRequests() {
   const rows = await adminDataRequests()
+  const erasable = rows.filter(
+    (r) =>
+      (r.kind === 'deletion' || r.kind === 'closure') &&
+      !r.erased &&
+      ['open', 'in_progress'].includes(r.status),
+  )
+  const previews = new Map(
+    await Promise.all(erasable.map(async (r) => [r.id, await erasurePreview(r.user_id)] as const)),
+  )
   return (
     <>
       <PageHeader
@@ -33,6 +43,19 @@ export default async function AdminDataRequests() {
                 ) : (
                   <p className="text-sm">Reply: {r.response_note}</p>
                 )}
+                {r.erased && <Badge tone="success">Account erased (financial records kept)</Badge>}
+                {previews.has(r.id) &&
+                  (() => {
+                    const pv = previews.get(r.id)
+                    return pv && pv.blockers.length > 0 ? (
+                      <p className="text-sm text-warning-700">
+                        Cannot erase yet. Unfinished business: {pv.blockers.join(', ')}. Finish or
+                        resolve it first.
+                      </p>
+                    ) : (
+                      <EraseAccountForm userId={r.user_id} requestId={r.id} />
+                    )
+                  })()}
               </Card>
             </li>
           ))}
