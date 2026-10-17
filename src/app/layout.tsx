@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   applicationName: 'AFIT Market',
   robots: { index: false, follow: false }, // pre-launch: not for search engines
 }
-export const viewport: Viewport = { themeColor: '#0b5551', width: 'device-width', initialScale: 1 }
+export const viewport: Viewport = { themeColor: '#174a9c', width: 'device-width', initialScale: 1 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   await connection() // CSP nonces require per-request (dynamic) rendering

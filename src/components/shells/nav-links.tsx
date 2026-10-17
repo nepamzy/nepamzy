@@ -18,7 +18,9 @@ export function SidebarNav({ items }: { items: NavItem[] }) {
             aria-current={active ? 'page' : undefined}
             className={cn(
               'touch-target flex items-center gap-3 rounded-[var(--radius-control)] px-3 py-2.5 font-semibold',
-              active ? 'bg-brand-700 text-white' : 'text-ink hover:bg-brand-50',
+              active
+                ? 'bg-brand-700 text-white shadow-[inset_4px_0_0_var(--color-gold-400)]'
+                : 'text-ink hover:bg-brand-50',
             )}
           >
             <span aria-hidden="true">{i.icon}</span>
@@ -44,7 +46,9 @@ export function BottomNav({ items, moreHref }: { items: NavItem[]; moreHref?: st
         aria-current={active ? 'page' : undefined}
         className={cn(
           'touch-target flex flex-col items-center justify-center gap-0.5 px-1 py-2 text-xs font-semibold',
-          active ? 'text-brand-800' : 'text-muted',
+          active
+            ? 'border-t-4 border-gold-400 text-brand-800'
+            : 'border-t-4 border-transparent text-muted',
         )}
       >
         <span aria-hidden="true" className="text-lg leading-none">

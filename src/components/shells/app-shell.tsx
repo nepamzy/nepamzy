@@ -20,7 +20,7 @@ export function AppShell({
 }) {
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
-      <aside className="hidden border-r border-line bg-card p-4 md:block">
+      <aside className="hidden border-r border-line border-t-4 border-t-gold-400 bg-card p-4 md:block">
         <Link href="/" className="mb-6 block text-xl font-extrabold text-brand-800">
           AFIT Market
         </Link>
@@ -28,7 +28,7 @@ export function AppShell({
         <SidebarNav items={items} />
       </aside>
       <div className="min-w-0">
-        <header className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-line bg-card px-4 py-3 sm:gap-x-3">
+        <header className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-line border-t-4 border-t-gold-400 bg-card px-4 py-3 sm:gap-x-3">
           <Link
             href="/"
             className="text-base font-extrabold whitespace-nowrap text-brand-800 sm:text-lg md:hidden"

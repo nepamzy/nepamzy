@@ -26,6 +26,8 @@ test('a raw sign-up with adult_declared false, or a non-boolean look-alike, is r
     ['false', false],
     ['string-no', 'no'],
     ['number', 1],
+    ['string-true', 'true'],
+    ['array', [true]],
   ] as const) {
     const email = uniqueEmail(`raw-${label}`)
     const r = await anon().auth.signUp({

@@ -5,7 +5,7 @@ import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
 export async function PublicHeader() {
   const who = await loadPrincipal()
   return (
-    <header className="border-b border-line bg-card">
+    <header className="border-b border-line border-t-4 border-t-gold-400 bg-card">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="text-xl font-extrabold text-brand-800">
           AFIT Market

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { execSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import { ADMIN_NAV, CUSTOMER_NAV, VENDOR_NAV } from '@/components/shells/nav-config'
 
@@ -30,6 +31,34 @@ describe('control borders meet 3:1 (WCAG 1.4.11) on every background they sit on
     expect(ratio(token('ink'), token('surface'))).toBeGreaterThanOrEqual(4.5)
     expect(ratio(token('muted'), '#ffffff')).toBeGreaterThanOrEqual(4.5)
     expect(ratio('#ffffff', token('brand-700'))).toBeGreaterThanOrEqual(4.5)
+  })
+  it('provisional palette (blue / gold / red): text and status pairs meet 4.5:1, decorative gold stays out of text', () => {
+    expect(ratio('#ffffff', token('brand-800'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('brand-700'), token('brand-50'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('accent-700'), '#ffffff')).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('accent-600'), token('accent-50'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('warning-700'), token('warning-50'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('danger-700'), token('danger-50'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('success-700'), token('success-50'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('info-700'), token('info-50'))).toBeGreaterThanOrEqual(4.5)
+    // gold is a fill: dark ink on gold passes, so any label placed on it is readable
+    expect(ratio(token('ink'), token('gold-400'))).toBeGreaterThanOrEqual(4.5)
+    // keyboard focus ring (brand-600) is visible against the page surface and white
+    expect(ratio(token('brand-600'), token('surface'))).toBeGreaterThanOrEqual(3)
+  })
+  it('no component hard-codes the old teal or any raw hex colour outside the token file and the signature pad', () => {
+    const files = execSync(
+      "grep -rlE '#[0-9a-fA-F]{6}' src --include=*.tsx --include=*.ts --include=*.css",
+      { encoding: 'utf8' },
+    )
+      .split('\n')
+      .filter(Boolean)
+    expect(files.sort()).toEqual([
+      'src/app/globals.css',
+      'src/app/layout.tsx',
+      'src/app/manifest.ts',
+      'src/components/domain/signature-pad.tsx',
+    ])
   })
 })
 

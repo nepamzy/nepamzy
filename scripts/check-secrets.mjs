@@ -45,11 +45,20 @@ const secrets = []
 for (const file of ['.env.local', '.env']) {
   if (!existsSync(file)) continue
   for (const line of readFileSync(file, 'utf8').split('\n')) {
-    const m = line.match(/^(SUPABASE_SERVICE_ROLE_KEY|DATABASE_URL)=(.+)$/)
-    if (m?.[2]) secrets.push(m[2].trim())
+    const m = line.match(
+      /^(SUPABASE_SERVICE_ROLE_KEY|DATABASE_URL|PICKUP_CODE_SECRET|JOBS_SECRET|BANK_DATA_KEYS)=(.+)$/,
+    )
+    if (m?.[2]) {
+      if (m[1] === 'BANK_DATA_KEYS')
+        // "id:base64,id2:base64": each key value is a secret on its own
+        for (const part of m[2].split(',')) secrets.push(part.slice(part.indexOf(':') + 1).trim())
+      else secrets.push(m[2].trim())
+    }
   }
 }
 if (process.env.SUPABASE_SERVICE_ROLE_KEY) secrets.push(process.env.SUPABASE_SERVICE_ROLE_KEY)
+for (const part of (process.env.BANK_DATA_KEYS ?? '').split(','))
+  if (part.includes(':')) secrets.push(part.slice(part.indexOf(':') + 1).trim())
 
 let scanned = 0
 if (existsSync('.next/static')) {

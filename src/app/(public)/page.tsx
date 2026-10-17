@@ -21,6 +21,7 @@ export default async function Home() {
           <h1 className="max-w-xl text-3xl font-extrabold tracking-tight sm:text-4xl">
             Campus food and shops, one tap away.
           </h1>
+          <span aria-hidden="true" className="mt-3 block h-1 w-16 rounded bg-gold-400" />
           <p className="mt-3 max-w-xl text-lg text-brand-100">
             Order from vendors on AFIT Market. Collect it yourself or have it delivered.
           </p>
