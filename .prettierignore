@@ -9,3 +9,4 @@ test-results
 # raw capture logs from the visual audit (machine generated)
 docs/reports/afit-market-visual-audit/*.json
 docs/reports/afit-market-visual-audit/*.jsonl
+artifacts/

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import {
   BANK_NOTE,
-  DFP_STATUS,
+  statusHelp,
   History,
   ReceiptCard,
   StatusBadge,
@@ -63,7 +63,7 @@ export default async function RiderPayments() {
                     <strong>{p.order_number}</strong> · <Money kobo={p.amount_kobo} /> ·{' '}
                     <StatusBadge status={p.status} />
                   </p>
-                  <p className="text-sm text-muted">{DFP_STATUS[p.status].help}</p>
+                  <p className="text-sm text-muted">{statusHelp(p.status, 'rider')}</p>
                   {p.status === 'customer_reported' && (
                     <>
                       <p className="font-medium">

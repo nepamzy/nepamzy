@@ -1,7 +1,7 @@
 // Builds the review material for artifacts/afit-market-ui-audit from the capture inventories (never from guesses):
 //   gallery.html, page-inventory.md, contact sheets (PNG) and a PDF review report.
 //   node scripts/build-ui-audit-gallery.mjs
-import { existsSync, readFileSync, writeFileSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync, statSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 
@@ -15,12 +15,18 @@ const maskId = (s) =>
   s
     .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, '[id]')
     .replace(/\/receipts\/[0-9a-f]{48}/, '/receipts/[token]')
+    .replace(/\/vendors\/shop-[a-z0-9]{6}/, '/vendors/[shop]')
 const esc = (s) =>
   String(s).replace(
     /[&<>"]/g,
     (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
   )
-const key = (r) => `${r.role}/${(r.file ?? '').split('/').pop()}`
+// file names carry per-run random parts (shop slug, receipt token): normalise them so before/after pair up
+const norm = (f) =>
+  f
+    .replace(/receipts-[0-9a-f]{48}/, 'receipts-TOKEN')
+    .replace(/vendors-shop-[a-z0-9]{6}/, 'vendors-SHOP')
+const key = (r) => `${r.role}/${norm((r.file ?? '').split('/').pop())}`
 
 const data = {}
 for (const phase of ['before', 'after'])
@@ -104,10 +110,10 @@ for (const phase of ['before', 'after'])
     const list = keys.filter((k) => data[`${phase}/${vp}`].get(k)?.file)
     const w = vp === 'desktop' ? 150 : 70
     const cell = (k) =>
-      `<div style="width:${w}px"><img style="width:100%;height:${vp === 'desktop' ? 100 : 130}px;object-fit:cover;object-position:top;border:1px solid #cdd6e4" src="${esc(data[`${phase}/${vp}`].get(k).file.split('/').slice(1).join('/'))}"><div style="font:8px system-ui;overflow:hidden;height:22px">${esc(k.replace(/__/g, ' / ').replace('.png', ''))}</div></div>`
+      `<div style="width:${w}px"><img style="width:100%;height:${vp === 'desktop' ? 100 : 130}px;object-fit:cover;object-position:top;border:1px solid #cdd6e4" src="${esc(rel(data[`${phase}/${vp}`].get(k).file))}"><div style="font:8px system-ui;overflow:hidden;height:22px">${esc(k.replace(/__/g, ' / ').replace('.png', ''))}</div></div>`
     const sheetHtml = `<!doctype html><body style="margin:8px;background:#fff"><h3 style="font:bold 14px system-ui">${phase} / ${vp} (${list.length} pages)</h3><div style="display:flex;flex-wrap:wrap;gap:6px">${list.map(cell).join('')}</div>`
     const base = join(ROOT, `_sheet-${phase}-${vp}.html`)
-    writeFileSync(base, sheetHtml.replaceAll('src="', `src="${phase}/${vp}/`))
+    writeFileSync(base, sheetHtml)
     await pg.goto('file://' + join(process.cwd(), base))
     await pg.waitForLoadState('load')
     const out = join(ROOT, `contact-sheet-${phase}-${vp}.png`)
@@ -132,6 +138,11 @@ await pg.goto('file://' + join(process.cwd(), ROOT, '_review.html'))
 await pg.waitForLoadState('load')
 await pg.pdf({ path: join(ROOT, 'visual-review-report.pdf'), format: 'A4', printBackground: true })
 await browser.close()
+for (const f of [
+  '_review.html',
+  ...['before', 'after'].flatMap((p) => ['desktop', 'mobile'].map((v) => `_sheet-${p}-${v}.html`)),
+])
+  rmSync(join(ROOT, f), { force: true }) // temporary render pages
 for (const p of [
   'gallery.html',
   'page-inventory.md',

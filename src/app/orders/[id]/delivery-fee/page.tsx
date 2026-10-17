@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
   BANK_NOTE,
-  DFP_STATUS,
+  statusHelp,
   History,
   ReceiptCard,
   StatusBadge,
@@ -37,7 +37,7 @@ export default async function PayDeliveryFee({ params }: { params: Promise<{ id:
           <Card className="space-y-3">
             <p className="flex flex-wrap items-center gap-2">
               <StatusBadge status={v.status} />
-              <span className="text-sm text-muted">{DFP_STATUS[v.status].help}</span>
+              <span className="text-sm text-muted">{statusHelp(v.status, 'customer')}</span>
             </p>
             <dl className="grid gap-x-4 gap-y-1 sm:grid-cols-2">
               <dt className="font-semibold">Order</dt>

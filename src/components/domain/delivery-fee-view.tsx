@@ -39,6 +39,24 @@ export const DFP_STATUS: Record<DfpPayment['status'], { label: string; tone: Ton
     },
   }
 
+/** Wording from the point of view of the person reading (the stored help text is neutral, third person). */
+export function statusHelp(status: DfpPayment['status'], viewer: 'customer' | 'rider' | 'staff') {
+  if (viewer === 'customer') {
+    if (status === 'awaiting_transfer') return 'You have not yet said that you made the transfer.'
+    if (status === 'customer_reported')
+      return 'You said you sent it. Waiting for the rider to check their bank account and confirm.'
+    if (status === 'rider_disputed')
+      return 'The rider says the money did not arrive. An administrator will review it.'
+  }
+  if (viewer === 'rider') {
+    if (status === 'awaiting_transfer')
+      return 'The customer has not yet said they made the transfer.'
+    if (status === 'customer_reported')
+      return 'The customer says they sent it. Check your own bank account before answering.'
+  }
+  return DFP_STATUS[status].help
+}
+
 export const BANK_NOTE =
   'AFIT Market does not hold this money and cannot check your bank. The customer and the rider each state what they did; that is recorded, but it is not a bank statement or independent proof of payment.'
 
