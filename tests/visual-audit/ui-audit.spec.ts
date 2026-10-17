@@ -24,8 +24,10 @@ import {
  * It never changes the design, never bypasses authorisation (each role signs in through the real UI incl. TOTP), and records
  * every attempt - including failures - in inventory-<viewport>.jsonl.
  */
-const PHASE = process.env.UI_AUDIT_PHASE === 'after' ? 'after' : 'before'
-const ROOT = 'artifacts/afit-market-ui-audit'
+const PHASE = /^[a-z0-9-]+$/.test(process.env.UI_AUDIT_PHASE ?? '')
+  ? process.env.UI_AUDIT_PHASE!
+  : 'before'
+const ROOT = process.env.UI_AUDIT_ROOT ?? 'artifacts/afit-market-ui-audit'
 let OUT = ROOT
 test.describe.configure({ mode: 'serial' })
 test.setTimeout(1_500_000)

@@ -45,17 +45,64 @@ export type HistoryRow = {
 const COLS =
   'id, order_number, customer_id, vendor_id, vendor_name, fulfilment, delivery_point_label, pickup_location_snapshot, prep_minutes_snapshot, status, items_total_kobo, delivery_fee_kobo, delivery_fee_collection, platform_fee_kobo, discount_kobo, total_kobo, expires_at, created_at'
 
+/** Orders that no longer need anyone's attention (everything else is "unfinished"). */
+export const FINISHED_ORDER_STATUSES = [
+  'PENDING_PAYMENT',
+  'COMPLETED',
+  'CANCELLED',
+  'REFUNDED',
+  'PARTIALLY_REFUNDED',
+  'RETURNED_TO_VENDOR',
+] as const
+
+export type ListOrdersOpts = {
+  vendorId?: string
+  /** Newest first, at most this many (default 50). Ignored when `page` is given. */
+  limit?: number
+  /** 1-based page of `pageSize` rows (default 25). With `page`, `hasMore` is reported by listOrdersPage. */
+  page?: number
+  pageSize?: number
+  /** Only these statuses / everything except these statuses. */
+  finished?: boolean
+  /** Only these exact statuses. */
+  statuses?: string[]
+  oldestFirst?: boolean
+}
+
 /** RLS decides what is visible: a customer gets their own orders; a vendor member its vendor's; staff all. */
-export async function listOrders(
-  opts: { vendorId?: string; limit?: number } = {},
-): Promise<OrderRow[]> {
+export async function listOrdersPage(
+  opts: ListOrdersOpts = {},
+): Promise<{ orders: OrderRow[]; hasMore: boolean }> {
+  const sb = await createSupabaseServerClient()
+  const pageSize = opts.pageSize ?? 25
+  const page = Math.max(1, Math.min(opts.page ?? 1, 1000))
+  let q = sb
+    .from('orders')
+    .select(COLS)
+    .order('created_at', { ascending: Boolean(opts.oldestFirst) })
+  if (opts.vendorId) q = q.eq('vendor_id', opts.vendorId)
+  const finished = `(${FINISHED_ORDER_STATUSES.join(',')})`
+  if (opts.statuses) q = q.in('status', opts.statuses)
+  if (opts.finished === true) q = q.in('status', [...FINISHED_ORDER_STATUSES])
+  if (opts.finished === false) q = q.not('status', 'in', finished)
+  const from = (page - 1) * pageSize
+  const { data } = await q.range(from, from + pageSize) // one extra row tells whether another page exists
+  const rows = (data as OrderRow[] | null) ?? []
+  return { orders: rows.slice(0, pageSize), hasMore: rows.length > pageSize }
+}
+
+export async function listOrders(opts: ListOrdersOpts = {}): Promise<OrderRow[]> {
+  if (opts.page) return (await listOrdersPage(opts)).orders
   const sb = await createSupabaseServerClient()
   let q = sb
     .from('orders')
     .select(COLS)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: Boolean(opts.oldestFirst) })
     .limit(opts.limit ?? 50)
   if (opts.vendorId) q = q.eq('vendor_id', opts.vendorId)
+  if (opts.statuses) q = q.in('status', opts.statuses)
+  if (opts.finished === true) q = q.in('status', [...FINISHED_ORDER_STATUSES])
+  if (opts.finished === false) q = q.not('status', 'in', `(${FINISHED_ORDER_STATUSES.join(',')})`)
   const { data } = await q
   return (data as OrderRow[] | null) ?? []
 }

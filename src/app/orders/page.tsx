@@ -5,16 +5,23 @@ import { ButtonLink } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
-import { listOrders } from '@/server/modules/orders-and-state-machine/queries'
+import { Pager } from '@/components/ui/pager'
+import { listOrdersPage } from '@/server/modules/orders-and-state-machine/queries'
 
 export const metadata: Metadata = { title: 'My orders' }
 
-export default async function OrdersPage() {
-  const orders = await listOrders()
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>
+}) {
+  const n = Number((await searchParams).page)
+  const page = Number.isInteger(n) && n >= 1 ? n : 1
+  const { orders, hasMore } = await listOrdersPage({ page, pageSize: 25 })
   return (
     <>
       <PageHeader title="My orders" />
-      {orders.length === 0 ? (
+      {orders.length === 0 && page === 1 ? (
         <EmptyState
           title="No orders yet"
           action={<ButtonLink href="/vendors">Browse vendors</ButtonLink>}
@@ -47,6 +54,10 @@ export default async function OrdersPage() {
           ))}
         </ul>
       )}
+      {orders.length === 0 && page > 1 && (
+        <p className="text-muted">There are no orders on this page.</p>
+      )}
+      <Pager basePath="/orders" page={page} hasMore={hasMore} />
     </>
   )
 }

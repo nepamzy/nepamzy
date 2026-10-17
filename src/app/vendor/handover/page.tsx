@@ -14,9 +14,12 @@ export const metadata: Metadata = { title: 'Confirm handover' }
 export default async function Handover() {
   const vendor = await getMyVendor()
   const waiting = vendor
-    ? (await listOrders({ vendorId: vendor.id })).filter(
-        (o) => o.status === 'PICKUP_AWAITING_HANDOVER',
-      )
+    ? await listOrders({
+        vendorId: vendor.id,
+        statuses: ['PICKUP_AWAITING_HANDOVER'],
+        oldestFirst: true,
+        limit: 200,
+      })
     : []
   const typedEnabled = await typedSignatureEnabled()
   const riderPickups = vendor ? await listPendingRiderPickups() : []

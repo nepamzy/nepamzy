@@ -23,13 +23,12 @@ export default async function VendorHome() {
         You have the vendor role but no shop is linked to this account. Contact support.
       </EmptyState>
     )
-  const [orders, products, shop] = await Promise.all([
-    listOrders({ vendorId: vendor.id, limit: 200 }),
+  const [paid, unpaid, products, shop] = await Promise.all([
+    listOrders({ vendorId: vendor.id, statuses: ['PAID'], limit: 1000 }),
+    listOrders({ vendorId: vendor.id, statuses: ['PENDING_PAYMENT'], limit: 1000 }),
     listProducts(vendor.id),
     getShop(vendor.id),
   ])
-  const paid = orders.filter((o) => o.status === 'PAID')
-  const unpaid = orders.filter((o) => o.status === 'PENDING_PAYMENT')
   const closed = shop.vendor?.temporarily_closed ?? false
   return (
     <>
