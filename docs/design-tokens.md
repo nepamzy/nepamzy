@@ -1,0 +1,17 @@
+# Colour system (PROVISIONAL)
+
+**Status: provisional working palette. These hex codes are our own choices. They are NOT official AFIT colours, NOT approved branding, and no AFIT crest or logo is used.** AFIT has not confirmed brand colours, and the earlier audit could not read AFIT's site from the sandbox. If AFIT supplies an official specification, change the tokens in `src/app/globals.css` (one file) and re-run `tests/unit/visual-fixes.test.ts`.
+
+Direction (from the earlier visual review): blue, gold/yellow, red and white. Replaced: the previous teal `#0b5551` and burnt-orange accent.
+
+| Role                   | Token                                                                   | Hex                                                                   | Used for                                                                                    |
+| ---------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Primary blue (brand)   | `brand-50 / 100 / 600 / 700 / 800`                                      | `#e9f0fc / #d2e1f8 / #1d57b8 / #174a9c / #10346f`                     | buttons, links, active navigation, focus ring (600), hero (800)                             |
+| Gold                   | `gold-400`                                                              | `#f4b400`                                                             | decorative only: header top rule, active-navigation marker, hero rule. Never text on white. |
+| Gold text pair         | `accent-50 / 600 / 700`, `warning-50 / 700`                             | `#fff4cf / #8f6400 / #7a5400`                                         | cautions and highlighted notes (dark gold on pale gold)                                     |
+| Red                    | `danger-50 / 700 / 800`                                                 | `#fdebe9 / #a3211a / #82170f`                                         | errors, destructive actions, disputed or failed states                                      |
+| White and neutrals     | `card`, `surface`, `line`, `line-strong`, `ink`, `muted`, `neutral-100` | `#ffffff / #f6f8fc / #cdd6e4 / #70819c / #131c2b / #44536a / #e6ebf3` | cards, page background, borders, text                                                       |
+| Success (semantic)     | `success-50 / 700`                                                      | `#e5f4ea / #17673a`                                                   | confirmed and completed states                                                              |
+| Information (semantic) | `info-50 / 700`                                                         | `#e6eefa / #1a4a8a`                                                   | neutral information                                                                         |
+
+Rules kept: every text pair is at least 4.5:1 and control borders at least 3:1 (tested). Status is never shown by colour alone (each status badge carries a text label; the active navigation item has `aria-current` and a shape marker). All colours come from tokens: a unit test fails if a component hard-codes a hex colour (the signature pad canvas is the one exception). The same palette is used by every role's shell, public pages, forms, alerts, receipts and payment screens.

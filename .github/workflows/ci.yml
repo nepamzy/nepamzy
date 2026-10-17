@@ -1,0 +1,50 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      # Scans tracked files and the client bundle for secrets (no secrets are needed or provided here).
+      - run: pnpm check:secrets
+      # Production dependencies must stay free of known advisories (the one open advisory is in a development-only chain, K62).
+      - run: pnpm audit --prod
+  # Database + browser suites need Docker (the local Supabase stack). This job runs on every push and pull request and has been
+  # green on recent commits; local runs are recorded in the stage reports.
+  db-and-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:start
+      - run: bash scripts/make-env-local.sh
+      - run: pnpm test:db
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results
+          retention-days: 7

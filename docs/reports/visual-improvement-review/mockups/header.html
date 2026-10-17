@@ -1,0 +1,39 @@
+<!doctype html><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><link
+  rel="stylesheet"
+  href="_tokens.css"
+/><title>Header mockup</title>
+<style>
+  .cur .word {
+  }
+  .prop .word {
+    white-space: nowrap;
+    font-size: 17px;
+  }
+  .prop .hdr-right {
+    gap: 8px;
+  }
+  .prop .btn {
+    white-space: nowrap;
+    padding: 6px 10px;
+  }
+  .prop a.n {
+    white-space: nowrap;
+    padding: 0 4px;
+  }
+  .cur .hdr-right {
+    gap: 12px;
+  }
+</style>
+<div class="label" id="lab"></div>
+<div id="root"></div>
+<script>
+  const q = new URLSearchParams(location.search),
+    v = q.get('v') || 'cur'
+  document.getElementById('lab').textContent =
+    'MOCKUP (static HTML, not the application): ' +
+    (v === 'cur'
+      ? 'CURRENT header layout (as audited)'
+      : 'PROPOSED: no word wrapping, tighter gap, same elements')
+  document.getElementById('root').innerHTML =
+    `<div class=${v}><header class=app><span class=word>AFIT Market</span><div class=hdr-right><a class=n href=#>Notifications</a><button class=btn>Sign out</button></div></header></div>`
+</script>

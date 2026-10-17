@@ -1,0 +1,80 @@
+<!doctype html><meta charset="utf-8" /><meta name="viewport" content="width=device-width" /><link
+  rel="stylesheet"
+  href="_tokens.css"
+/><title>Navigation mockup</title>
+<style>
+  .more {
+    background: #fff;
+    margin: 12px;
+    border-radius: 14px;
+    padding: 8px;
+  }
+  .more a {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 12px;
+    color: var(--ink);
+    font: 600 15px system-ui;
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+  }
+  h2 {
+    font: 700 15px system-ui;
+    margin: 12px;
+  }
+</style>
+<div class="label" id="lab"></div>
+<div id="root" style="padding-bottom: 70px"></div>
+<script>
+  const q = new URLSearchParams(location.search),
+    v = q.get('v') || 'cur',
+    role = q.get('role') || 'admin'
+  const A = [
+    ['🏠', 'Home'],
+    ['📝', 'Applications'],
+    ['🏪', 'Vendors'],
+    ['🏍', 'Riders'],
+    ['⚠️', 'Rider issues'],
+    ['💳', 'Payments'],
+    ['💸', 'Refunds'],
+    ['📣', 'Reports'],
+    ['↩️', 'Returns'],
+    ['⭐', 'Reviews'],
+    ['⚙️', 'Jobs'],
+    ['🎛', 'Settings'],
+    ['🧾', 'Audit'],
+    ['🔑', 'Roles'],
+    ['📍', 'Delivery points'],
+    ['🗂', 'Categories'],
+  ]
+  const V = [
+    ['🏠', 'Home'],
+    ['📋', 'Orders'],
+    ['🍽', 'Catalogue'],
+    ['🏪', 'Shop'],
+    ['🤝', 'Handover'],
+    ['↩️', 'Returns'],
+  ]
+  const L = role === 'admin' ? A : V
+  document.getElementById('lab').textContent =
+    'MOCKUP (static HTML, not the application): ' +
+    role +
+    ' phone navigation, ' +
+    (v === 'cur'
+      ? 'CURRENT (first five only; the rest unreachable from the bar)'
+      : 'PROPOSED (four + More; More lists every destination)')
+  const bar = (items) =>
+    `<nav class=bottom><ul>${items.map((i) => `<li><a href=#><span style="font-size:18px">${i[0]}</span>${i[1]}</a></li>`).join('')}</ul></nav>`
+  let h = ''
+  if (v === 'cur') {
+    h = bar(L.slice(0, 5))
+  } else {
+    h =
+      `<h2>"More" opened (a plain list of real links)</h2><div class=more>${L.slice(4)
+        .map((i) => `<a href=#><span>${i[0]}</span>${i[1]}</a>`)
+        .join('')}</div>` + bar([...L.slice(0, 4), ['⋯', 'More']])
+  }
+  document.getElementById('root').innerHTML = h
+</script>
