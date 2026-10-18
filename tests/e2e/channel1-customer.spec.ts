@@ -67,7 +67,7 @@ test('another customer cannot read, cancel, refund or download an order they do 
   test.setTimeout(240000)
   await fixPricing(50000)
   const owner = await createUser('c1-owner', ['vendor_owner'])
-  const shop = await makeShopWithPoint(owner.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.id, `Meal ${tag()}`)
   const a = await openSession(browser, info, 'c1-a')
   const b = await openSession(browser, info, 'c1-b')
   const order = await seedPaidCompletedOrder(shop, a.user.id)
@@ -128,7 +128,7 @@ test('a customer cannot forge prices, totals or ownership through the database A
   test.setTimeout(240000)
   await fixPricing(50000)
   const owner = await createUser('c1-forge-o', ['vendor_owner'])
-  const shop = await makeShopWithPoint(owner.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.id, `Meal ${tag()}`)
   const c = await openSession(browser, info, 'c1-forge')
   const cc = await aal2ClientWithSecret(c.user.email, c.secret)
   const [prod] = await sql<{ id: string; price_kobo: string }>(
@@ -197,7 +197,7 @@ test('stale prices: the cart, the checkout quote and the order always use the cu
   test.setTimeout(240000)
   await fixPricing(50000)
   const owner = await createUser('c1-price-o', ['vendor_owner'])
-  const shop = await makeShopWithPoint(owner.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.id, `Meal ${tag()}`)
   const c = await openSession(browser, info, 'c1-price')
   const p = c.page
   const [prod] = await sql<{ id: string }>(`select id from public.products where vendor_id = $1`, [
@@ -237,7 +237,7 @@ test('unavailable and archived products cannot be bought, in the page or through
 }, info) => {
   test.setTimeout(240000)
   const owner = await createUser('c1-unav-o', ['vendor_owner'])
-  const shop = await makeShopWithPoint(owner.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.id, `Meal ${tag()}`)
   const c = await openSession(browser, info, 'c1-unav')
   const cc = await aal2ClientWithSecret(c.user.email, c.secret)
   const [prod] = await sql<{ id: string }>(`select id from public.products where vendor_id = $1`, [
@@ -321,7 +321,7 @@ test('a customer asks for deletion, an administrator erases the account: sign-in
 }, info) => {
   test.setTimeout(300000)
   const owner = await createUser('c1-del-o', ['vendor_owner'])
-  const shop = await makeShopWithPoint(owner.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.id, `Meal ${tag()}`)
   const c = await openSession(browser, info, 'c1-del')
   const order = await seedPaidCompletedOrder(shop, c.user.id)
   await sql(`update public.profiles set display_name = 'Ada Student' where id = $1`, [c.user.id])
@@ -384,7 +384,7 @@ test('refund request submitted twice (double click) creates one refund; a differ
 }, info) => {
   test.setTimeout(240000)
   const owner = await createUser('c1-rf-o', ['vendor_owner'])
-  const shop = await makeShopWithPoint(owner.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.id, `Meal ${tag()}`)
   const c = await openSession(browser, info, 'c1-rf')
   const order = await seedPaidCompletedOrder(shop, c.user.id)
   await c.page.goto(`/orders/${order.id}/help`)
@@ -484,7 +484,7 @@ test('order history reaches every order: more than one page of orders can be pag
 }, info) => {
   test.setTimeout(300000)
   const owner = await createUser('c1-hist-o', ['vendor_owner'])
-  const shop = await makeShopWithPoint(owner.id, `Rice ${tag()}`)
+  const shop = await makeShopWithPoint(owner.id, `Meal ${tag()}`)
   const c = await openSession(browser, info, 'c1-hist')
   const rows = Array.from({ length: 60 }, (_, i) => ({
     order_number: `AFM-H${String(i).padStart(3, '0')}${tag()}`,

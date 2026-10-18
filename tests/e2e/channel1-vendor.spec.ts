@@ -321,7 +321,7 @@ test('hostile text in vendor-controlled fields is shown as plain text and never 
 }, info) => {
   test.setTimeout(240000)
   const v = await shopWithOwnerSession(browser, info, 'c1-xss')
-  const payload = `<img src=x onerror="window.__xss=1"><script>window.__xss=2</script>`
+  const payload = `<img src=x onerror="window.pwned=1"><script>window.pwned=2</script>`
   const vc = await aal2ClientWithSecret(v.s.user.email, v.s.secret)
   const up = await vc.rpc('product_upsert', {
     p_vendor: v.shop.vendorId,
@@ -344,7 +344,7 @@ test('hostile text in vendor-controlled fields is shown as plain text and never 
   })
   await page.goto(`/vendors/${v.shop.slug}`)
   await expect(page.getByText('<img src=x', { exact: false }).first()).toBeVisible() // visible as text
-  expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined()
+  expect(await page.evaluate(() => (window as unknown as { pwned?: number }).pwned)).toBeUndefined()
   expect(await page.locator('img[src="x"]').count()).toBe(0)
   expect(dialogs).toEqual([])
   await anon.close()
