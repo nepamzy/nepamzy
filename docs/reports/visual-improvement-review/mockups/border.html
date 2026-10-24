@@ -1,0 +1,80 @@
+<!doctype html><meta charset="utf-8" /><link rel="stylesheet" href="_tokens.css" /><title>
+  Border contrast mockup
+</title>
+<style>
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+  .box {
+    background: #fff;
+    padding: 16px;
+    border-radius: 14px;
+  }
+  input {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font: 16px system-ui;
+    background: #fff;
+  }
+  .cur input,
+  .cur .btn {
+    border: 1px solid var(--line-strong);
+  }
+  .cand input,
+  .cand .btn {
+    border: 1px solid var(--line-strong-candidate);
+  }
+  .cand .btn {
+    border-color: var(--line-strong-candidate);
+  }
+  .page {
+    background: var(--surface);
+    padding: 16px;
+    border-radius: 14px;
+  }
+  h2 {
+    margin: 0 0 8px;
+    font: 700 15px system-ui;
+  }
+  p {
+    font: 13px system-ui;
+    color: var(--muted);
+  }
+</style>
+<div class="label">
+  MOCKUP (static HTML, not the application). Left: current token #8c9a94. Right: candidate #7a8a83.
+  Only --color-line-strong would change.
+</div>
+<div class="row">
+  <div class="cur">
+    <div class="box">
+      <h2>Current #8c9a94</h2>
+      <label>Search<input value="" /></label>
+      <p>2.93:1 on white, 2.70:1 on page surface</p>
+      <button class="btn">Secondary button</button>
+    </div>
+    <div class="page" style="margin-top: 12px">
+      <div class="box" style="border: 1px solid var(--line-strong)">
+        Bordered box on the page surface
+      </div>
+    </div>
+  </div>
+  <div class="cand">
+    <div class="box">
+      <h2>Candidate #7a8a83</h2>
+      <label>Search<input value="" /></label>
+      <p>3.63:1 on white, 3.34:1 on page surface</p>
+      <button class="btn">Secondary button</button>
+    </div>
+    <div class="page" style="margin-top: 12px">
+      <div class="box" style="border: 1px solid var(--line-strong-candidate)">
+        Bordered box on the page surface
+      </div>
+    </div>
+  </div>
+</div>

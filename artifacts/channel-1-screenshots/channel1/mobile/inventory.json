@@ -1,0 +1,1142 @@
+[
+  {
+    "role": "public",
+    "route": "/",
+    "actualUrl": "/",
+    "state": "landing",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/home__landing.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors",
+    "actualUrl": "/vendors",
+    "state": "list",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/vendors__list.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors?q=zzzz-no-such-item",
+    "actualUrl": "/vendors?q=zzzz-no-such-item",
+    "state": "search-no-results",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/vendors-q-zzzz-no-such-item__search-no-results.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors?q=Fixture",
+    "actualUrl": "/vendors?q=Fixture",
+    "state": "search-results",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/vendors-q-Fixture__search-results.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors/shop-61hmzd",
+    "actualUrl": "/vendors/shop-61hmzd",
+    "state": "vendor-menu",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/vendors-shop-61hmzd__vendor-menu.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/products/b8422594-4931-4dbc-9b3e-0c5dfa46bc03",
+    "actualUrl": "/products/b8422594-4931-4dbc-9b3e-0c5dfa46bc03",
+    "state": "product-detail",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/products-ID__product-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors/no-such-shop",
+    "actualUrl": "/vendors/no-such-shop",
+    "state": "not-found-404",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/vendors-no-such-shop__not-found-404.png",
+    "http": 404,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/login",
+    "actualUrl": "/login",
+    "state": "empty-form",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/login__empty-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/login",
+    "actualUrl": "/login",
+    "state": "wrong-password-error",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/login__wrong-password-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/signup",
+    "actualUrl": "/signup",
+    "state": "empty-form",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/signup__empty-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/signup",
+    "actualUrl": "/signup",
+    "state": "validation-error",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/signup__validation-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/offline",
+    "actualUrl": "/offline",
+    "state": "offline-fallback",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/offline__offline-fallback.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/design",
+    "actualUrl": "/design",
+    "state": "design-system-page",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/design__design-system-page.png",
+    "http": 200,
+    "note": "internal design reference page"
+  },
+  {
+    "role": "public",
+    "route": "/orders",
+    "actualUrl": "/login?next=%2Forders",
+    "state": "anonymous-redirected-to-login",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/orders__anonymous-redirected-to-login.png",
+    "http": 200,
+    "note": " redirected to /login?next=%2Forders"
+  },
+  {
+    "role": "public",
+    "route": "/admin",
+    "actualUrl": "/login?next=%2Fadmin",
+    "state": "anonymous-redirected-to-login",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/admin__anonymous-redirected-to-login.png",
+    "http": 200,
+    "note": " redirected to /login?next=%2Fadmin"
+  },
+  {
+    "role": "public",
+    "route": "/cart",
+    "actualUrl": "/login?next=%2Fcart",
+    "state": "anonymous-cart",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/cart__anonymous-cart.png",
+    "http": 200,
+    "note": " redirected to /login?next=%2Fcart"
+  },
+  {
+    "role": "public",
+    "route": "/",
+    "actualUrl": "/",
+    "state": "signed-in-no-factor-home",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/home__signed-in-no-factor-home.png",
+    "http": null,
+    "note": "a customer without a factor can browse after sign-in (K15)"
+  },
+  {
+    "role": "public",
+    "route": "/mfa/enroll",
+    "actualUrl": "/mfa/enroll",
+    "state": "enrol-first-factor",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/mfa-enroll__enrol-first-factor.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/mfa/challenge",
+    "actualUrl": "/mfa/challenge?next=%2F",
+    "state": "challenge",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/mfa-challenge__challenge.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/mfa/challenge",
+    "actualUrl": "/mfa/challenge?next=%2F",
+    "state": "wrong-code-error",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/mfa-challenge__wrong-code-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cart",
+    "actualUrl": "/cart",
+    "state": "empty-cart",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/cart__empty-cart.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/products/b8422594-4931-4dbc-9b3e-0c5dfa46bc03",
+    "actualUrl": "/products/b8422594-4931-4dbc-9b3e-0c5dfa46bc03",
+    "state": "product-detail-signed-in",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/products-ID__product-detail-signed-in.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/products/b8422594-4931-4dbc-9b3e-0c5dfa46bc03",
+    "actualUrl": "/cart",
+    "state": "after-add-to-cart",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/products-ID__after-add-to-cart.png",
+    "http": null,
+    "note": " redirected to /cart"
+  },
+  {
+    "role": "customer",
+    "route": "/cart",
+    "actualUrl": "/cart",
+    "state": "populated-cart",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/cart__populated-cart.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/checkout",
+    "actualUrl": "/checkout",
+    "state": "checkout-form",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/checkout__checkout-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders",
+    "actualUrl": "/orders",
+    "state": "order-history",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders__order-history.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437",
+    "actualUrl": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437",
+    "state": "completed-order-with-review-form",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__completed-order-with-review-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437/help",
+    "actualUrl": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437/help",
+    "state": "help-refund-and-report-forms",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID-help__help-refund-and-report-forms.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/6e8dafac-0381-4751-a6e7-cd9f71bf63dd",
+    "actualUrl": "/orders/6e8dafac-0381-4751-a6e7-cd9f71bf63dd",
+    "state": "paid-order-waiting-for-shop",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__paid-order-waiting-for-shop.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/b8b7d0f4-b2d9-41d8-9e62-a343a5cd5d93",
+    "actualUrl": "/orders/b8b7d0f4-b2d9-41d8-9e62-a343a5cd5d93",
+    "state": "delivery-en-route-no-location-yet",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__delivery-en-route-no-location-yet.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications-with-unread",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/notifications__notifications-with-unread.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cases",
+    "actualUrl": "/cases",
+    "state": "reports-empty",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/cases__reports-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account",
+    "actualUrl": "/account",
+    "state": "account",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/account__account.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/security",
+    "actualUrl": "/account/security",
+    "state": "account-security-mfa",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/account-security__account-security-mfa.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/apply",
+    "actualUrl": "/apply",
+    "state": "vendor-application-form",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/apply__vendor-application-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/rider-apply",
+    "actualUrl": "/rider-apply",
+    "state": "rider-application-form",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/rider-apply__rider-application-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437",
+    "actualUrl": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437",
+    "state": "review-published",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__review-published.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437/help",
+    "actualUrl": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437/help",
+    "state": "refund-requested",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID-help__refund-requested.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437/help",
+    "actualUrl": "/orders/a4b692e9-7b8a-4c83-9470-995b3af8a437/help",
+    "state": "report-opened",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID-help__report-opened.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cases",
+    "actualUrl": "/cases",
+    "state": "reports-list",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/cases__reports-list.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cases/0154cb0e-d4cf-4bfd-b70a-a074eb208ff6",
+    "actualUrl": "/cases/0154cb0e-d4cf-4bfd-b70a-a074eb208ff6",
+    "state": "report-detail",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/cases-ID__report-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/f6fec45b-9445-4bb7-a4b0-e8bfb8d8d051",
+    "actualUrl": "/orders/f6fec45b-9445-4bb7-a4b0-e8bfb8d8d051",
+    "state": "rider-arrived-confirm-receipt",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__rider-arrived-confirm-receipt.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/f6fec45b-9445-4bb7-a4b0-e8bfb8d8d051",
+    "actualUrl": "/orders/f6fec45b-9445-4bb7-a4b0-e8bfb8d8d051",
+    "state": "signature-capture-empty",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__signature-capture-empty.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/f6fec45b-9445-4bb7-a4b0-e8bfb8d8d051",
+    "actualUrl": "/orders/f6fec45b-9445-4bb7-a4b0-e8bfb8d8d051",
+    "state": "signature-missing-error",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__signature-missing-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/vendor",
+    "actualUrl": "/vendor",
+    "state": "forbidden-for-customer",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/vendor__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/rider",
+    "actualUrl": "/rider",
+    "state": "forbidden-for-customer",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/rider__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "forbidden-for-customer",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/admin__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/admin/settings",
+    "actualUrl": "/admin/settings",
+    "state": "forbidden-for-customer",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/admin-settings__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders",
+    "actualUrl": "/orders",
+    "state": "orders-empty",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders__orders-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications-empty",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/notifications__notifications-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cart",
+    "actualUrl": "/cart",
+    "state": "cart-empty",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/cart__cart-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor",
+    "actualUrl": "/vendor",
+    "state": "dashboard",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor__dashboard.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/orders",
+    "actualUrl": "/vendor/orders",
+    "state": "incoming-orders",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-orders__incoming-orders.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/catalogue",
+    "actualUrl": "/vendor/catalogue",
+    "state": "catalogue",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-catalogue__catalogue.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/catalogue/new",
+    "actualUrl": "/vendor/catalogue/new",
+    "state": "new-product-form",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-catalogue-new__new-product-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/catalogue/b8422594-4931-4dbc-9b3e-0c5dfa46bc03",
+    "actualUrl": "/vendor/catalogue/b8422594-4931-4dbc-9b3e-0c5dfa46bc03",
+    "state": "edit-product",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-catalogue-ID__edit-product.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/profile",
+    "actualUrl": "/vendor/profile",
+    "state": "shop-profile-and-hours",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-profile__shop-profile-and-hours.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/handover",
+    "actualUrl": "/vendor/handover",
+    "state": "pickup-handover",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-handover__pickup-handover.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/returns",
+    "actualUrl": "/vendor/returns",
+    "state": "returns",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-returns__returns.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/notifications__notifications.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/account",
+    "actualUrl": "/account",
+    "state": "account",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/account__account.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor",
+    "actualUrl": "/vendor",
+    "state": "forbidden-for-non-vendor",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor__forbidden-for-non-vendor.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider",
+    "actualUrl": "/rider",
+    "state": "dashboard-active-shift",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider__dashboard-active-shift.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/jobs",
+    "actualUrl": "/rider/jobs",
+    "state": "jobs-with-arrived-delivery",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-jobs__jobs-with-arrived-delivery.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/profile",
+    "actualUrl": "/rider/profile",
+    "state": "profile",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-profile__profile.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/notifications__notifications.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider",
+    "actualUrl": "/rider",
+    "state": "dashboard-inactive",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider__dashboard-inactive.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/jobs",
+    "actualUrl": "/rider/jobs",
+    "state": "jobs-inactive-no-offers",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-jobs__jobs-inactive-no-offers.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/applications",
+    "actualUrl": "/admin/applications",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-applications__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/vendors",
+    "actualUrl": "/admin/vendors",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-vendors__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/delivery-points",
+    "actualUrl": "/admin/delivery-points",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-delivery-points__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/categories",
+    "actualUrl": "/admin/categories",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-categories__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/riders",
+    "actualUrl": "/admin/riders",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-riders__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/rider-issues",
+    "actualUrl": "/admin/rider-issues",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-rider-issues__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/payments",
+    "actualUrl": "/admin/payments",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-payments__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/refunds",
+    "actualUrl": "/admin/refunds",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-refunds__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases",
+    "actualUrl": "/admin/cases",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-cases__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/returns",
+    "actualUrl": "/admin/returns",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-returns__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/reviews",
+    "actualUrl": "/admin/reviews",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-reviews__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/jobs",
+    "actualUrl": "/admin/jobs",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-jobs__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/settings",
+    "actualUrl": "/admin/settings",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-settings__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/audit",
+    "actualUrl": "/admin/audit",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-audit__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/roles",
+    "actualUrl": "/admin/roles",
+    "state": "platform-admin",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-roles__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases/0154cb0e-d4cf-4bfd-b70a-a074eb208ff6",
+    "actualUrl": "/admin/cases/0154cb0e-d4cf-4bfd-b70a-a074eb208ff6",
+    "state": "case-detail",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-cases-ID__case-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/refunds?status=requested&q=AFM",
+    "actualUrl": "/admin/refunds?status=requested&q=AFM",
+    "state": "refunds-filtered",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-refunds-status-requested-q-AFM__refunds-filtered.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/notifications__notifications.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "support-agent-overview",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin__support-agent-overview.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases",
+    "actualUrl": "/admin/cases",
+    "state": "support-agent-cases",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-cases__support-agent-cases.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/settings",
+    "actualUrl": "/admin/settings",
+    "state": "forbidden-for-support",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-settings__forbidden-for-support.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "finance-admin-overview",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin__finance-admin-overview.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/refunds",
+    "actualUrl": "/admin/refunds",
+    "state": "finance-admin-refunds",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-refunds__finance-admin-refunds.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases",
+    "actualUrl": "/admin/cases",
+    "state": "forbidden-for-finance",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-cases__forbidden-for-finance.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "no-bank-details-yet",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-payments__no-bank-details-yet.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "bank-details-saved",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-payments__bank-details-saved.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b",
+    "actualUrl": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b",
+    "state": "order-with-delivery-fee-notice",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID__order-with-delivery-fee-notice.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b/delivery-fee",
+    "actualUrl": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b/delivery-fee",
+    "state": "pay-delivery-fee-start",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID-delivery-fee__pay-delivery-fee-start.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b/delivery-fee",
+    "actualUrl": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b/delivery-fee",
+    "state": "pay-delivery-fee-details",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID-delivery-fee__pay-delivery-fee-details.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b/delivery-fee",
+    "actualUrl": "/orders/8316f1bf-9c9e-432a-85da-c9d39271927b/delivery-fee",
+    "state": "transfer-reported-waiting",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID-delivery-fee__transfer-reported-waiting.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "customer-reported-awaiting-confirmation",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-payments__customer-reported-awaiting-confirmation.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "confirmed-with-receipt",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-payments__confirmed-with-receipt.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/receipts",
+    "actualUrl": "/account/receipts",
+    "state": "receipt-list",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/account-receipts__receipt-list.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/receipts/bc7179e5eae151a4298d43f5dfe0b69c9b2fa97a5197ca80",
+    "actualUrl": "/receipts/bc7179e5eae151a4298d43f5dfe0b69c9b2fa97a5197ca80",
+    "state": "public-receipt-check",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/receipts-bc7179e5eae151a4298d43f5dfe0b69c9b2fa97a5197ca80__public-receipt-check.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/receipts/000000000000000000000000000000000000000000000000",
+    "actualUrl": "/receipts/000000000000000000000000000000000000000000000000",
+    "state": "public-receipt-not-found",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/public/receipts-000000000000000000000000000000000000000000000000__public-receipt-not-found.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "disputed",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/rider/rider-payments__disputed.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/872d518d-b105-449c-af9f-30f03c3f3f1a/delivery-fee",
+    "actualUrl": "/orders/872d518d-b105-449c-af9f-30f03c3f3f1a/delivery-fee",
+    "state": "disputed-customer-view",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/orders-ID-delivery-fee__disputed-customer-view.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/delivery-fee-payments",
+    "actualUrl": "/admin/delivery-fee-payments",
+    "state": "dispute-awaiting-decision",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-delivery-fee-payments__dispute-awaiting-decision.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/delivery-fee-payments",
+    "actualUrl": "/admin/delivery-fee-payments",
+    "state": "finance-admin-view",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-delivery-fee-payments__finance-admin-view.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/earnings",
+    "actualUrl": "/vendor/earnings",
+    "state": "earnings",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-earnings__earnings.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/menu",
+    "actualUrl": "/vendor/menu",
+    "state": "more-menu",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/vendor/vendor-menu__more-menu.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/settlements",
+    "actualUrl": "/admin/settlements",
+    "state": "settlements",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-settlements__settlements.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/data-requests",
+    "actualUrl": "/admin/data-requests",
+    "state": "data-requests",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-data-requests__data-requests.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/menu",
+    "actualUrl": "/admin/menu",
+    "state": "more-menu",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/admin/admin-menu__more-menu.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/data-requests",
+    "actualUrl": "/account/data-requests",
+    "state": "data-requests",
+    "viewport": "mobile",
+    "file": "artifacts/channel-1-screenshots/channel1/mobile/customer/account-data-requests__data-requests.png",
+    "http": 200,
+    "note": ""
+  }
+]

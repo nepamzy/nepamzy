@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+
+/* AFIT Market design tokens. Contrast ratios checked against WCAG AA (4.5:1 text, 3:1 UI) by tests/unit/visual-fixes.test.ts.
+   PROVISIONAL palette (blue, gold, red, white): our own working choices, NOT official AFIT colours and NOT approved branding.
+   See docs/design-tokens.md. Change colours here only; components use the tokens. */
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-ink: #131c2b;
+  --color-muted: #44536a;
+  --color-surface: #f6f8fc;
+  --color-card: #ffffff;
+  --color-line: #cdd6e4;
+  --color-line-strong: #70819c;
+
+  --color-brand-50: #e9f0fc;
+  --color-brand-100: #d2e1f8;
+  --color-brand-600: #1d57b8;
+  --color-brand-700: #174a9c;
+  --color-brand-800: #10346f;
+
+  /* Gold: decorative fills and rules only (never text on white); text uses accent-600/700. */
+  --color-gold-400: #f4b400;
+  --color-accent-50: #fff4cf;
+  --color-accent-600: #8f6400;
+  --color-accent-700: #7a5400;
+
+  --color-success-50: #e5f4ea;
+  --color-success-700: #17673a;
+  --color-warning-50: #fff4cf;
+  --color-warning-700: #7a5400;
+  --color-danger-50: #fdebe9;
+  --color-danger-700: #a3211a;
+  --color-danger-800: #82170f;
+  --color-neutral-100: #e6ebf3;
+  --color-info-50: #e6eefa;
+  --color-info-700: #1a4a8a;
+
+  --radius-card: 0.875rem;
+  --radius-control: 0.625rem;
+  --shadow-card: 0 1px 2px rgb(19 28 43 / 0.06), 0 2px 8px rgb(19 28 43 / 0.05);
+  --text-base: 1rem;
+}
+
+html {
+  color-scheme: light;
+}
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+:focus-visible {
+  outline: 3px solid var(--color-brand-600);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+@keyframes afit-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+.afit-skeleton {
+  animation: afit-pulse 1.6s ease-in-out infinite;
+}
+/* Minimum touch target for interactive controls */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
