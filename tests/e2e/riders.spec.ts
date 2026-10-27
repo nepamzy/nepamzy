@@ -58,7 +58,7 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect(c).toHaveURL(/\/cart$/)
   await c.goto('/checkout')
   await c.getByRole('radio', { name: /Delivery/ }).check()
-  await c.getByLabel('Delivery point').selectOption({ label: shop.pointLabel })
+  await c.getByLabel('Delivery point', { exact: true }).selectOption({ label: shop.pointLabel })
   await clickAndWait(c, () => c.getByRole('button', { name: 'Place order' }).click())
   await expect(c).toHaveURL(/\/orders\/[0-9a-f-]{36}$/)
   const orderId = c.url().split('/').pop()!

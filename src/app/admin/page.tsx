@@ -44,7 +44,8 @@ const ACTIONS: [string, string, IconName][] = [
 
 export default async function AdminHome() {
   const [d, overview] = await Promise.all([adminDashboard(), adminOverview()])
-  const attention = Object.entries(overview ?? {}).filter(([, v]) => v > 0)
+  const attention = Object.entries(overview ?? {})
+  const waiting = attention.filter(([, v]) => v > 0).length
   return (
     <>
       <PageHeader
@@ -175,11 +176,15 @@ export default async function AdminHome() {
       <Section
         title="Needs attention"
         id="todo"
-        description="Only items that need someone are listed."
+        description={
+          waiting === 0
+            ? 'Nothing is waiting: reports, refunds, applications and background jobs are all clear.'
+            : `${waiting} ${waiting === 1 ? 'queue has' : 'queues have'} items waiting. Queues you can see are listed; empty ones are dimmed.`
+        }
       >
         {attention.length === 0 ? (
-          <EmptyState title="Nothing needs attention" icon="check-circle">
-            Reports, refunds, applications and background jobs are all clear.
+          <EmptyState title="No queues to show" icon="check-circle">
+            Your role has no work queues.
           </EmptyState>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -192,7 +197,11 @@ export default async function AdminHome() {
                     className="flex items-center justify-between gap-3 rounded-[var(--radius-card)] border border-line bg-card p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-pop)]"
                   >
                     <span className="text-sm font-semibold text-muted">{label}</span>
-                    <span className="text-2xl font-extrabold text-navy-900">{v}</span>
+                    <span
+                      className={`text-2xl font-extrabold ${v > 0 ? 'text-navy-900' : 'text-muted'}`}
+                    >
+                      {v}
+                    </span>
                   </Link>
                 </li>
               )

@@ -116,14 +116,14 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
   await expect(anon.page).toHaveURL(/\/cart$/)
   await expect(anon.page.getByText(item)).toBeVisible()
   await expect(anon.page.getByText('₦3,600').first()).toBeVisible() // 2 x (1500 + 300)
-  await anon.page.getByRole('link', { name: 'Go to checkout' }).click()
+  await anon.page.getByRole('link', { name: 'Proceed to checkout' }).click()
   await expect(anon.page).toHaveURL(/\/checkout$/)
 
   // 6. Checkout shows server-calculated totals for both choices.
   await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦3,600') // 3600, no customer service fee, pickup
   await anon.page.getByRole('radio', { name: /Delivery/ }).check()
   await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦4,100') // + 500 delivery
-  await anon.page.getByLabel('Delivery point').selectOption({ index: 1 })
+  await anon.page.getByLabel('Delivery point', { exact: true }).selectOption({ index: 1 })
   await clickAndWait(anon.page, () =>
     anon.page.getByRole('button', { name: 'Place order' }).click(),
   )
@@ -285,7 +285,7 @@ test('checkout stays blocked with clear messages when the vendor is closed or an
   await b.getByRole('button', { name: 'Add to cart' }).click()
   await expect(b).toHaveURL(/\/cart$/)
   await expect(alertIn(b)).toContainText(/closed right now/)
-  await b.getByRole('link', { name: 'Go to checkout' }).click()
+  await b.getByRole('link', { name: 'Proceed to checkout' }).click()
   await b.getByRole('button', { name: 'Place order' }).click()
   await expect(alertIn(b)).toContainText(/closed right now/)
   const { count } = await admin()

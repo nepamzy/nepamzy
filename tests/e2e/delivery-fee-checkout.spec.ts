@@ -40,7 +40,7 @@ test('an administrator switches the mode with a reason; the next delivery order 
     await expect(c).toHaveURL(/\/cart$/)
     await c.goto('/checkout')
     await c.getByRole('radio', { name: /Delivery/ }).check()
-    await c.getByLabel('Delivery point').selectOption({ label: shop.pointLabel })
+    await c.getByLabel('Delivery point', { exact: true }).selectOption({ label: shop.pointLabel })
     return c
   }
 
