@@ -120,12 +120,22 @@ test.describe('MFA is enforced for protected areas', () => {
     await expect(page.getByRole('heading', { name: 'No vendor account yet' })).toBeVisible()
   })
 
-  test('vendor with NO factor must enrol before reaching anything protected', async ({ page }) => {
-    const u = await createUser('vendor-nofactor', ['vendor_owner'])
+  test('staff with NO factor must enrol before reaching anything protected', async ({ page }) => {
+    const u = await createUser('staff-nofactor', ['support_agent'])
     await uiSignIn(page, u.email)
     await expect(page).toHaveURL(/\/mfa\/enroll/)
-    await page.goto('/vendor/orders')
-    await expect(page).toHaveURL(/\/mfa\/enroll\?next=%2Fvendor%2Forders/)
+    await page.goto('/admin/cases')
+    await expect(page).toHaveURL(/\/mfa\/enroll\?next=%2Fadmin%2Fcases/)
+  })
+
+  test('a vendor with no authenticator is NOT forced to set one up: two-step sign-in is optional', async ({
+    page,
+  }) => {
+    const u = await createUser('vendor-nofactor', ['vendor_owner'])
+    await uiSignIn(page, u.email)
+    await expect(page).not.toHaveURL(/\/mfa\//)
+    await page.goto('/vendor')
+    await expect(page).toHaveURL(/\/vendor$/)
   })
 
   test('admin at aal1 cannot reach /admin even right after password sign-in', async ({ page }) => {

@@ -21,8 +21,12 @@ export const ALL_ROLES: AppRole[] = [
   'finance_admin',
   'platform_admin',
 ]
-/** Everything except `customer` must be at aal2 for any protected access (mirrors the DB). */
-export const isPrivilegedRole = (r: AppRole) => r !== 'customer'
+/**
+ * Staff roles must use the second sign-in step (mirrors the DB). Everyone else may switch it on from their
+ * account page; once they have, it is enforced for them too.
+ */
+export const isPrivilegedRole = (r: AppRole) =>
+  r === 'platform_admin' || r === 'finance_admin' || r === 'support_agent'
 
 export type Principal = {
   authenticated: boolean
@@ -56,9 +60,12 @@ export function decideAccess(req: AccessRequirement, who: Principal): Decision {
   if (req.roles && !req.roles.some((r) => who.roles.includes(r))) {
     return { allow: false, action: 'forbidden' }
   }
-  const needsAal2 =
-    req.aal === 'aal2' || (!req.mfaSetup && who.roles.some((r) => isPrivilegedRole(r)))
-  if (needsAal2 && who.aal !== 'aal2') {
+  const staff = who.roles.some((r) => isPrivilegedRole(r))
+  const needsAal2 = req.aal === 'aal2' || (!req.mfaSetup && staff)
+  // The second step counts as satisfied when it was completed, or when it is optional for this person:
+  // not staff and no authenticator set up.
+  const satisfied = who.aal === 'aal2' || (!who.hasVerifiedFactor && !staff)
+  if (needsAal2 && !satisfied) {
     return { allow: false, action: who.hasVerifiedFactor ? 'mfa-challenge' : 'mfa-enroll' }
   }
   return { allow: true }

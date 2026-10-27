@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: 'Sign in' }
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; confirmed?: string; error?: string }>
+  searchParams: Promise<{ next?: string; confirmed?: string; error?: string; reset?: string }>
 }) {
   const sp = await searchParams
   const next = safeNextPath(sp.next)
@@ -25,6 +25,14 @@ export default async function LoginPage({
           className="mb-4 rounded-[var(--radius-control)] bg-success-50 px-3 py-2 font-medium text-success-700"
         >
           Email confirmed. You can sign in now.
+        </p>
+      )}
+      {sp.reset && (
+        <p
+          role="status"
+          className="mb-4 rounded-[var(--radius-control)] bg-success-50 px-3 py-2 font-medium text-success-700"
+        >
+          Your password was changed. Sign in with the new one.
         </p>
       )}
       {sp.error && (

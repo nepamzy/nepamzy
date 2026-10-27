@@ -14,7 +14,6 @@ import {
   openAnonymous,
   openSession,
   statusIn,
-  submitCode,
   tag,
   uiSignIn,
   uiSignInWithMfa,
@@ -107,7 +106,7 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
   await anon.page.getByRole('button', { name: 'Add to cart' }).click()
   await expect(anon.page).toHaveURL(new RegExp(`/login\\?next=%2Fproducts%2F${productId}`))
 
-  // 5. A customer without MFA signs in, fills a cart, and is stopped at checkout until MFA is done.
+  // 5. A customer without two-step sign-in (optional) signs in, fills a cart and goes straight to checkout.
   const email = (await createUser('buyer')).email
   await uiSignIn(anon.page, email, PASSWORD, `/products/${productId}`)
   await expect(anon.page).toHaveURL(new RegExp(`/products/${productId}`))
@@ -118,10 +117,6 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
   await expect(anon.page.getByText(item)).toBeVisible()
   await expect(anon.page.getByText('₦3,600').first()).toBeVisible() // 2 x (1500 + 300)
   await anon.page.getByRole('link', { name: 'Go to checkout' }).click()
-  await expect(anon.page).toHaveURL(/\/mfa\/enroll\?next=%2Fcheckout/)
-  await anon.page.getByRole('button', { name: 'Start setup' }).click()
-  const secret = (await anon.page.locator('code').first().textContent())!.trim()
-  await submitCode(anon.page, await freshCode(secret), /confirm and finish/i)
   await expect(anon.page).toHaveURL(/\/checkout$/)
 
   // 6. Checkout shows server-calculated totals for both choices.

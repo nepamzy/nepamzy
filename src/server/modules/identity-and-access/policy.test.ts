@@ -33,11 +33,15 @@ describe('decideAccess', () => {
       allow: false,
       action: 'forbidden',
     }))
-  it('right role at aal1 without a factor -> enroll', () =>
-    expect(decideAccess(req, who(['vendor_owner'], 'aal1', false))).toEqual({
-      allow: false,
-      action: 'mfa-enroll',
-    }))
+  it('staff at aal1 without a factor -> enroll', () =>
+    expect(
+      decideAccess(
+        { roles: ['platform_admin'], aal: 'aal2' },
+        who(['platform_admin'], 'aal1', false),
+      ),
+    ).toEqual({ allow: false, action: 'mfa-enroll' }))
+  it('a vendor without an authenticator is let in: the second step is optional', () =>
+    expect(decideAccess(req, who(['vendor_owner'], 'aal1', false))).toEqual({ allow: true }))
   it('right role at aal1 with a factor -> challenge', () =>
     expect(decideAccess(req, who(['vendor_owner'], 'aal1', true))).toEqual({
       allow: false,
@@ -45,11 +49,16 @@ describe('decideAccess', () => {
     }))
   it('right role at aal2 -> allow', () =>
     expect(decideAccess(req, who(['vendor_owner'], 'aal2'))).toEqual({ allow: true }))
-  it('privileged users need aal2 even when the route only says aal1', () => {
+  it('staff need aal2 even when the route only says aal1', () => {
     const r = { aal: 'aal1' as const }
-    expect(decideAccess(r, who(['rider'], 'aal1', true))).toEqual({
+    expect(decideAccess(r, who(['rider'], 'aal1', true))).toEqual({ allow: true })
+    expect(decideAccess(r, who(['support_agent'], 'aal1', true))).toEqual({
       allow: false,
       action: 'mfa-challenge',
+    })
+    expect(decideAccess(r, who(['support_agent'], 'aal1', false))).toEqual({
+      allow: false,
+      action: 'mfa-enroll',
     })
     expect(decideAccess(r, who(['customer'], 'aal1', false))).toEqual({ allow: true })
   })
@@ -75,10 +84,10 @@ describe('route policy matrix (generated)', () => {
         const d = decideAccess(p.requirement, principal)
         const roleOk =
           !p.requirement.roles || p.requirement.roles.some((r) => principal.roles.includes(r))
+        const staff = principal.roles.some(isPrivilegedRole)
+        const needs2 = p.requirement.aal === 'aal2' || (!p.requirement.mfaSetup && staff)
         const aalOk =
-          principal.aal === 'aal2' ||
-          (p.requirement.aal === 'aal1' &&
-            (p.requirement.mfaSetup || !principal.roles.some(isPrivilegedRole)))
+          !needs2 || principal.aal === 'aal2' || (!principal.hasVerifiedFactor && !staff)
         const expected = principal.authenticated && roleOk && aalOk
         expect(d.allow, `${label} on ${p.prefix}`).toBe(expected)
       }
@@ -101,13 +110,16 @@ describe('route policy matrix (generated)', () => {
       decideAccess(policyFor('/admin/audit')!.requirement, who(['finance_admin'], 'aal2')).allow,
     ).toBe(false)
   })
-  it('registered customers need aal2 for orders and account', () => {
+  it('customers reach orders and account without a second step, unless they set one up', () => {
     expect(decideAccess(policyFor('/orders')!.requirement, who(['customer'], 'aal1')).allow).toBe(
-      false,
+      true,
     )
     expect(decideAccess(policyFor('/account')!.requirement, who(['customer'], 'aal1')).allow).toBe(
-      false,
+      true,
     )
+    expect(
+      decideAccess(policyFor('/orders')!.requirement, who(['customer'], 'aal1', true)).allow,
+    ).toBe(false)
     expect(decideAccess(policyFor('/orders')!.requirement, who(['customer'], 'aal2')).allow).toBe(
       true,
     )

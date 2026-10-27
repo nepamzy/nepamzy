@@ -38,7 +38,7 @@ export default async function AccountPage() {
         </p>
         <p>
           <Link className="font-semibold text-brand-700 underline" href="/account/security">
-            Security and authenticators
+            Security: two-step sign-in (optional)
           </Link>
         </p>
         <p>

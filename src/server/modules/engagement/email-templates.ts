@@ -93,6 +93,20 @@ export function welcomeEmail(siteUrl: string): RenderedEmail {
   })
 }
 
+export function resetCodeEmail(code: string, siteUrl: string): RenderedEmail {
+  return renderEmail({
+    subject: 'Your AFIT Market password reset code',
+    preheader: `Your code is ${code}`,
+    heading: `Your code is ${code}`,
+    paragraphs: [
+      'Enter this 6-digit code on the reset page to choose a new password. It works once and expires in 15 minutes.',
+      'If you did not ask for this, ignore this message. Your password has not changed and nobody can use this code without your e-mail.',
+    ],
+    button: { label: 'Open the reset page', url: `${siteUrl.replace(/\/+$/, '')}/reset-password` },
+    siteUrl,
+  })
+}
+
 type NotificationLike = { kind: string; title: string; body: string; link: string | null }
 
 function buttonLabel(link: string | null): string {
