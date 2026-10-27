@@ -1,6 +1,6 @@
 # Page inventory (Frontend redesign)
 
-Built from `artifacts/afit-market-ui-audit/{redesign-before,redesign-before}/{desktop,mobile}/inventory.json`: what was actually rendered. Routes with ids are shown with `[id]`. "yes" means a screenshot file exists.
+Built from `artifacts/afit-market-ui-audit/{redesign-before,redesign-ch1-after}/{desktop,mobile}/inventory.json`: what was actually rendered. Routes with ids are shown with `[id]`. "yes" means a screenshot file exists.
 
 | Role | Route | State | HTTP | Desk before | Desk after | Mob before | Mob after | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -121,6 +121,6 @@ Built from `artifacts/afit-market-ui-audit/{redesign-before,redesign-before}/{de
 
 Total pages/states: 114. Missing in at least one of the four captures: 0.
 
-Screenshot counts, before (redesign-before): desktop: 114, mobile: 114. After (redesign-before): desktop: 114, mobile: 114.
+Screenshot counts, before (redesign-before): desktop: 114, mobile: 114. After (redesign-ch1-after): desktop: 114, mobile: 114.
 
 By role (both viewports): before/public=44, before/customer=76, before/vendor=26, before/rider=22, before/admin=60, after/public=44, after/customer=76, after/vendor=26, after/rider=22, after/admin=60.
