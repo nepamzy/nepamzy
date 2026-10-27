@@ -186,7 +186,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         </Card>
       )}
 
-      <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card className="space-y-3">
           <h2 className="text-lg font-extrabold text-navy-900">Items</h2>
           <ul className="space-y-2">

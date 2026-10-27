@@ -15,7 +15,10 @@ export function Alert({
   title,
   children,
   className,
+  plain,
 }: {
+  /** Static page notice: no live-region role, so it is not announced as a result and tests/readers find real status messages. */
+  plain?: boolean
   tone?: keyof typeof TONES
   title?: string
   children?: ReactNode
@@ -24,7 +27,7 @@ export function Alert({
   const [cls, icon] = TONES[tone]
   return (
     <div
-      role={tone === 'danger' || tone === 'warning' ? 'alert' : 'status'}
+      role={plain ? undefined : tone === 'danger' || tone === 'warning' ? 'alert' : 'status'}
       className={cn('flex gap-3 rounded-[var(--radius-control)] border px-4 py-3', cls, className)}
     >
       <Icon name={icon} className="mt-0.5 shrink-0" />

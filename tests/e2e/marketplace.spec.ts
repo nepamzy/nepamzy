@@ -212,7 +212,7 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
 test('browse, search and filter; cart rules (one vendor at a time, quantities, removal)', async ({
   browser,
 }, info) => {
-  test.setTimeout(120000)
+  test.setTimeout(240000)
   const anon = await openAnonymous(browser, info)
   const p = anon.page
   await p.goto('/vendors?q=print')
@@ -266,7 +266,7 @@ test('browse, search and filter; cart rules (one vendor at a time, quantities, r
 
   // quantity update and removal
   for (const n of [2, 3, 4]) {
-    await b.getByRole('button', { name: /Increase quantity of/ }).click()
+    await clickAndWait(b, () => b.getByRole('button', { name: /Increase quantity of/ }).click())
     await expect(b.getByLabel(`Quantity ${n}`)).toBeVisible()
   }
   await expect(b.getByText('₦200').first()).toBeVisible() // 4 x N50

@@ -104,7 +104,7 @@ export default async function AdminHome() {
               href="/admin/riders"
             />
           </MetricGrid>
-          <div className="mb-8 grid gap-4 lg:grid-cols-[1.6fr_1fr]">
+          <div className="mb-8 grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <Card>
               <h2 className="mb-2 text-lg font-extrabold text-navy-900">Orders, last 14 days</h2>
               <BarChart

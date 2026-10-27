@@ -37,7 +37,7 @@ export default async function AdminOrder({ params }: { params: Promise<{ id: str
         ]}
         actions={<OrderStatusPill code={order.status} />}
       />
-      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <div className="space-y-4">
           <Card>
             <h2 className="mb-2 text-lg font-extrabold text-navy-900">Items and price breakdown</h2>

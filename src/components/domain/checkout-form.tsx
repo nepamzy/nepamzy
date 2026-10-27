@@ -29,7 +29,7 @@ export function CheckoutForm({
   const optionCls = (on: boolean, disabled = false) =>
     `touch-target flex items-start gap-3 rounded-[var(--radius-card)] border-2 p-4 ${disabled ? 'cursor-not-allowed border-line text-muted' : on ? 'cursor-pointer border-navy-900 bg-brand-50' : 'cursor-pointer border-line bg-card hover:border-line-strong'}`
   return (
-    <form action={action} className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+    <form action={action} className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
       <div className="space-y-5">
         {state.error && <Alert tone="danger">{state.error}</Alert>}

@@ -70,12 +70,12 @@ export default async function CartPage() {
           </ul>
         </Alert>
       )}
-      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <ul className="space-y-3">
           {q.lines.map((l) => (
             <li key={l.item_id}>
               <article className="flex gap-3 rounded-[var(--radius-card)] border border-line bg-card p-3 shadow-[var(--shadow-card)]">
-                <NoImageTile icon="bag" className="size-20 shrink-0 rounded-xl" />
+                <NoImageTile icon="bag" className="aspect-square! w-20! shrink-0 rounded-xl" />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div>
