@@ -40,3 +40,16 @@ The scheduler routes are `POST /api/jobs/expire-orders` and `POST /api/jobs/purg
 ## Batch 6
 
 No new variable was introduced. `JOBS_SECRET` now guards all three job routes (`expire-orders`, `purge-location`, `process-notifications`); `/api/health` needs no secret. Nothing in the repository sends mail, SMS or push: the notification "copy" channel is a local sink. `.env.example` is unchanged.
+
+## Operator alert e-mails
+
+Optional. When all three variables are set, the server e-mails the owner a short plain-text alert for each of: new sign-up (e-mail masked), vendor application, rider application, new order, payment result (paid, late, mismatch, duplicate, failed), refund request, return request and support report. Nothing is sent, and nothing breaks, when any variable is missing.
+
+| Variable                | Purpose                                                                                                       | Secret? |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- | ------- |
+| `BREVO_API_KEY`         | Brevo API key (Brevo, SMTP & API, API Keys; starts `xkeysib-`). Used only server-side as the `api-key` header | **yes** |
+| `ADMIN_ALERT_TO`        | Where alerts are delivered (the owner's admin mailbox)                                                        | no      |
+| `ADMIN_ALERT_FROM`      | Sender address. Must be a verified sender in the Brevo account                                                | no      |
+| `ADMIN_ALERT_FROM_NAME` | Optional display name (default `AFIT Market`)                                                                 | no      |
+
+Limits and behaviour: best effort (no retry; a provider failure is logged without the key and dropped); at most 200 alerts per rolling day across all instances (Brevo free plan allows 300 e-mails a day in total, shared with sign-in e-mails sent through Supabase SMTP); subjects are fixed text; no names, phones, addresses or order contents are included. Code: `src/server/modules/engagement/admin-alerts.ts`.

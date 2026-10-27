@@ -1,5 +1,6 @@
 'use server'
 
+import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -48,6 +49,7 @@ export async function requestRefundAction(_p: ActionState, fd: FormData): Promis
   })
   if (error)
     return dbFailed(error, 'The refund could not be recorded. Check the amount and reason.')
+  notifyAdmin({ type: 'refund_requested', orderId: order, by: 'finance' })
   revalidatePath('/admin/payments')
   return done('Refund request recorded (no money has moved).')
 }

@@ -1,5 +1,6 @@
 'use server'
 
+import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { serverEnv } from '@/lib/env'
@@ -68,6 +69,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   if (error?.code === 'weak_password') return { error: 'Choose a stronger password.' }
   if (error && (!error.status || error.status >= 500))
     return { error: 'We could not create your account right now. Please try again.' }
+  if (!error) notifyAdmin({ type: 'signup', email })
   // Same message whether or not the address already exists (prevents account enumeration).
   return { ok: true, message: 'Check your email. We sent a link to confirm your address.' }
 }
