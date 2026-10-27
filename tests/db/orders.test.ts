@@ -140,12 +140,18 @@ describe('cart and quote', () => {
     })
   })
 
-  it('an empty cart quotes zero; customers can use the cart at aal1 (ordering needs aal2)', async () => {
+  it('an empty cart quotes zero; a customer without two-step sign-in uses the cart; once they set it up, ordering needs aal2', async () => {
     await withTx(async (c) => {
       const s = await shop(c)
+      await c.query('delete from auth.mfa_factors where user_id = $1', [s.cust])
       expect((await quote(c, AAL1(s.cust), 'pickup')).empty).toBe(true)
       await addToCart(c, AAL1(s.cust), s.p, 1)
       expect((await quote(c, AAL1(s.cust), 'pickup')).total_kobo).toBeGreaterThan(0)
+      await c.query(
+        `insert into auth.mfa_factors (id, user_id, friendly_name, factor_type, status, created_at, updated_at)
+         values (gen_random_uuid(), $1, 'test', 'totp', 'verified', now(), now())`,
+        [s.cust],
+      )
       expect(
         (
           await as(c, AAL1(s.cust), () =>

@@ -7,7 +7,13 @@ vi.mock('@/server/modules/identity-and-access/security', () => ({
   sha256Hex: (s: string) => s,
 }))
 import { drainNotifications, type Claimed, type Deps, type Report } from './dispatch'
-import { appLink, escapeHtml, notificationEmail, welcomeEmail } from './email-templates'
+import {
+  appLink,
+  escapeHtml,
+  notificationEmail,
+  resetCodeEmail,
+  welcomeEmail,
+} from './email-templates'
 import { mailConfig, sendMail } from './mail'
 import { isAllowedPushEndpoint, pushConfig } from './push'
 
@@ -79,6 +85,16 @@ describe('templates', () => {
     const m = welcomeEmail('https://x.test')
     expect(m.subject).toMatch(/Welcome/)
     expect(m.html).toContain('https://x.test/vendors')
+  })
+})
+
+describe('reset code e-mail', () => {
+  it('shows the code and warns it can be ignored', () => {
+    const m = resetCodeEmail('042917', 'https://x.test')
+    expect(m.subject).toMatch(/reset code/i)
+    expect(m.html).toContain('042917')
+    expect(m.text).toContain('042917')
+    expect(m.text).toMatch(/ignore/i)
   })
 })
 

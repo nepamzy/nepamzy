@@ -21,7 +21,16 @@ export async function withTx<T>(fn: (c: PoolClient) => Promise<T>): Promise<T> {
   }
 }
 
-export async function createUser(c: PoolClient, label = 'u'): Promise<string> {
+/**
+ * Test users have a VERIFIED authenticator by default, so an "aal1" caller is someone who still owes the second step
+ * (the original meaning of these tests). Pass `{ mfa: false }` for a person who never set one up: for them the
+ * second step is optional.
+ */
+export async function createUser(
+  c: PoolClient,
+  label = 'u',
+  opts: { mfa?: boolean } = {},
+): Promise<string> {
   const id = randomUUID()
   await c.query(
     `insert into auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at,
@@ -30,6 +39,12 @@ export async function createUser(c: PoolClient, label = 'u'): Promise<string> {
        now(), '{}'::jsonb, '{}'::jsonb, now(), now())`,
     [id, `${label}-${id}@example.test`],
   )
+  if (opts.mfa !== false)
+    await c.query(
+      `insert into auth.mfa_factors (id, user_id, friendly_name, factor_type, status, created_at, updated_at)
+       values (gen_random_uuid(), $1, 'test', 'totp', 'verified', now(), now())`,
+      [id],
+    )
   return id
 }
 

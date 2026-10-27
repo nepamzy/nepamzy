@@ -4,9 +4,14 @@ import { notifyWelcome } from '@/server/modules/engagement/dispatch'
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { serverEnv } from '@/lib/env'
+import { createHmac, randomInt } from 'node:crypto'
+import { after } from 'next/server'
+import { serverEnv, serviceEnv } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServiceClient } from '@/lib/supabase/service'
+import { resetCodeEmail } from '@/server/modules/engagement/email-templates'
+import { mailConfig, sendMail } from '@/server/modules/engagement/mail'
 import { checkAccess, loadPrincipal } from './guard'
 import { isPrivilegedRole, safeNextPath, signUpOutcome } from './policy'
 import { clientIp, rateLimit, recordSecurityEvent, sha256Hex } from './security'
@@ -113,11 +118,120 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
     await recordSecurityEvent(null, 'auth.login_failed', { email_hash: emailKey.slice(0, 16) })
     return { error: 'Email or password is incorrect.', email }
   }
+  return finishSignIn(next)
+}
+
+/** After a password was accepted: staff and people with an authenticator go to the second step; others are in. */
+async function finishSignIn(next: string): Promise<never> {
   const who = await loadPrincipal()
-  const privileged = who.roles.some(isPrivilegedRole)
+  const staff = who.roles.some(isPrivilegedRole)
   if (who.hasVerifiedFactor) redirect(`/mfa/challenge?next=${encodeURIComponent(next)}`)
-  if (privileged) redirect(`/mfa/enroll?next=${encodeURIComponent(next)}`)
+  if (staff) redirect(`/mfa/enroll?next=${encodeURIComponent(next)}`)
   redirect(next)
+}
+
+// ------------------------------- Forgot password (e-mailed 6-digit code) -----------------------
+
+const resetHash = (userId: string, code: string) =>
+  createHmac('sha256', serviceEnv().SUPABASE_SERVICE_ROLE_KEY)
+    .update(`${userId}:${code}`)
+    .digest('hex')
+
+/** Step 1: e-mail a 6-digit code. The answer is the same whether or not the address has an account. */
+export async function requestPasswordResetAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const parsed = emailSchema.safeParse(formData.get('email'))
+  if (!parsed.success) return { error: 'Enter a valid email address.' }
+  const email = parsed.data
+  const ip = await clientIp()
+  if (
+    !(await rateLimit(`reset:ip:${ip}`, 3600, 10)) ||
+    !(await rateLimit(`reset:email:${sha256Hex(email)}`, 3600, 3))
+  )
+    return { error: TOO_MANY, email }
+  const mail = mailConfig()
+  if (!mail)
+    return {
+      error: 'Password reset by e-mail is not switched on yet. Please contact support.',
+      email,
+    }
+  after(async () => {
+    try {
+      const svc = createSupabaseServiceClient()
+      const { data: uid } = await svc.rpc('auth_user_id_by_email', { p_email: email })
+      if (typeof uid !== 'string') return
+      const code = String(randomInt(0, 1_000_000)).padStart(6, '0')
+      const { error } = await svc.rpc('password_reset_issue', {
+        p_user: uid,
+        p_hash: resetHash(uid, code),
+      })
+      if (error) return
+      await sendMail(email, resetCodeEmail(code, serverEnv().SITE_URL), { config: mail })
+      await recordSecurityEvent(uid, 'auth.password_reset_requested', {})
+    } catch (e) {
+      logger.warn('password reset request failed', { err: e instanceof Error ? e.name : 'error' })
+    }
+  })
+  redirect(`/reset-password?email=${encodeURIComponent(email)}`)
+}
+
+const resetSchema = z
+  .object({
+    email: emailSchema,
+    code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code from your e-mail.'),
+    password: passwordSchema,
+    confirm: z.string(),
+  })
+  .refine((v) => v.password === v.confirm, {
+    message: 'Passwords do not match.',
+    path: ['confirm'],
+  })
+
+/** Step 2: code + new password. A correct code proves the e-mail is theirs, so the address is also marked confirmed. */
+export async function resetPasswordAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const parsed = resetSchema.safeParse({
+    email: formData.get('email'),
+    code: String(formData.get('code') ?? '').replace(/\s+/g, ''),
+    password: formData.get('password'),
+    confirm: formData.get('confirm'),
+  })
+  if (!parsed.success)
+    return {
+      error: parsed.error.issues[0]?.message ?? 'Check your details.',
+      email: String(formData.get('email') ?? '').slice(0, 254),
+    }
+  const { email, code, password } = parsed.data
+  const ip = await clientIp()
+  if (
+    !(await rateLimit(`resetcode:ip:${ip}`, 3600, 30)) ||
+    !(await rateLimit(`resetcode:email:${sha256Hex(email)}`, 3600, 15))
+  )
+    return { error: TOO_MANY, email }
+  const WRONG = 'That code is not right or has expired. Ask for a new one.'
+  const svc = createSupabaseServiceClient()
+  const { data: uid } = await svc.rpc('auth_user_id_by_email', { p_email: email })
+  if (typeof uid !== 'string') return { error: WRONG, email }
+  const { data: verdict } = await svc.rpc('password_reset_check', {
+    p_user: uid,
+    p_hash: resetHash(uid, code),
+  })
+  if (verdict === 'locked') return { error: 'Too many wrong codes. Ask for a new code.', email }
+  if (verdict !== 'ok') return { error: WRONG, email }
+  const { error } = await svc.auth.admin.updateUserById(uid, { password, email_confirm: true })
+  if (error) {
+    logger.warn('password reset update failed', { code: error.code })
+    return { error: 'We could not save your new password. Please try again.', email }
+  }
+  await recordSecurityEvent(uid, 'auth.password_reset_done', {})
+  const supabase = await createSupabaseServerClient()
+  const signedIn = await supabase.auth.signInWithPassword({ email, password })
+  if (signedIn.error) redirect('/login?reset=1')
+  return finishSignIn('/')
 }
 
 export async function signOutAction(): Promise<void> {

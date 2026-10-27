@@ -64,7 +64,6 @@ const NO_IDENTITY_CHECK = [
 // Identity read-backs that are deliberately usable before the second factor (the sign-in flow needs them).
 // The cart is deliberately usable at aal1 for plain customers (route policy for /cart); checkout and everything after needs aal2.
 const AAL1_READS = ['list_delivery_points', 'my_roles', 'my_vendor']
-const AAL1_CART = ['cart_clear', 'cart_quote']
 
 describe('catalogue-wide authorisation regression', () => {
   it('every callable function checks the caller, except the published public reads', async () => {
@@ -100,13 +99,13 @@ describe('catalogue-wide authorisation regression', () => {
     })
   })
 
-  it('a signed-in customer WITHOUT a second factor cannot run any function with arguments, except the pinned reads', async () => {
+  it('a signed-in customer who set up a second factor but has not completed it cannot run any function with arguments, except the pinned reads', async () => {
     await withTx(async (c) => {
       const u = await createUser(c, 'aal1')
       const ok: string[] = []
       for (const f of await callable(c)) if (await succeedsWithNulls(c, AAL1(u), f)) ok.push(f.name)
       expect([...new Set(ok)].sort()).toEqual(
-        [...new Set([...NO_IDENTITY_CHECK, ...AAL1_READS, ...AAL1_CART])].sort(),
+        [...new Set([...NO_IDENTITY_CHECK, ...AAL1_READS])].sort(),
       )
     })
   })

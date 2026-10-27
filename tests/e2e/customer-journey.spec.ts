@@ -21,7 +21,7 @@ test.use({
   },
 })
 
-test('customer: sign up -> confirm email -> sign in -> MFA required for orders -> backup authenticator', async ({
+test('customer: sign up -> confirm email -> sign in -> orders without any second step -> optional authenticator -> backup authenticator', async ({
   page,
 }) => {
   const email = uniqueEmail('journey')
@@ -68,19 +68,21 @@ test('customer: sign up -> confirm email -> sign in -> MFA required for orders -
   // 4. Sign in: customers can browse without MFA...
   await uiSignIn(page, email)
   await expect(page).toHaveURL('http://127.0.0.1:3000/')
-  // ...but ordering / account features require the second step
+  // ...and so can orders and the account: the second step is optional and is never forced on a customer
   await page.goto('/orders')
-  await expect(page).toHaveURL(/\/mfa\/enroll\?next=%2Forders/)
+  await expect(page).toHaveURL(/\/orders$/)
+  await expect(page.getByRole('heading', { name: 'My orders' })).toBeVisible()
 
-  // 5. Enrol an authenticator app (scan-less: use the manual key shown on screen)
+  // 5. Turn on two-step sign-in from the account's Security page (scan-less: use the manual key shown on screen)
+  await page.goto('/account/security')
+  await expect(page.getByRole('heading', { name: /turn on two-step sign-in/i })).toBeVisible()
   await page.getByRole('button', { name: 'Start setup' }).click()
   const secret = (await page.locator('code').first().textContent())!.trim()
   expect(secret).toMatch(/^[A-Z2-7]{16,}$/)
   await submitCode(page, '000000', /confirm and finish/i)
   await expect(alertIn(page)).toContainText(/not correct/i)
   await submitCode(page, await freshCode(secret), /confirm and finish/i)
-  await expect(page).toHaveURL(/\/orders$/)
-  await expect(page.getByRole('heading', { name: 'My orders' })).toBeVisible()
+  await expect(page).toHaveURL(/\/account\/security$/)
 
   // 6. New sign-in needs the code again; orders stay locked until verified
   await uiSignOut(page)
@@ -116,12 +118,12 @@ test('customer: sign up -> confirm email -> sign in -> MFA required for orders -
   expect(ev!.filter((e) => e.action === 'mfa.enrolled')).toHaveLength(2)
 })
 
-test('customer can remove one authenticator but a privileged role cannot remove its last one', async ({
+test('customer can remove one authenticator but staff cannot remove their last one', async ({
   page,
 }) => {
   const { createUser, enrolFactorViaApi, uiSignInWithMfa } = await import('./helpers')
-  // privileged: last factor protected
-  const v = await createUser('vendor-lastfactor', ['vendor_owner'])
+  // staff: last factor protected
+  const v = await createUser('staff-lastfactor', ['support_agent'])
   const { secret } = await enrolFactorViaApi(v.email)
   await uiSignInWithMfa(page, v.email, secret, '/account/security')
   await expect(page.getByRole('button', { name: /remove authenticator app/i })).toHaveCount(0)

@@ -56,7 +56,7 @@ describe('my_roles()', () => {
 describe('profiles RLS', () => {
   it('customer reads own profile but not another customer’s (aal1 and aal2)', async () => {
     await withTx(async (c) => {
-      const a = await createUser(c)
+      const a = await createUser(c, 'u', { mfa: false })
       const b = await createUser(c)
       for (const aal of ['aal1', 'aal2'] as const) {
         const rows = await as(

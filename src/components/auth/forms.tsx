@@ -4,6 +4,8 @@ import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox, Input } from '@/components/ui/fields'
 import {
+  requestPasswordResetAction,
+  resetPasswordAction,
   signInAction,
   signUpAction,
   type FormState,
@@ -58,6 +60,11 @@ export function SignInForm({ next }: { next: string }) {
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? 'Signing in…' : 'Sign in'}
       </Button>
+      <p className="text-center text-sm">
+        <Link className="font-semibold text-brand-700 underline" href="/forgot-password">
+          Forgot your password?
+        </Link>
+      </p>
       <p className="text-center text-sm text-muted">
         New here?{' '}
         <Link className="font-semibold text-brand-700 underline" href="/signup">
@@ -113,6 +120,79 @@ export function SignUpForm() {
         Already registered?{' '}
         <Link className="font-semibold text-brand-700 underline" href="/login">
           Sign in
+        </Link>
+      </p>
+    </form>
+  )
+}
+
+export function ForgotPasswordForm() {
+  const [state, action, pending] = useActionState(requestPasswordResetAction, initial)
+  return (
+    <form action={action} className="space-y-4" noValidate>
+      <Notice state={state} />
+      <Input
+        label="Email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        inputMode="email"
+        required
+        defaultValue={state.email ?? ''}
+        hint="We will send a 6-digit code to the email you used to open your account."
+      />
+      <Button type="submit" disabled={pending} className="w-full">
+        {pending ? 'Sending…' : 'Send me a code'}
+      </Button>
+    </form>
+  )
+}
+
+export function ResetPasswordForm({ email }: { email: string }) {
+  const [state, action, pending] = useActionState(resetPasswordAction, initial)
+  return (
+    <form action={action} className="space-y-4" noValidate>
+      <Notice state={state} />
+      <Input
+        label="Email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        inputMode="email"
+        required
+        defaultValue={state.email ?? email}
+      />
+      <Input
+        label="6-digit code"
+        name="code"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        pattern="[0-9]*"
+        maxLength={6}
+        required
+      />
+      <Input
+        label="New password"
+        name="password"
+        type="password"
+        autoComplete="new-password"
+        required
+        hint="At least 10 characters with upper case, lower case and a number."
+      />
+      <Input
+        label="Repeat new password"
+        name="confirm"
+        type="password"
+        autoComplete="new-password"
+        required
+      />
+      <Button type="submit" disabled={pending} className="w-full">
+        {pending ? 'Saving…' : 'Save password and sign in'}
+      </Button>
+      <p className="text-center text-sm text-muted">
+        No code?{' '}
+        <Link className="font-semibold text-brand-700 underline" href="/forgot-password">
+          Send a new one
         </Link>
       </p>
     </form>
