@@ -65,6 +65,7 @@ describe('every server action gates access', () => {
     'requestPasswordResetAction', // public: e-mails a one-time code (rate limited by IP and email hash)
     'resetPasswordAction', // public: code + new password (rate limited, five tries per code)
     'signOutAction', // ends the caller's own session; needs no role
+    'switchModeAction', // checks sign-in and the staff role itself; the cookie it sets can only reduce access (audited)
     'startEnrollmentAction', // checks loadPrincipal() itself
     'verifyEnrollmentAction', // checks loadPrincipal() itself
     'verifySignInAction', // completes the challenge for the session that holds the pending factor

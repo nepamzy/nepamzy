@@ -37,9 +37,17 @@
   --color-info-50: #e6eefa;
   --color-info-700: #1a4a8a;
 
+  /* Navy: the Administration sidebar, hero bands and footer. Light text on navy is checked in visual-fixes.test.ts. */
+  --color-navy-950: #081c45;
+  --color-navy-900: #0c2a63;
+  --color-navy-800: #123575;
+  --color-navy-700: #1b4690;
+  --color-navy-text: #d6e1f6;
+
   --radius-card: 0.875rem;
   --radius-control: 0.625rem;
   --shadow-card: 0 1px 2px rgb(19 28 43 / 0.06), 0 2px 8px rgb(19 28 43 / 0.05);
+  --shadow-pop: 0 8px 28px rgb(8 28 69 / 0.18);
   --text-base: 1rem;
 }
 

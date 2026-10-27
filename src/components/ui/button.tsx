@@ -2,11 +2,12 @@ import Link from 'next/link'
 import type { ButtonHTMLAttributes, ComponentProps } from 'react'
 import { cn } from './cn'
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'danger' | 'ghost' | 'gold'
 const base =
   'touch-target inline-flex items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 py-2.5 text-base font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60'
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand-700 text-white hover:bg-brand-800',
+  primary: 'bg-brand-700 text-white shadow-sm hover:bg-brand-800',
+  gold: 'bg-gold-400 text-ink shadow-sm hover:brightness-95',
   secondary: 'border border-line-strong bg-card text-ink hover:bg-brand-50',
   danger: 'bg-danger-700 text-white hover:bg-danger-800',
   ghost: 'text-brand-700 hover:bg-brand-50',

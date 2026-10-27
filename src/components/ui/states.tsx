@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, type ReactNode } from 'react'
 import { Button } from './button'
 import { Card } from './card'
+import { Icon, type IconName } from './icons'
 import { cn } from './cn'
 
 export function Skeleton({ className }: { className?: string }) {
@@ -22,14 +23,19 @@ export function EmptyState({
   title,
   children,
   action,
+  icon = 'package',
 }: {
   title: string
   children?: ReactNode
   action?: ReactNode
+  icon?: IconName
 }) {
   return (
-    <Card className="text-center">
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <Card className="px-4 py-10 text-center">
+      <span className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-brand-50 text-brand-700">
+        <Icon name={icon} size={24} />
+      </span>
+      <h2 className="text-lg font-bold text-navy-900">{title}</h2>
       {children && <p className="mx-auto mt-1 max-w-prose text-muted">{children}</p>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </Card>
@@ -53,8 +59,11 @@ export function ErrorState({
   onRetry?: () => void
 }) {
   return (
-    <Card role="alert" className="border-danger-700 text-center">
-      <h2 className="text-lg font-semibold text-danger-700">{title}</h2>
+    <Card role="alert" className="border-danger-700 px-4 py-10 text-center">
+      <span className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-danger-50 text-danger-700">
+        <Icon name="alert" size={24} />
+      </span>
+      <h2 className="text-lg font-bold text-danger-700">{title}</h2>
       <p className="mx-auto mt-1 max-w-prose text-muted">
         {children ?? 'Please try again. If it keeps happening, contact support.'}
       </p>

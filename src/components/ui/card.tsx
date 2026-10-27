@@ -1,4 +1,5 @@
 import type { HTMLAttributes } from 'react'
+import { Breadcrumbs, type Crumb } from './breadcrumbs'
 import { cn } from './cn'
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -16,18 +17,25 @@ export function PageHeader({
   title,
   subtitle,
   actions,
+  breadcrumbs,
 }: {
   title: string
   subtitle?: string
   actions?: React.ReactNode
+  breadcrumbs?: Crumb[]
 }) {
   return (
-    <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-muted">{subtitle}</p>}
+    <div className="mb-6">
+      {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-extrabold tracking-tight text-navy-900 sm:text-3xl">
+            {title}
+          </h1>
+          {subtitle && <p className="mt-1 text-muted">{subtitle}</p>}
+        </div>
+        {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
-      {actions}
     </div>
   )
 }

@@ -57,7 +57,23 @@ export function SignInForm({ next }: { next: string }) {
         autoComplete="current-password"
         required
       />
-      <Button type="submit" disabled={pending} className="w-full">
+      <fieldset className="rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
+        <legend className="px-1 text-sm font-bold text-navy-900">Sign in to (optional)</legend>
+        <div className="flex flex-wrap gap-x-5 gap-y-1">
+          <label className="touch-target flex items-center gap-2 font-semibold">
+            <input type="radio" name="mode" value="customer" /> Customer
+          </label>
+          <label className="touch-target flex items-center gap-2 font-semibold">
+            <input type="radio" name="mode" value="admin" /> Administrator
+          </label>
+        </div>
+        <p className="text-xs text-muted">
+          Only for accounts that have administrator access; everyone else is signed in as a
+          customer. Leave both unticked to sign in as usual. You can switch at any time after
+          signing in.
+        </p>
+      </fieldset>
+      <Button type="submit" variant="gold" disabled={pending} className="w-full">
         {pending ? 'Signing in…' : 'Sign in'}
       </Button>
       <p className="text-center text-sm">

@@ -34,7 +34,9 @@ export async function gate(
     state: failed(
       decision.action === 'forbidden'
         ? 'You are not allowed to do this.'
-        : 'Please sign in and confirm your authenticator code to continue.',
+        : decision.action === 'switch-mode'
+          ? 'You are in Customer mode. Switch to Administrator mode to do this.'
+          : 'Please sign in and confirm your authenticator code to continue.',
     ),
   }
 }
@@ -47,6 +49,7 @@ export async function gateOrRedirect(req: AccessRequirement, next: string): Prom
   if (decision.action === 'login') redirect(`/login?next=${n}`)
   if (decision.action === 'mfa-enroll') redirect(`/mfa/enroll?next=${n}`)
   if (decision.action === 'mfa-challenge') redirect(`/mfa/challenge?next=${n}`)
+  if (decision.action === 'switch-mode') redirect(`/account/mode?next=${n}`)
   forbidden()
 }
 
