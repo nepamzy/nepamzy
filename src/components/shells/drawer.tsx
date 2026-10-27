@@ -41,7 +41,7 @@ export function MobileDrawer({
         ref={ref}
         onClose={() => setOpen(false)}
         onClick={(e) => e.target === ref.current && setOpen(false)}
-        aria-label={`${area} menu`}
+        aria-label={`${area} navigation`}
         className={`m-0 h-dvh max-h-none w-[min(20rem,86vw)] max-w-none overflow-y-auto p-4 backdrop:bg-black/50 ${navy ? 'bg-navy-900 text-white' : 'bg-card text-ink'}`}
       >
         <div className="mb-4 flex items-center justify-between">

@@ -37,7 +37,7 @@ export function AuthFrame({ children }: { children: ReactNode }) {
         </div>
         <span
           aria-hidden="true"
-          className="absolute -bottom-24 -right-24 size-80 rounded-full border-[28px] border-gold-400/25"
+          className="absolute -bottom-24 -right-24 size-80 rounded-full border-[28px] border-navy-800"
         />
         <p className="text-xs text-navy-text">
           Pre-launch preview. Provisional design, not official AFIT branding.

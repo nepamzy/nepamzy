@@ -19,19 +19,35 @@ const maskId = (s) =>
     .replace(/\/receipts\/[0-9a-f]{48}/, '/receipts/[token]')
     .replace(/\/vendors\/shop-[a-z0-9]{6}/, '/vendors/[shop]')
 const esc = (s) =>
-  String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+  String(s).replace(
+    /[&<>"]/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+  )
 const norm = (f) =>
-  f.replace(/receipts-[0-9a-f]{48}/, 'receipts-TOKEN').replace(/vendors-shop-[a-z0-9]{6}/, 'vendors-SHOP')
+  f
+    .replace(/receipts-[0-9a-f]{48}/, 'receipts-TOKEN')
+    .replace(/vendors-shop-[a-z0-9]{6}/, 'vendors-SHOP')
 const key = (r) => `${r.role}/${norm((r.file ?? '').split('/').pop())}`
 
 const data = {}
-for (const [name, phase] of [['before', BEFORE], ['after', AFTER]])
-  for (const vp of ['desktop', 'mobile']) data[`${name}/${vp}`] = new Map(load(phase, vp).map((r) => [key(r), r]))
-const keys = [...new Set(Object.values(data).flatMap((m) => [...m.keys()]))].filter((k) => !k.endsWith('/'))
+for (const [name, phase] of [
+  ['before', BEFORE],
+  ['after', AFTER],
+])
+  for (const vp of ['desktop', 'mobile'])
+    data[`${name}/${vp}`] = new Map(load(phase, vp).map((r) => [key(r), r]))
+const keys = [...new Set(Object.values(data).flatMap((m) => [...m.keys()]))].filter(
+  (k) => !k.endsWith('/'),
+)
 const order = { public: 0, customer: 1, vendor: 2, rider: 3, admin: 4 }
-keys.sort((a, b) => (order[a.split('/')[0]] ?? 9) - (order[b.split('/')[0]] ?? 9) || a.localeCompare(b))
+keys.sort(
+  (a, b) => (order[a.split('/')[0]] ?? 9) - (order[b.split('/')[0]] ?? 9) || a.localeCompare(b),
+)
 const row = (k) =>
-  data['after/desktop'].get(k) ?? data['after/mobile'].get(k) ?? data['before/desktop'].get(k) ?? data['before/mobile'].get(k)
+  data['after/desktop'].get(k) ??
+  data['after/mobile'].get(k) ??
+  data['before/desktop'].get(k) ??
+  data['before/mobile'].get(k)
 const img = (name, vp, k) => {
   const r = data[`${name}/${vp}`].get(k)
   return r?.file
@@ -46,7 +62,11 @@ article{background:#fff;border:1px solid #cdd6e4;border-radius:10px;padding:12px
 img{width:100%;height:auto;border:1px solid #cdd6e4;border-radius:6px;display:block}.none{border:1px dashed #70819c;padding:30px 8px;text-align:center;color:#44536a;font-size:13px}
 .note{font-size:12px;color:#7a5400}nav a{margin-right:12px}@media(max-width:900px){.grid{grid-template-columns:1fr}}`
 let html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AFIT Market ${esc(TITLE)} gallery</title><style>${css}</style>
-<header><h1>AFIT Market: ${esc(TITLE)} gallery</h1><p>Synthetic local data only. Before = ${esc(BEFORE)}; After = ${esc(AFTER)}. Desktop 1440x900, mobile 390x844. ${keys.length} pages/states. Provisional palette, not official AFIT branding.</p></header><main><nav>${Object.keys(order).map((r) => `<a href="#${r}">${r}</a>`).join('')}</nav>`
+<header><h1>AFIT Market: ${esc(TITLE)} gallery</h1><p>Synthetic local data only. Before = ${esc(BEFORE)}; After = ${esc(AFTER)}. Desktop 1440x900, mobile 390x844. ${keys.length} pages/states. Provisional palette, not official AFIT branding.</p></header><main><nav>${Object.keys(
+  order,
+)
+  .map((r) => `<a href="#${r}">${r}</a>`)
+  .join('')}</nav>`
 let cur = ''
 for (const k of keys) {
   const role = k.split('/')[0]
@@ -67,24 +87,39 @@ for (const k of keys) {
   const r = row(k)
   md += `| ${r.role} | \`${maskId(r.route)}\` | ${r.state} | ${r.http ?? ''} | ${yn('before', 'desktop', k)} | ${yn('after', 'desktop', k)} | ${yn('before', 'mobile', k)} | ${yn('after', 'mobile', k)} | ${maskId(r.note ?? '').replace(/\|/g, '/')} |\n`
 }
-const missing = keys.filter((k) => ['before', 'after'].some((p) => ['desktop', 'mobile'].some((v) => !data[`${p}/${v}`].get(k)?.file)))
+const missing = keys.filter((k) =>
+  ['before', 'after'].some((p) =>
+    ['desktop', 'mobile'].some((v) => !data[`${p}/${v}`].get(k)?.file),
+  ),
+)
 md += `\nTotal pages/states: ${keys.length}. Missing in at least one of the four captures: ${missing.length}${missing.length ? ` (${missing.join(', ')})` : ''}.\n`
 const counts = (name) =>
-  ['desktop', 'mobile'].map((v) => `${v}: ${[...data[`${name}/${v}`].values()].filter((r) => r.file).length}`).join(', ')
+  ['desktop', 'mobile']
+    .map((v) => `${v}: ${[...data[`${name}/${v}`].values()].filter((r) => r.file).length}`)
+    .join(', ')
 md += `\nScreenshot counts, before (${BEFORE}): ${counts('before')}. After (${AFTER}): ${counts('after')}.\n`
 const byRole = {}
 for (const name of ['before', 'after'])
   for (const vp of ['desktop', 'mobile'])
-    for (const r of data[`${name}/${vp}`].values()) if (r.file) byRole[`${name}/${r.role}`] = (byRole[`${name}/${r.role}`] ?? 0) + 1
-md += `\nBy role (both viewports): ${Object.entries(byRole).map(([k, v]) => `${k}=${v}`).join(', ')}.\n`
+    for (const r of data[`${name}/${vp}`].values())
+      if (r.file) byRole[`${name}/${r.role}`] = (byRole[`${name}/${r.role}`] ?? 0) + 1
+md += `\nBy role (both viewports): ${Object.entries(byRole)
+  .map(([k, v]) => `${k}=${v}`)
+  .join(', ')}.\n`
 writeFileSync(join(ROOT, 'page-inventory.md'), md)
 
 const failures = []
 for (const name of ['before', 'after'])
   for (const vp of ['desktop', 'mobile'])
-    for (const r of data[`${name}/${vp}`].values()) if (!r.file || /FAILED/.test(r.note ?? '')) failures.push(`- ${name}/${vp}: ${r.role} ${maskId(r.route)} (${r.state}): ${maskId(r.note ?? 'no file')}`)
+    for (const r of data[`${name}/${vp}`].values())
+      if (!r.file || /FAILED/.test(r.note ?? ''))
+        failures.push(
+          `- ${name}/${vp}: ${r.role} ${maskId(r.route)} (${r.state}): ${maskId(r.note ?? 'no file')}`,
+        )
 writeFileSync(
   join(ROOT, 'capture-failures.md'),
   `# Capture failures (${TITLE})\n\n${failures.length ? failures.join('\n') : 'None: every attempted page/state produced a screenshot in both viewports.'}\n\nPages that redirect (for example an anonymous visitor to /login) are real rendered states and are noted in the inventory, not counted as failures. Screens that need fixtures the audit does not create (real payment provider pages, real map tiles, a hosted file store) are not captured and are listed in docs/known-issues.md.\n`,
 )
-console.log(`pages/states: ${keys.length}; missing in some capture: ${missing.length}; failures: ${failures.length}`)
+console.log(
+  `pages/states: ${keys.length}; missing in some capture: ${missing.length}; failures: ${failures.length}`,
+)

@@ -87,7 +87,7 @@ export default async function Home() {
         )}
       </section>
       <p className="text-center text-sm text-muted">
-        Browsing needs no account. You will set up a second sign-in step before you place an order.
+        Browsing needs no account. Create one when you are ready to order.
       </p>
       <div className="flex justify-center">
         <ButtonLink href="/apply" variant="ghost">

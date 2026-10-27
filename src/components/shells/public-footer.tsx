@@ -27,10 +27,7 @@ const COLS: { title: string; links: [string, string][] }[] = [
   },
   {
     title: 'Help',
-    links: [
-      ['Report a problem', '/cases'],
-      ['Check a receipt', '/receipts/check'],
-    ],
+    links: [['Report a problem', '/cases']],
   },
 ]
 
