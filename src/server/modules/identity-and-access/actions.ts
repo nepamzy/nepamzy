@@ -1,5 +1,6 @@
 'use server'
 
+import { notifyWelcome } from '@/server/modules/engagement/dispatch'
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -74,7 +75,10 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     return { error: 'An account with this email already exists. Try signing in instead.', email }
   if (!error) notifyAdmin({ type: 'signup', email })
   // E-mail confirmation is switched off in the provider settings: the person is already signed in.
-  if (outcome === 'signed_in') redirect('/')
+  if (outcome === 'signed_in') {
+    notifyWelcome(email)
+    redirect('/')
+  }
   // Same message whether or not the address already exists (prevents account enumeration).
   return { ok: true, message: 'Check your email. We sent a link to confirm your address.' }
 }

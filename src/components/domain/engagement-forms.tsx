@@ -55,13 +55,13 @@ export function PreferenceForm({ emailEnabled }: { emailEnabled: boolean }) {
   return (
     <ActionForm action={setNotificationPreferenceAction} submitLabel="Save" pendingLabel="Saving…">
       <Checkbox
-        label="Also copy my notifications to the local test sink"
+        label="Email me about my orders, reports and refunds"
         name="email_enabled"
         defaultChecked={emailEnabled}
       />
       <p className="text-sm text-muted">
-        No real email, SMS or push message is sent by this system. This only writes a copy to a
-        local test sink on the server, so the delivery pipeline can be rehearsed.
+        We email the address on your account. Emails never contain payment details, codes or
+        locations. Turn this off to stop them; the notifications above stay in your account.
       </p>
     </ActionForm>
   )

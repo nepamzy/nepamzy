@@ -1,5 +1,6 @@
 'use server'
 
+import { kickDispatch } from '@/server/modules/engagement/dispatch'
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -103,6 +104,7 @@ export async function placeOrderAction(_p: CheckoutState, fd: FormData): Promise
     return dbFailed(error)
   }
   notifyAdmin({ type: 'order_placed', orderId: String(data) })
+  kickDispatch()
   revalidatePath('/orders')
   revalidatePath('/cart')
   redirect(`/orders/${String(data)}`)

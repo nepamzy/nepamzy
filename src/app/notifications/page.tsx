@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarkReadButton, PreferenceForm } from '@/components/domain/engagement-forms'
+import { PushToggle } from '@/components/domain/push-toggle'
+import { pushConfig } from '@/server/modules/engagement/push'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { Pager } from '@/components/ui/pager'
@@ -27,6 +29,7 @@ export default async function Notifications({
     myDeliverySummary(),
   ])
   const items = data?.items ?? []
+  const pushKey = pushConfig()?.publicKey ?? null
   return (
     <>
       <PageHeader
@@ -77,20 +80,18 @@ export default async function Notifications({
           Copies
         </h2>
         <Card className="space-y-3">
-          <PreferenceForm emailEnabled={prefs.email_enabled} />
+          <PreferenceForm emailEnabled={!prefs.saved || prefs.email_enabled} />
+          {pushKey && <PushToggle publicKey={pushKey} />}
           {summary && (
             <div>
-              <h3 className="font-semibold">Status of your optional copies (last 30 days)</h3>
+              <h3 className="font-semibold">Older copy requests (last 30 days)</h3>
               <ul className="mt-1 list-disc pl-5 text-sm">
                 <li>Waiting to be processed: {summary.queued}</li>
-                <li>
-                  Written to the test sink (not a real email): {summary.delivered_to_test_sink}
-                </li>
                 <li>Failed after several tries: {summary.failed}</li>
               </ul>
               <p className="mt-1 text-sm text-muted">
-                Waiting is not delivered. Messages shown at the top of this page are always in your
-                account. Nothing on this page has been sent as a real email, SMS or push message.
+                Messages shown at the top of this page are always in your account, whether or not an
+                email or pop-up reaches you.
               </p>
             </div>
           )}

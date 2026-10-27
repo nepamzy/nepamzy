@@ -4,9 +4,11 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { rateLimit } from '@/server/modules/identity-and-access/security'
 import type { AccessRequirement } from '@/server/modules/identity-and-access/policy'
 import { EDITABLE_SETTINGS } from './queries'
+import { isAllowedPushEndpoint } from './push'
 import {
   dbFailed,
   done,
@@ -49,7 +51,7 @@ export async function setNotificationPreferenceAction(
   const { error } = await sb.rpc('set_notification_preference', { p_email: on })
   if (error) return dbFailed(error, 'Could not save your choice.')
   revalidatePath('/notifications')
-  return done(on ? 'Saved: copies go to the local test sink.' : 'Saved: no copies are sent.')
+  return done(on ? 'Saved: we will email you.' : 'Saved: we will not email you.')
 }
 
 export async function createReviewAction(_p: ActionState, fd: FormData): Promise<ActionState> {
@@ -238,4 +240,56 @@ export async function resolveDataRequestAction(
   if (error) return dbFailed(error, 'Give a note of at least 10 characters.')
   revalidatePath('/admin/data-requests')
   return done('Recorded.')
+}
+
+const pushSub = z.object({
+  endpoint: z.string().max(1000).refine(isAllowedPushEndpoint),
+  p256dh: z.string().min(20).max(200),
+  auth: z.string().min(8).max(100),
+})
+const MAX_DEVICES = 5
+
+/** Registers this browser/phone for pop-up notifications. One person may register up to five devices. */
+export async function savePushSubscriptionAction(input: unknown): Promise<ActionState> {
+  const g = await gate(ANY_USER)
+  if ('state' in g) return g.state
+  const userId = g.who.userId
+  if (!userId) return failed('Please sign in to continue.')
+  if (!(await rateLimit(`push:save:${userId}`, 3600, 20)))
+    return failed('Too many attempts. Please try again later.')
+  const parsed = pushSub.safeParse(input)
+  if (!parsed.success) return failed('This device cannot receive pop-ups.')
+  const svc = createSupabaseServiceClient()
+  const mine = await svc.from('push_subscriptions').select('endpoint').eq('user_id', userId)
+  if (mine.error) return failed('Could not turn on pop-ups. Please try again.')
+  const known = (mine.data ?? []).some((r) => r.endpoint === parsed.data.endpoint)
+  if (!known && (mine.data ?? []).length >= MAX_DEVICES)
+    return failed('You have pop-ups on five devices already. Turn one off first.')
+  const { error } = await svc
+    .from('push_subscriptions')
+    .upsert({ user_id: userId, ...parsed.data }, { onConflict: 'endpoint' })
+  if (error) {
+    logger.warn('push subscription save failed', { code: error.code })
+    return failed('Could not turn on pop-ups. Please try again.')
+  }
+  revalidatePath('/notifications')
+  return done('Pop-ups are on for this device.')
+}
+
+export async function removePushSubscriptionAction(endpoint: string): Promise<ActionState> {
+  const g = await gate(ANY_USER)
+  if ('state' in g) return g.state
+  const userId = g.who.userId
+  if (!userId) return failed('Please sign in to continue.')
+  if (!(await rateLimit(`push:remove:${userId}`, 3600, 20)))
+    return failed('Too many attempts. Please try again later.')
+  if (typeof endpoint !== 'string' || endpoint.length > 1000) return failed('Not found.')
+  const { error } = await createSupabaseServiceClient()
+    .from('push_subscriptions')
+    .delete()
+    .eq('user_id', userId)
+    .eq('endpoint', endpoint)
+  if (error) return failed('Could not turn off pop-ups. Please try again.')
+  revalidatePath('/notifications')
+  return done('Pop-ups are off for this device.')
 }

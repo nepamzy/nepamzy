@@ -46,7 +46,7 @@ describe('control borders meet 3:1 (WCAG 1.4.11) on every background they sit on
     // keyboard focus ring (brand-600) is visible against the page surface and white
     expect(ratio(token('brand-600'), token('surface'))).toBeGreaterThanOrEqual(3)
   })
-  it('no component hard-codes the old teal or any raw hex colour outside the token file and the signature pad', () => {
+  it('no component hard-codes the old teal or any raw hex colour outside the token file, the signature pad and the e-mail template', () => {
     const files = execSync(
       "grep -rlE '#[0-9a-fA-F]{6}' src --include=*.tsx --include=*.ts --include=*.css",
       { encoding: 'utf8' },
@@ -58,6 +58,8 @@ describe('control borders meet 3:1 (WCAG 1.4.11) on every background they sit on
       'src/app/layout.tsx',
       'src/app/manifest.ts',
       'src/components/domain/signature-pad.tsx',
+      // e-mail clients cannot use CSS variables, so the brand colours are written out in the message template
+      'src/server/modules/engagement/email-templates.ts',
     ])
   })
 })
