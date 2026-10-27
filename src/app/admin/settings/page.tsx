@@ -16,7 +16,7 @@ export default async function Settings() {
         title="Settings"
         subtitle="Fees, limits and policies. The vendor commission rates are owner-approved; other values (for example the delivery fee and refund limits) are still development placeholders awaiting owner decisions. The old customer platform fee is retired and fixed at 0. Every change is validated by the database and written to the audit trail."
       />
-      <Alert tone="warning" title="Handle with care" className="mb-4">
+      <Alert tone="info" title="Handle with care" className="mb-4">
         Settings change how the whole marketplace behaves. Each change is validated by the database
         and written to the audit log with your account.
       </Alert>

@@ -52,7 +52,7 @@ test('platform admin grants and revokes a role through the UI; everything is aud
 
   // The audit page (real data via RLS) shows the events
   await page.goto('/admin/audit')
-  await expect(page.getByText('role.granted').first()).toBeVisible()
+  await expect(page.getByText('role.granted').filter({ visible: true }).first()).toBeVisible()
 })
 
 test('a support agent cannot use the role form even by calling the server action path (page is 403)', async ({

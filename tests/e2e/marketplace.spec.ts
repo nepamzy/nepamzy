@@ -231,7 +231,7 @@ test('browse, search and filter; cart rules (one vendor at a time, quantities, r
     await p.goto(`/vendors?q=${q}`)
     await expect(p.getByText('No matches')).toBeVisible()
   }
-  await p.goto('/vendors?q=rice')
+  await p.goto('/vendors?q=jollof')
   await expect(p.getByRole('heading', { name: 'Matching items' })).toBeVisible()
   await expect(p.getByRole('link', { name: 'Jollof rice and chicken' })).toBeVisible()
   await p.goto('/vendors/sample-kitchen')
@@ -265,8 +265,10 @@ test('browse, search and filter; cart rules (one vendor at a time, quantities, r
   await expect(b.getByText('Jollof rice and chicken')).toHaveCount(0)
 
   // quantity update and removal
-  await b.getByLabel('Quantity').fill('4')
-  await b.getByRole('button', { name: 'Update' }).click()
+  for (const n of [2, 3, 4]) {
+    await b.getByRole('button', { name: /Increase quantity of/ }).click()
+    await expect(b.getByLabel(`Quantity ${n}`)).toBeVisible()
+  }
   await expect(b.getByText('₦200').first()).toBeVisible() // 4 x N50
   await b.getByRole('button', { name: 'Remove' }).click()
   await expect(b.getByText('Your cart is empty')).toBeVisible()
