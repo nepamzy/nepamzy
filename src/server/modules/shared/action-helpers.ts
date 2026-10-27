@@ -1,6 +1,7 @@
 import 'server-only'
 import { forbidden, redirect } from 'next/navigation'
 import { friendlyDbError, type DbError } from '@/lib/db-errors'
+import { kickDispatch } from '@/server/modules/engagement/dispatch'
 import { checkAccess } from '@/server/modules/identity-and-access/guard'
 import {
   safeNextPath,
@@ -9,7 +10,11 @@ import {
 } from '@/server/modules/identity-and-access/policy'
 
 export type ActionState = { ok?: boolean; error?: string; message?: string }
-export const done = (message: string): ActionState => ({ ok: true, message })
+export const done = (message: string): ActionState => {
+  // A successful action may have produced a notification: deliver it within seconds (no-op unless mail/push is configured).
+  kickDispatch()
+  return { ok: true, message }
+}
 export const failed = (error: string): ActionState => ({ error })
 export const dbFailed = (e: DbError, fallback?: string): ActionState => ({
   error: friendlyDbError(e, fallback),

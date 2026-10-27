@@ -1,5 +1,6 @@
 'use server'
 
+import { notifyWelcome } from '@/server/modules/engagement/dispatch'
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -7,7 +8,7 @@ import { serverEnv } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { checkAccess, loadPrincipal } from './guard'
-import { isPrivilegedRole, safeNextPath } from './policy'
+import { isPrivilegedRole, safeNextPath, signUpOutcome } from './policy'
 import { clientIp, rateLimit, recordSecurityEvent, sha256Hex } from './security'
 
 export type FormState = { ok?: boolean; error?: string; message?: string; email?: string }
@@ -55,7 +56,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     return { error: TOO_MANY }
   }
   const supabase = await createSupabaseServerClient()
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -66,10 +67,18 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   if (error && error.status && error.status < 500 && error.code !== 'weak_password') {
     logger.warn('signup rejected', { code: error.code })
   }
-  if (error?.code === 'weak_password') return { error: 'Choose a stronger password.' }
-  if (error && (!error.status || error.status >= 500))
+  const outcome = signUpOutcome({ error, hasSession: Boolean(data?.session) })
+  if (outcome === 'weak_password') return { error: 'Choose a stronger password.' }
+  if (outcome === 'unavailable')
     return { error: 'We could not create your account right now. Please try again.' }
+  if (outcome === 'exists')
+    return { error: 'An account with this email already exists. Try signing in instead.', email }
   if (!error) notifyAdmin({ type: 'signup', email })
+  // E-mail confirmation is switched off in the provider settings: the person is already signed in.
+  if (outcome === 'signed_in') {
+    notifyWelcome(email)
+    redirect('/')
+  }
   // Same message whether or not the address already exists (prevents account enumeration).
   return { ok: true, message: 'Check your email. We sent a link to confirm your address.' }
 }

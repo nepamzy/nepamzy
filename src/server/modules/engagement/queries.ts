@@ -74,8 +74,9 @@ export const listNotifications = (page = 1, unreadOnly = false) =>
 export const unreadCount = async () =>
   (await rpc<NotificationPage>('list_my_notifications', { p_limit: 1, p_offset: 0 }))?.unread ?? 0
 export const getNotificationPreferences = async () =>
-  (await rpc<{ email_enabled: boolean }>('get_notification_preferences')) ?? {
+  (await rpc<{ email_enabled: boolean; saved?: boolean }>('get_notification_preferences')) ?? {
     email_enabled: false,
+    saved: false,
   }
 
 export const myOrderReview = (order: string) =>

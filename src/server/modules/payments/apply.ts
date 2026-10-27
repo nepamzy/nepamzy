@@ -1,5 +1,6 @@
 import 'server-only'
 import { alertablePaymentOutcome, notifyAdmin } from '@/server/modules/engagement/admin-alerts'
+import { kickDispatch } from '@/server/modules/engagement/dispatch'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import type { PaymentEventCall } from './events'
 
@@ -15,6 +16,7 @@ export async function applyPaymentEvent(c: PaymentEventCall): Promise<string> {
   })
   if (error) throw new Error(`payment_apply_event failed: ${error.code ?? ''}`)
   const outcome = String(data)
+  kickDispatch()
   if (alertablePaymentOutcome(outcome))
     notifyAdmin({
       type: 'payment',

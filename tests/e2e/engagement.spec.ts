@@ -47,11 +47,11 @@ test('notifications: generic in-app notices, private to their owner, keyboard op
   ])
   await expect(c.getByText('1 unread')).toHaveCount(0)
 
-  // preference: opt-in copy goes to a LOCAL sink; the page says plainly nothing is emailed
-  await expect(c.getByText(/No real email, SMS or push message is sent/)).toBeVisible()
-  await c.getByLabel(/local test sink/).check()
+  // preference: e-mail copies are on unless the person turns them off; the page says what is and is not emailed
+  await expect(c.getByText(/Emails never contain payment details/)).toBeVisible()
+  await c.getByLabel(/Email me about/).check()
   await clickAndWait(c, () => c.getByRole('button', { name: 'Save' }).click())
-  await expect(statusIn(c)).toContainText(/local test sink/)
+  await expect(statusIn(c)).toContainText(/we will email you/)
   const pref = await admin()
     .from('notification_preferences')
     .select('email_enabled')
@@ -194,7 +194,7 @@ test('jobs: every worker route rejects callers without the secret, and the notif
   const o = await seedPaidCompletedOrder(shop, customer.user.id)
   // the customer opts in to the local sink, then something happens to their order
   await customer.page.goto('/notifications')
-  await customer.page.getByLabel(/local test sink/).check()
+  await customer.page.getByLabel(/Email me about/).check()
   await clickAndWait(customer.page, () =>
     customer.page.getByRole('button', { name: 'Save' }).click(),
   )
