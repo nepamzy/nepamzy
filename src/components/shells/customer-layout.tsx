@@ -23,7 +23,7 @@ export async function CustomerLayout({
       signedInAs={data.user?.email}
       items={CUSTOMER_NAV}
       showCart
-      search={{ action: '/vendors', placeholder: 'Search food, shops and services' }}
+      search={{ action: '/products', placeholder: 'Search food, shops and services' }}
     >
       {children}
     </AppShell>

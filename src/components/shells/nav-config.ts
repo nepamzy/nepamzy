@@ -3,7 +3,7 @@ import type { IconName } from '@/components/ui/icons'
 export type NavItem = { href: string; label: string; icon: IconName; group?: string }
 
 export const CUSTOMER_NAV: NavItem[] = [
-  { href: '/vendors', label: 'Browse', icon: 'store' },
+  { href: '/products', label: 'Browse', icon: 'store' },
   { href: '/cart', label: 'Cart', icon: 'cart' },
   { href: '/orders', label: 'Orders', icon: 'package' },
   { href: '/cases', label: 'Reports', icon: 'help' },

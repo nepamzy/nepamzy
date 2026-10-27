@@ -9,6 +9,9 @@ import { rateLimit } from '@/server/modules/identity-and-access/security'
 import type { AccessRequirement } from '@/server/modules/identity-and-access/policy'
 import { EDITABLE_SETTINGS } from './queries'
 import { isAllowedPushEndpoint } from './push'
+import { notifyAdmin } from './admin-alerts'
+import { clientIp, sha256Hex } from '@/server/modules/identity-and-access/security'
+import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
 import {
   dbFailed,
   done,
@@ -292,4 +295,54 @@ export async function removePushSubscriptionAction(endpoint: string): Promise<Ac
   if (error) return failed('Could not turn off pop-ups. Please try again.')
   revalidatePath('/notifications')
   return done('Pop-ups are off for this device.')
+}
+
+const contactSchema = z.object({
+  name: z.string().trim().min(2, 'Enter your name.').max(80),
+  email: z.email('Enter a valid email address.').max(254),
+  subject: z.string().trim().min(3, 'Enter a short subject.').max(100),
+  message: z.string().trim().min(10, 'Write at least a few words.').max(2000),
+})
+
+/** Public contact form. No login needed; rate limited by address and e-mail; staff read it in Administration. */
+export async function submitContactAction(_p: ActionState, fd: FormData): Promise<ActionState> {
+  // a hidden field real people never fill in: bots do. Pretend success so they learn nothing.
+  if (text(fd, 'website', 100)) return done('Thank you. We received your message.')
+  const parsed = contactSchema.safeParse({
+    name: text(fd, 'name', 80),
+    email: text(fd, 'email', 254).toLowerCase(),
+    subject: text(fd, 'subject', 100),
+    message: text(fd, 'message', 2000),
+  })
+  if (!parsed.success) return failed(parsed.error.issues[0]?.message ?? 'Check your message.')
+  const ip = await clientIp()
+  if (
+    !(await rateLimit(`contact:ip:${ip}`, 3600, 5)) ||
+    !(await rateLimit(`contact:email:${sha256Hex(parsed.data.email)}`, 3600, 3))
+  )
+    return failed('Too many messages. Please try again later.')
+  const who = await loadPrincipal()
+  const { error } = await createSupabaseServiceClient()
+    .from('contact_messages')
+    .insert({ ...parsed.data, user_id: who.userId })
+  if (error) {
+    logger.warn('contact message not saved', { code: error.code })
+    return failed('We could not send your message. Please try again.')
+  }
+  notifyAdmin({ type: 'contact_message' })
+  return done('Thank you. We received your message and will reply by email.')
+}
+
+export async function setContactStatusAction(_p: ActionState, fd: FormData): Promise<ActionState> {
+  const g = await gate({ roles: ['platform_admin', 'support_agent'], aal: 'aal2' })
+  if ('state' in g) return g.state
+  const id = text(fd, 'id', 40)
+  const status = text(fd, 'status', 10)
+  if (!uuid.safeParse(id).success || !['read', 'closed'].includes(status))
+    return failed('That message was not found.')
+  const sb = await createSupabaseServerClient()
+  const { error } = await sb.rpc('staff_set_contact_message_status', { p_id: id, p_status: status })
+  if (error) return dbFailed(error, 'Could not update the message.')
+  revalidatePath('/admin/messages')
+  return done(status === 'closed' ? 'Marked as closed.' : 'Marked as read.')
 }

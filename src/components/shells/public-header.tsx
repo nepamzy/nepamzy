@@ -19,18 +19,24 @@ export async function PublicHeader() {
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
         <Logo />
         <SearchField
-          action="/vendors"
+          action="/products"
           placeholder="Search food, shops and services"
           label="Search the marketplace"
           className="order-last w-full md:order-none md:max-w-lg md:flex-1"
         />
         <nav aria-label="Main" className="ml-auto flex items-center gap-1 sm:gap-2">
-          <Link
-            href="/vendors"
-            className="touch-target hidden items-center px-3 font-semibold text-navy-900 hover:underline sm:inline-flex"
-          >
-            Shops
-          </Link>
+          {[
+            ['/products', 'Items'],
+            ['/vendors', 'Shops'],
+          ].map(([href, label]) => (
+            <Link
+              key={href}
+              href={href!}
+              className="touch-target hidden items-center px-3 font-semibold text-navy-900 hover:underline sm:inline-flex"
+            >
+              {label}
+            </Link>
+          ))}
           <ModePill who={who} />
           {who.authenticated ? (
             <>

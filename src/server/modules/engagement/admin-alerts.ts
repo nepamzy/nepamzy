@@ -27,6 +27,7 @@ export type AdminAlertEvent =
   | { type: 'refund_requested'; orderId: string; by: 'customer' | 'finance' }
   | { type: 'return_requested'; orderId: string }
   | { type: 'support_case'; caseNo: string; kind: string }
+  | { type: 'contact_message' }
 
 export type AdminAlertConfig = { apiKey: string; to: string; from: string; fromName: string }
 export type AdminAlertResult = 'sent' | 'disabled' | 'capped' | 'failed'
@@ -121,6 +122,11 @@ export function buildAdminAlert(
       subject = '[AFIT Market] Return requested'
       lines.push(`Order id: ${ident(event.orderId, 40)}`)
       link = '/admin/returns'
+      break
+    case 'contact_message':
+      subject = '[AFIT Market] New contact message'
+      lines.push('A message from the public contact form is waiting.')
+      link = '/admin/messages'
       break
     case 'support_case':
       subject = '[AFIT Market] New support report'

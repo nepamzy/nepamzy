@@ -27,14 +27,29 @@ const COLS: { title: string; links: [string, string][] }[] = [
   },
   {
     title: 'Help',
-    links: [['Report a problem', '/cases']],
+    links: [
+      ['Help and FAQ', '/faq'],
+      ['Contact us', '/contact'],
+      ['Report a problem', '/cases'],
+    ],
+  },
+  {
+    title: 'Company',
+    links: [
+      ['About', '/about'],
+      ['Delivery', '/delivery'],
+      ['Payments', '/payments'],
+      ['Refunds and returns', '/refunds'],
+      ['Terms summary', '/terms'],
+      ['Privacy summary', '/privacy'],
+    ],
   },
 ]
 
 export function PublicFooter() {
   return (
     <footer className="mt-12 bg-navy-900 text-navy-text">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-2 lg:grid-cols-[1.3fr_repeat(5,1fr)]">
         <div>
           <Logo tone="light" />
           <p className="mt-3 max-w-xs text-sm">

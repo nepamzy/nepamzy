@@ -48,6 +48,21 @@ const PATHS = {
   key: 'M14.5 9.5a3.5 3.5 0 1 0-3.3 3.5L5 19v2h3l1-1v-1.5h1.5L12 17l1-1M15 7.5h.01',
   plus: 'M12 5v14M5 12h14',
   file: 'M7 3h7l5 5v13H7zM14 3v5h5',
+  utensils: 'M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 1.5-3 4-3 7 0 1.7 1 3 3 3V3zM17 13v8',
+  cup: 'M6 4h12l-1.5 15a2 2 0 0 1-2 1.8h-5a2 2 0 0 1-2-1.8zM6.5 9h11',
+  printer:
+    'M7 8V3h10v5M7 17H5a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2M7 14h10v7H7z',
+  gift: 'M4 9h16v4H4zM5 13h14v8H5zM12 9v12M12 9c-2.5 0-4-1-4-2.5S10 4 12 9zM12 9c2.5 0 4-1 4-2.5S14 4 12 9z',
+  bag: 'M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  filter: 'M4 5h16l-6 7v6l-4 2v-8z',
+  sort: 'M7 4v16M7 20l-3-3M7 20l3-3M17 20V4M17 4l-3 3M17 4l3 3',
+  trash: 'M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6',
+  edit: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4',
+  lock: 'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',
+  phone: 'M8 3h8a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1M11 18h2',
+  info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 11v5M12 8h.01',
+  minus: 'M5 12h14',
 } as const
 
 export type IconName = keyof typeof PATHS
