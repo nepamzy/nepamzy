@@ -9,6 +9,7 @@ import {
   safeNextPath,
   type AppRole,
   type Principal,
+  signUpOutcome,
 } from './policy'
 
 const who = (
@@ -159,5 +160,35 @@ describe('delivery-fee payment routes', () => {
     expect(policyFor('/orders/abc/delivery-fee')?.requirement.roles).toEqual(['customer'])
     expect(policyFor('/account/receipts')?.requirement.aal).toBe('aal2')
     expect(policyFor('/receipts/' + 'a'.repeat(48))).toBeNull()
+  })
+})
+
+describe('signUpOutcome', () => {
+  it('signs the person in at once when the provider returns a session (confirmation switched off)', () => {
+    expect(signUpOutcome({ error: null, hasSession: true })).toBe('signed_in')
+  })
+  it('asks to check e-mail when confirmation is required (no session)', () => {
+    expect(signUpOutcome({ error: null, hasSession: false })).toBe('check_email')
+  })
+  it('reports a taken address plainly, a weak password, and outages', () => {
+    expect(
+      signUpOutcome({ error: { code: 'user_already_exists', status: 422 }, hasSession: false }),
+    ).toBe('exists')
+    expect(signUpOutcome({ error: { code: 'email_exists', status: 422 }, hasSession: false })).toBe(
+      'exists',
+    )
+    expect(
+      signUpOutcome({ error: { code: 'weak_password', status: 422 }, hasSession: false }),
+    ).toBe('weak_password')
+    expect(signUpOutcome({ error: { status: 503 }, hasSession: false })).toBe('unavailable')
+    expect(signUpOutcome({ error: {}, hasSession: false })).toBe('unavailable')
+  })
+  it('keeps other client errors indistinguishable from success', () => {
+    expect(
+      signUpOutcome({
+        error: { code: 'over_email_send_rate_limit', status: 429 },
+        hasSession: false,
+      }),
+    ).toBe('check_email')
   })
 })

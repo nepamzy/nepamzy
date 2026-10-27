@@ -78,3 +78,12 @@ Add the Paystack **test** secret key, then in the Paystack dashboard set the web
 3. Deploy; open `/api/health`.
 4. Sign up, confirm email, grant yourself `platform_admin`, enrol authenticator.
 5. Approve a vendor, add a product, place a test order.
+
+## Optional e-mail confirmation
+
+Sign-up works with or without e-mail confirmation, decided by one Supabase setting (Authentication, Sign In / Providers, Email, "Confirm email"):
+
+- **On** (the local and CI setting): a new person is told to check their e-mail and cannot sign in until they click the link.
+- **Off** (the live preview): the person is signed in straight away and goes to the home page. There is no later confirmation step at all; the address is simply unverified. An address that is already registered is reported plainly ("An account with this email already exists"), because that cannot be hidden once confirmation is off.
+
+Accounts created while the setting was On stay unconfirmed until confirmed by hand (Supabase, Authentication, Users) or by the link. Privileged roles (administrators, vendors, riders) are unaffected: they still need the authenticator second step and, for vendors and riders, administrator approval.

@@ -148,3 +148,23 @@ export function safeNextPath(next: string | null | undefined): string {
   if (/^\/(login|signup|auth)(\/|$)/.test(next)) return '/'
   return next
 }
+
+export type SignUpOutcome = 'signed_in' | 'check_email' | 'weak_password' | 'exists' | 'unavailable'
+
+/**
+ * What a sign-up attempt means for the person. When the project requires e-mail confirmation the provider returns no
+ * session (and hides whether the address is taken), so the person is told to check their e-mail. When confirmation is
+ * switched off in the provider settings it returns a session at once: the person is signed in and may confirm later
+ * or never, and an address that is already taken is reported plainly because it cannot be hidden any more.
+ */
+export function signUpOutcome(r: {
+  error?: { code?: string; status?: number } | null
+  hasSession: boolean
+}): SignUpOutcome {
+  const e = r.error
+  if (e?.code === 'weak_password') return 'weak_password'
+  if (e?.code === 'user_already_exists' || e?.code === 'email_exists') return 'exists'
+  if (e && (!e.status || e.status >= 500)) return 'unavailable'
+  if (e) return 'check_email'
+  return r.hasSession ? 'signed_in' : 'check_email'
+}
