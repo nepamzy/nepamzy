@@ -1,5 +1,6 @@
 'use server'
 
+import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -48,6 +49,7 @@ export async function submitApplicationAction(_p: ActionState, fd: FormData): Pr
       error,
       'Please check the form: name 2-80 characters, a valid phone number, a description of at least 10 characters.',
     )
+  notifyAdmin({ type: 'vendor_application', businessName: text(fd, 'businessName', 80) })
   revalidatePath('/apply')
   return done('Application received. An administrator will review it.')
 }

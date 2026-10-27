@@ -1,5 +1,6 @@
 'use server'
 
+import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
@@ -65,6 +66,7 @@ export async function requestRefundCustomerAction(
     return dbFailed(error, 'The refund request could not be sent. Check the details and try again.')
   revalidatePath(`/orders/${order}/help`)
   const r = data as { replayed: boolean }
+  if (!r.replayed) notifyAdmin({ type: 'refund_requested', orderId: order, by: 'customer' })
   return done(
     r.replayed
       ? 'You already sent this request. Its status is shown below.'
@@ -90,6 +92,7 @@ export async function requestReturnAction(_p: ActionState, fd: FormData): Promis
   })
   if (error)
     return dbFailed(error, 'The return request could not be sent. Check the details and try again.')
+  notifyAdmin({ type: 'return_requested', orderId: order })
   revalidatePath(`/orders/${order}/help`)
   return done(
     'Your return request was sent. A return is not a refund: support will decide and you will see its status here.',
@@ -118,6 +121,8 @@ export async function openCaseAction(_p: ActionState, fd: FormData): Promise<Act
   revalidatePath(`/orders/${order}/help`)
   revalidatePath('/cases')
   const r = data as { case_no: string; replayed: boolean }
+  if (!r.replayed)
+    notifyAdmin({ type: 'support_case', caseNo: r.case_no, kind: text(fd, 'type', 30) })
   return done(
     `${r.replayed ? 'You already reported this' : 'Your report was received'}: ${r.case_no}. Support will look at it and you can follow it under Reports.`,
   )

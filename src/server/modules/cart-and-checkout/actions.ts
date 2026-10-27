@@ -1,5 +1,6 @@
 'use server'
 
+import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -101,6 +102,7 @@ export async function placeOrderAction(_p: CheckoutState, fd: FormData): Promise
     }
     return dbFailed(error)
   }
+  notifyAdmin({ type: 'order_placed', orderId: String(data) })
   revalidatePath('/orders')
   revalidatePath('/cart')
   redirect(`/orders/${String(data)}`)

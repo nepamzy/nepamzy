@@ -46,7 +46,7 @@ for (const file of ['.env.local', '.env']) {
   if (!existsSync(file)) continue
   for (const line of readFileSync(file, 'utf8').split('\n')) {
     const m = line.match(
-      /^(SUPABASE_SERVICE_ROLE_KEY|DATABASE_URL|PICKUP_CODE_SECRET|JOBS_SECRET|BANK_DATA_KEYS)=(.+)$/,
+      /^(SUPABASE_SERVICE_ROLE_KEY|DATABASE_URL|PICKUP_CODE_SECRET|JOBS_SECRET|BANK_DATA_KEYS|BREVO_API_KEY)=(.+)$/,
     )
     if (m?.[2]) {
       if (m[1] === 'BANK_DATA_KEYS')
@@ -57,6 +57,7 @@ for (const file of ['.env.local', '.env']) {
   }
 }
 if (process.env.SUPABASE_SERVICE_ROLE_KEY) secrets.push(process.env.SUPABASE_SERVICE_ROLE_KEY)
+if (process.env.BREVO_API_KEY) secrets.push(process.env.BREVO_API_KEY)
 for (const part of (process.env.BANK_DATA_KEYS ?? '').split(','))
   if (part.includes(':')) secrets.push(part.slice(part.indexOf(':') + 1).trim())
 
