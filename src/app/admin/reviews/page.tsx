@@ -28,6 +28,7 @@ export default async function ReviewReports({
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Review reports' }]}
         title="Review reports"
         subtitle="Hiding a review keeps it on record. It never changes an order, a payment or a refund."
       />

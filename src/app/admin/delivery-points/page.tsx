@@ -14,6 +14,7 @@ export default async function DeliveryPoints() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Delivery points' }]}
         title="Delivery points"
         subtitle="Customers can have orders delivered only to active points. Use only places AFIT has approved; the seeded ones are fictional placeholders. Do not enter coordinates or sensitive locations."
       />

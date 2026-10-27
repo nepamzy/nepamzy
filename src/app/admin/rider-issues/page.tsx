@@ -21,6 +21,7 @@ export default async function RiderIssues() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Rider issues' }]}
         title="Rider issues"
         subtitle="Reports from riders. A report never penalises anyone automatically."
       />

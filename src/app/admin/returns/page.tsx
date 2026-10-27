@@ -12,6 +12,7 @@ export default async function AdminReturns() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Returns' }]}
         title="Returns"
         subtitle="A return is separate from a refund. Approving a return does not pay anyone and nothing is restocked automatically."
       />

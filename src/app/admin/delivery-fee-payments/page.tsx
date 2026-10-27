@@ -19,13 +19,17 @@ export default async function AdminDeliveryFeePayments() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[
+          { label: 'Administration', href: '/admin' },
+          { label: 'Delivery fee payments' },
+        ]}
         title="Delivery fee payments"
         subtitle="Direct bank transfers from customers to riders. Nothing is paid or checked by AFIT Market."
       />
       <p className="mb-4 max-w-2xl text-sm text-muted">{BANK_NOTE}</p>
       {data.ambiguous_orders.length > 0 && (
         <Card className="mb-5 space-y-1 border-warning-700">
-          <h2 className="text-lg font-bold">Orders with unclear records</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Orders with unclear records</h2>
           <p className="text-sm">
             These orders are marked as paying the rider directly, but the payment records disagree
             with that. The customer is not being asked to pay.

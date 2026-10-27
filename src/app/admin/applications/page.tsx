@@ -42,6 +42,10 @@ export default async function Applications({
   return (
     <>
       <PageHeader
+        breadcrumbs={[
+          { label: 'Administration', href: '/admin' },
+          { label: 'Vendor applications' },
+        ]}
         title="Vendor applications"
         subtitle="Approving creates the vendor and gives the applicant the vendor role."
       />
@@ -70,7 +74,7 @@ export default async function Applications({
             <li key={a.id}>
               <Card className="space-y-3" data-testid="pending-application">
                 <div>
-                  <p className="text-lg font-bold">{a.business_name}</p>
+                  <p className="text-lg font-extrabold text-navy-900">{a.business_name}</p>
                   <p className="text-sm text-muted">
                     {a.category} · {a.contact_phone} ·{' '}
                     {new Date(a.created_at).toLocaleDateString('en-NG')}

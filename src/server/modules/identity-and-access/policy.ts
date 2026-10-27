@@ -86,6 +86,23 @@ export type RoutePolicy = { prefix: string; requirement: AccessRequirement }
 
 /** Longest matching prefix wins. Paths not listed here are public. */
 export const ROUTE_POLICIES: RoutePolicy[] = [
+  { prefix: '/admin/users', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  {
+    prefix: '/admin/orders',
+    requirement: { roles: ['platform_admin', 'support_agent', 'finance_admin'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/products',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/reports',
+    requirement: { roles: ['platform_admin', 'finance_admin'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/messages',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
   { prefix: '/admin/roles', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/applications', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/vendors', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
