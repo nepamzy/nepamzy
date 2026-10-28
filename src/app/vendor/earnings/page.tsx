@@ -1,6 +1,10 @@
 import type { Metadata } from 'next'
+import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
+import { DataTable } from '@/components/ui/data-table'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
+import { Section } from '@/components/ui/section'
 import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
 import { vendorSettlement } from '@/server/modules/settlement/queries'
@@ -20,18 +24,40 @@ export default async function Earnings() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Shop', href: '/vendor' }, { label: 'Earnings' }]}
         title="Earnings"
         subtitle="What your completed orders add up to after AFIT Market's commission."
       />
-      <p
-        role="note"
-        className="mb-4 rounded-[var(--radius-control)] bg-warning-50 px-3 py-2 text-warning-700"
-      >
-        <strong>Nothing has been paid out.</strong> {s.payout.note} These are calculated amounts
-        only.
-      </p>
+      <Alert tone="warning" plain title="Nothing has been paid out">
+        {s.payout.note} These are calculated amounts only.
+      </Alert>
 
-      <Card className="mb-4 space-y-2">
+      <div className="mt-4">
+        <MetricGrid>
+          <MetricCard label="Completed orders" value={f.orders} icon="check-circle" />
+          <MetricCard
+            label="Product sales"
+            value={<Money kobo={f.gross_sales_kobo} />}
+            icon="chart"
+            accent="success"
+          />
+          <MetricCard
+            label="Commission"
+            value={<Money kobo={f.commission_kobo} />}
+            note={`${pct(s.rates.commission_bps)} of product value`}
+            icon="coins"
+            accent="gold"
+          />
+          <MetricCard
+            label="Calculated amount due"
+            value={<Money kobo={f.payable_kobo} />}
+            note="Not a payout. See below."
+            icon="card"
+          />
+        </MetricGrid>
+      </div>
+
+      <Card className="mb-6 space-y-2">
         <h2 className="text-lg font-bold">How the commission works</h2>
         <p>
           AFIT Market keeps a commission of <strong>{pct(s.rates.commission_bps)}</strong> of the
@@ -42,82 +68,113 @@ export default async function Earnings() {
         </p>
       </Card>
 
-      <h2 className="mb-2 text-lg font-bold">Completed orders (final)</h2>
-      <Card className="mb-4">
-        <dl className="grid grid-cols-[1fr_auto] gap-y-1">
-          <dt>Orders</dt>
-          <dd className="font-semibold">{f.orders}</dd>
-          <dt>Product sales</dt>
-          <dd className="font-semibold">
-            <Money kobo={f.gross_sales_kobo} />
-          </dd>
-          <dt>Commission</dt>
-          <dd className="font-semibold">
-            − <Money kobo={f.commission_kobo} />
-          </dd>
-          <dt>Refunded product value</dt>
-          <dd className="font-semibold">
-            − <Money kobo={f.refunded_sales_kobo} />
-          </dd>
-          <dt>Commission returned on refunds</dt>
-          <dd className="font-semibold">
-            + <Money kobo={f.commission_reversed_kobo} />
-          </dd>
-          <dt className="font-bold">Calculated amount due to you</dt>
-          <dd className="font-bold">
-            <Money kobo={f.payable_kobo} />
-          </dd>
-          <dt className="text-sm text-muted">
-            Delivery fees on these orders (not yours, not in the commission)
-          </dt>
-          <dd className="text-sm text-muted">
-            <Money kobo={f.delivery_fees_kobo} />
-          </dd>
-        </dl>
-      </Card>
+      <Section title="Completed orders (final)" id="final">
+        <Card>
+          <dl className="grid grid-cols-[1fr_auto] gap-y-1">
+            <dt>Orders</dt>
+            <dd className="font-semibold">{f.orders}</dd>
+            <dt>Product sales</dt>
+            <dd className="font-semibold">
+              <Money kobo={f.gross_sales_kobo} />
+            </dd>
+            <dt>Commission</dt>
+            <dd className="font-semibold">
+              − <Money kobo={f.commission_kobo} />
+            </dd>
+            <dt>Refunded product value</dt>
+            <dd className="font-semibold">
+              − <Money kobo={f.refunded_sales_kobo} />
+            </dd>
+            <dt>Commission returned on refunds</dt>
+            <dd className="font-semibold">
+              + <Money kobo={f.commission_reversed_kobo} />
+            </dd>
+            <dt className="font-bold">Calculated amount due to you</dt>
+            <dd className="font-bold">
+              <Money kobo={f.payable_kobo} />
+            </dd>
+            <dt className="text-sm text-muted">
+              Delivery fees on these orders (not yours, not in the commission)
+            </dt>
+            <dd className="text-sm text-muted">
+              <Money kobo={f.delivery_fees_kobo} />
+            </dd>
+          </dl>
+        </Card>
+      </Section>
 
-      <h2 className="mb-2 text-lg font-bold">Paid orders not yet completed (estimate)</h2>
-      <Card className="mb-6">
-        <p>
-          {s.pending.orders} order(s) worth <Money kobo={s.pending.gross_sales_kobo} />. Estimated
-          commission <Money kobo={s.pending.estimated_commission_kobo} />.{' '}
-          <span className="text-muted">{s.pending.note}</span>
-        </p>
-      </Card>
+      <Section title="Paid orders not yet completed (estimate)" id="pending">
+        <Card>
+          <p>
+            {s.pending.orders} order(s) worth <Money kobo={s.pending.gross_sales_kobo} />. Estimated
+            commission <Money kobo={s.pending.estimated_commission_kobo} />.{' '}
+            <span className="text-muted">{s.pending.note}</span>
+          </p>
+        </Card>
+      </Section>
 
-      <h2 className="mb-2 text-lg font-bold">Recent completed orders</h2>
-      {s.recent.length === 0 ? (
-        <EmptyState title="No completed orders yet">
-          Orders appear here once they are completed.
-        </EmptyState>
-      ) : (
-        <ul className="space-y-3">
-          {s.recent.map((o) => (
-            <li key={o.order_id}>
-              <Card className="space-y-1">
-                <p className="flex flex-wrap items-center gap-2">
+      <Section
+        title="Settlement history"
+        description="Your most recent completed orders and how each amount was worked out."
+        id="history"
+      >
+        <DataTable
+          caption="Recent completed orders"
+          rows={s.recent}
+          rowKey={(o) => o.order_id}
+          empty={
+            <EmptyState title="No completed orders yet">
+              Orders appear here once they are completed.
+            </EmptyState>
+          }
+          columns={[
+            {
+              header: 'Order',
+              cell: (o) => (
+                <span className="flex flex-wrap items-center gap-2">
                   <span className="font-bold">{o.order_number}</span>
                   <Badge tone="success">Completed {day(o.completed_at)}</Badge>
-                </p>
-                <p className="text-sm">
-                  Product sales <Money kobo={o.gross_kobo} />; commission {pct(o.commission_bps)} ={' '}
-                  <Money kobo={o.commission_kobo} />
-                  {o.refunded_kobo > 0 && (
-                    <>
-                      ; refunded <Money kobo={o.refunded_kobo} /> (commission returned{' '}
-                      <Money kobo={o.commission_reversed_kobo} />)
-                    </>
-                  )}
-                  .
-                </p>
-                <p className="font-semibold">
-                  Calculated amount due: <Money kobo={o.payable_kobo} />
-                </p>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
+                </span>
+              ),
+            },
+            {
+              header: 'Product sales',
+              align: 'right',
+              cell: (o) => <Money kobo={o.gross_kobo} />,
+            },
+            {
+              header: 'Commission',
+              align: 'right',
+              cell: (o) => (
+                <>
+                  <Money kobo={o.commission_kobo} />{' '}
+                  <span className="text-muted">({pct(o.commission_bps)})</span>
+                </>
+              ),
+            },
+            {
+              header: 'Refunded',
+              align: 'right',
+              cell: (o) =>
+                o.refunded_kobo > 0 ? (
+                  <>
+                    <Money kobo={o.refunded_kobo} />{' '}
+                    <span className="text-muted">
+                      (commission returned <Money kobo={o.commission_reversed_kobo} />)
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-muted">None</span>
+                ),
+            },
+            {
+              header: 'Amount due',
+              align: 'right',
+              cell: (o) => <Money kobo={o.payable_kobo} className="font-bold" />,
+            },
+          ]}
+        />
+      </Section>
     </>
   )
 }

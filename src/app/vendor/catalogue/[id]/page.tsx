@@ -23,7 +23,15 @@ export default async function EditProduct({
   const created = (await searchParams).created
   return (
     <>
-      <PageHeader title={product.name} subtitle="Edit item" />
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Shop', href: '/vendor' },
+          { label: 'Catalogue', href: '/vendor/catalogue' },
+          { label: product.name },
+        ]}
+        title={product.name}
+        subtitle="Edit item. Photos are not available yet because file storage has not been set up."
+      />
       {created && (
         <p
           role="status"

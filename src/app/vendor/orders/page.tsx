@@ -5,7 +5,8 @@ import { OrderStatusPill } from '@/components/domain/order-status'
 import { PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
-import { Table, Td } from '@/components/ui/table'
+import { DataTable } from '@/components/ui/data-table'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { Pager } from '@/components/ui/pager'
 import {
   listItemsForOrders,
@@ -27,34 +28,37 @@ function OrdersTable({
   items: Awaited<ReturnType<typeof listItemsForOrders>>
 }) {
   return (
-    <Table caption={caption} head={['Order', 'Type', 'Items', 'Placed', 'Status', 'Next step']}>
-      {orders.map((o) => (
-        <tr key={o.id}>
-          <Td>
-            <span className="font-semibold">{o.order_number}</span>
-          </Td>
-          <Td>{o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup'}</Td>
-          <Td>
-            <ul className="space-y-0.5 text-sm">
-              {(items.get(o.id) ?? []).map((i) => (
-                <li key={i.id}>
-                  {i.quantity} × {i.product_name}
-                  {i.options.length > 0 && ` (${i.options.map((x) => x.name).join(', ')})`}
-                </li>
-              ))}
-            </ul>
-            <Money kobo={o.items_total_kobo} className="font-semibold" />
-          </Td>
-          <Td>{new Date(o.created_at).toLocaleString('en-NG')}</Td>
-          <Td>
-            <OrderStatusPill code={o.status} />
-          </Td>
-          <Td>
-            <VendorOrderActions orderId={o.id} status={o.status} />
-          </Td>
-        </tr>
-      ))}
-    </Table>
+    <DataTable
+      caption={caption}
+      rows={orders}
+      rowKey={(o) => o.id}
+      columns={[
+        { header: 'Order', cell: (o) => <span className="font-semibold">{o.order_number}</span> },
+        { header: 'Type', cell: (o) => (o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup') },
+        {
+          header: 'Items',
+          cell: (o) => (
+            <>
+              <ul className="space-y-0.5 text-sm">
+                {(items.get(o.id) ?? []).map((i) => (
+                  <li key={i.id}>
+                    {i.quantity} × {i.product_name}
+                    {i.options.length > 0 && ` (${i.options.map((x) => x.name).join(', ')})`}
+                  </li>
+                ))}
+              </ul>
+              <Money kobo={o.items_total_kobo} className="font-semibold" />
+            </>
+          ),
+        },
+        { header: 'Placed', cell: (o) => new Date(o.created_at).toLocaleString('en-NG') },
+        { header: 'Status', cell: (o) => <OrderStatusPill code={o.status} /> },
+        {
+          header: 'Next step',
+          cell: (o) => <VendorOrderActions orderId={o.id} status={o.status} />,
+        },
+      ]}
+    />
   )
 }
 
@@ -79,7 +83,26 @@ export default async function VendorOrders({
   const items = await listItemsForOrders([...open, ...done.orders].map((o) => o.id))
   return (
     <>
-      <PageHeader title="Orders" subtitle="Accept paid orders, prepare them and mark them ready." />
+      <PageHeader
+        breadcrumbs={[{ label: 'Shop', href: '/vendor' }, { label: 'Orders' }]}
+        title="Orders"
+        subtitle="Accept paid orders, prepare them and mark them ready."
+      />
+      <MetricGrid>
+        <MetricCard
+          label="Needs your attention"
+          value={open.length}
+          icon="clipboard"
+          accent="gold"
+        />
+        <MetricCard
+          label="Finished on this page"
+          value={done.orders.length}
+          note="Completed, cancelled, refunded or unpaid"
+          icon="check-circle"
+          accent="success"
+        />
+      </MetricGrid>
       {open.length === 0 && done.orders.length === 0 && page === 1 ? (
         <EmptyState title="No orders yet">New orders will appear here.</EmptyState>
       ) : (

@@ -11,7 +11,15 @@ export default async function NewProduct() {
     return <EmptyState title="You cannot add items right now" />
   return (
     <>
-      <PageHeader title="Add an item" />
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Shop', href: '/vendor' },
+          { label: 'Catalogue', href: '/vendor/catalogue' },
+          { label: 'Add an item' },
+        ]}
+        title="Add an item"
+        subtitle="Name, price and options. Photos are not available yet because file storage has not been set up."
+      />
       <Card className="max-w-2xl">
         <ProductForm vendorId={vendor.id} />
       </Card>

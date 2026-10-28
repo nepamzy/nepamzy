@@ -10,13 +10,15 @@ export const CUSTOMER_NAV: NavItem[] = [
   { href: '/account', label: 'Account', icon: 'user' },
 ]
 export const VENDOR_NAV: NavItem[] = [
-  { href: '/vendor', label: 'Home', icon: 'home' },
-  { href: '/vendor/orders', label: 'Orders', icon: 'clipboard' },
-  { href: '/vendor/catalogue', label: 'Catalogue', icon: 'package' },
-  { href: '/vendor/profile', label: 'Shop', icon: 'store' },
-  { href: '/vendor/handover', label: 'Handover', icon: 'check-circle' },
-  { href: '/vendor/returns', label: 'Returns', icon: 'return' },
-  { href: '/vendor/earnings', label: 'Earnings', icon: 'coins' },
+  { href: '/vendor', label: 'Home', icon: 'home', group: 'Sell' },
+  { href: '/vendor/orders', label: 'Orders', icon: 'clipboard', group: 'Sell' },
+  { href: '/vendor/catalogue', label: 'Catalogue', icon: 'package', group: 'Sell' },
+  { href: '/vendor/handover', label: 'Handover', icon: 'check-circle', group: 'Sell' },
+  { href: '/vendor/returns', label: 'Returns', icon: 'return', group: 'Sell' },
+  { href: '/vendor/earnings', label: 'Earnings', icon: 'coins', group: 'Money' },
+  { href: '/vendor/profile', label: 'Shop', icon: 'store', group: 'Shop' },
+  { href: '/vendor/reviews', label: 'Reviews', icon: 'star', group: 'Shop' },
+  { href: '/vendor/help', label: 'Help', icon: 'help', group: 'Shop' },
 ]
 export const RIDER_NAV: NavItem[] = [
   { href: '/rider', label: 'Home', icon: 'home' },

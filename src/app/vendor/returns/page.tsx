@@ -12,6 +12,7 @@ export default async function VendorReturns() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Shop', href: '/vendor' }, { label: 'Returns' }]}
         title="Returns"
         subtitle="Approved returns coming back to your shop. Confirm when the item arrives."
       />
