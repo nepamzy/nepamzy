@@ -188,6 +188,20 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
   await shot(ap, 'public', `/vendors/${shop.slug}`, 'vendor-menu')
   await shot(ap, 'public', `/products/${prod}`, 'product-detail')
   await shot(ap, 'public', '/vendors/no-such-shop', 'not-found-404')
+  await shot(ap, 'public', '/products', 'items-browse')
+  await shot(ap, 'public', '/products?sort=price_asc&q=Fixture', 'items-sorted-search')
+  await shot(ap, 'public', '/products?q=zzzz-no-such-item', 'items-no-results')
+  for (const info2 of [
+    'about',
+    'faq',
+    'contact',
+    'terms',
+    'privacy',
+    'refunds',
+    'delivery',
+    'payments',
+  ])
+    await shot(ap, 'public', `/${info2}`, info2)
   await shot(ap, 'public', '/login', 'empty-form')
   await ap.getByLabel('Email').fill('nobody@example.test')
   await ap.getByLabel('Password').fill('wrong-password-123')
@@ -255,6 +269,9 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
     ['/notifications', 'notifications-with-unread'],
     ['/cases', 'reports-empty'],
     ['/account', 'account'],
+    ['/account/profile', 'profile'],
+    ['/account/wishlist', 'wishlist'],
+    ['/account/addresses', 'saved-places'],
     ['/account/security', 'account-security-mfa'],
     ['/apply', 'vendor-application-form'],
     ['/rider-apply', 'rider-application-form'],
@@ -408,9 +425,17 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
     '/admin/settings',
     '/admin/audit',
     '/admin/roles',
+    '/admin/users',
+    '/admin/orders',
+    '/admin/products',
+    '/admin/reports',
+    '/admin/messages',
   ])
     await shot(ad, 'admin', p, 'platform-admin')
   if (caseRow) await shot(ad, 'admin', `/admin/cases/${caseRow.id}`, 'case-detail')
+  await shot(ad, 'admin', `/admin/users/${cust}`, 'user-detail')
+  await shot(ad, 'admin', `/admin/orders/${done.id}`, 'order-detail')
+  await shot(ad, 'admin', '/admin/users?q=au-', 'users-filtered')
   await shot(ad, 'admin', '/admin/refunds?status=requested&q=AFM', 'refunds-filtered')
   await shot(ad, 'admin', '/notifications', 'notifications')
   // role-scoped views of the same pages

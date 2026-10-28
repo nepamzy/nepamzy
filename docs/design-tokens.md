@@ -1,4 +1,6 @@
-# Colour system (PROVISIONAL)
+# Colour system (PROVISIONAL; v2 follows the owner's reference palette)
+
+> Update (frontend redesign, master channel 1): the palette now follows the owner-supplied reference pack: navy `#073B7A` (`navy-900`, `brand-800`), action blue `#1261B0` (`brand-600`, `navy-700`), gold `#FFC928` (`gold-400`), red `#D92D3A` (`red-500`, decorative only; text red stays `danger-700` for contrast) and pale background `#F3F7FC` (`surface`). The table below lists the earlier values; the live values are in `src/app/globals.css`.
 
 **Status: provisional working palette. These hex codes are our own choices. They are NOT official AFIT colours, NOT approved branding, and no AFIT crest or logo is used.** AFIT has not confirmed brand colours, and the earlier audit could not read AFIT's site from the sandbox. If AFIT supplies an official specification, change the tokens in `src/app/globals.css` (one file) and re-run `tests/unit/visual-fixes.test.ts`.
 
