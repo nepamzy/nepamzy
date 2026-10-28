@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { RiderApplicationForm } from '@/components/domain/rider-controls'
+import { RiderFreeNotice } from '@/components/domain/rider-free-notice'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -23,6 +24,9 @@ export default async function RiderApply() {
         title="Deliver on AFIT Market"
         subtitle="Apply to become an approved campus delivery rider"
       />
+      <div className="mb-5 max-w-xl">
+        <RiderFreeNotice />
+      </div>
       {profile ? (
         <Card>
           <p>

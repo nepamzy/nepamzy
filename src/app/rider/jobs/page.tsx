@@ -28,7 +28,10 @@ export default async function Jobs() {
   if (!me.active)
     return (
       <>
-        <PageHeader title="Jobs" />
+        <PageHeader
+          breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Jobs' }]}
+          title="Jobs"
+        />
         <EmptyState title="You are off duty">
           Go active from{' '}
           <Link className="font-semibold underline" href="/rider">
@@ -45,7 +48,11 @@ export default async function Jobs() {
   ])
   return (
     <>
-      <PageHeader title="Jobs" subtitle={`${assignments.length} of 5 active deliveries`} />
+      <PageHeader
+        breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Jobs' }]}
+        title="Jobs"
+        subtitle={`${assignments.length} of 5 active deliveries`}
+      />
       <div className="mb-5">
         <LocationSharing
           enabled={assignments.length > 0}

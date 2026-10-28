@@ -8,17 +8,17 @@ import type { DfpPayment } from '@/server/modules/delivery-fee/queries'
 export const DFP_STATUS: Record<DfpPayment['status'], { label: string; tone: Tone; help: string }> =
   {
     awaiting_transfer: {
-      label: 'Waiting for transfer',
+      label: 'Awaiting transfer',
       tone: 'warning',
       help: 'The customer has not yet said they made the transfer.',
     },
     customer_reported: {
-      label: 'Customer says it was sent',
+      label: 'Awaiting Rider Confirmation',
       tone: 'info',
       help: 'Waiting for the rider to check their own bank account and confirm.',
     },
     rider_confirmed: {
-      label: 'Confirmed by both',
+      label: 'Confirmed',
       tone: 'success',
       help: 'The customer reported the transfer and the rider confirmed receiving it.',
     },

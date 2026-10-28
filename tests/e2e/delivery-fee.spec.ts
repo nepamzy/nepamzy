@@ -98,7 +98,7 @@ test('customer reports, rider confirms, one receipt is issued, and the public pa
   await a11yClean(c, 'customer pay delivery fee')
 
   // A customer report alone does not complete anything
-  await clickAndWait(c, () => c.getByRole('button', { name: 'I have made this transfer' }).click())
+  await clickAndWait(c, () => c.getByRole('button', { name: 'I Have Made the Transfer' }).click())
   await expect(c.getByText(/waiting for the rider to confirm/i)).toBeVisible()
   await c.goto('/account/receipts')
   await expect(c.getByText('You have no delivery fee receipts.')).toBeVisible()
@@ -147,7 +147,7 @@ test('rider dispute needs a reason; an administrator decides it and the record i
   const c = customer.page
   await c.goto(`/orders/${order.id}/delivery-fee`)
   await clickAndWait(c, () => c.getByRole('button', { name: 'Show payment details' }).click())
-  await clickAndWait(c, () => c.getByRole('button', { name: 'I have made this transfer' }).click())
+  await clickAndWait(c, () => c.getByRole('button', { name: 'I Have Made the Transfer' }).click())
 
   await r.page.goto('/rider/payments')
   await r.page.getByLabel('Why are you disputing it?').fill('Nothing arrived in my account')

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Badge } from '@/components/ui/badge'
+import { RiderFreeNotice } from '@/components/domain/rider-free-notice'
 import { Card, PageHeader } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/states'
 import { getMyRider } from '@/server/modules/riders/queries'
@@ -14,8 +15,15 @@ export default async function RiderProfile() {
     )
   return (
     <>
-      <PageHeader title="Rider profile" subtitle={me.full_name} />
-      <Card className="max-w-xl space-y-3">
+      <PageHeader
+        breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Profile' }]}
+        title="Rider profile"
+        subtitle={me.full_name}
+      />
+      <div className="mb-5 max-w-3xl">
+        <RiderFreeNotice />
+      </div>
+      <Card className="max-w-3xl space-y-3">
         <p>
           Rider terms: <strong>{me.terms_version}</strong>{' '}
           <Badge tone={me.terms_acknowledged ? 'success' : 'warning'}>

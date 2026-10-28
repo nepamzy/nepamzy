@@ -504,7 +504,7 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
   await shot(c, 'customer', `/orders/${dfpA}/delivery-fee`, 'pay-delivery-fee-details', {
     goto: false,
   })
-  await c.getByRole('button', { name: 'I have made this transfer' }).click()
+  await c.getByRole('button', { name: 'I Have Made the Transfer' }).click()
   await c.waitForTimeout(1200)
   await shot(c, 'customer', `/orders/${dfpA}/delivery-fee`, 'transfer-reported-waiting', {
     goto: false,
@@ -523,7 +523,7 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
   await c.goto(`/orders/${dfpB}/delivery-fee`)
   await c.getByRole('button', { name: 'Show payment details' }).click()
   await c.waitForTimeout(1000)
-  await c.getByRole('button', { name: 'I have made this transfer' }).click()
+  await c.getByRole('button', { name: 'I Have Made the Transfer' }).click()
   await c.waitForTimeout(1200)
   await pr.goto('/rider/payments')
   await pr

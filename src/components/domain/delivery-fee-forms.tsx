@@ -93,7 +93,7 @@ export function ReportTransferForm({ paymentId }: { paymentId: string }) {
   return (
     <ActionForm
       action={reportDeliveryFeeAction}
-      submitLabel="I have made this transfer"
+      submitLabel="I Have Made the Transfer"
       pendingLabel="Saving…"
     >
       <input type="hidden" name="paymentId" value={paymentId} />
