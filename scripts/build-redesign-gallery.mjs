@@ -8,6 +8,9 @@ const ROOT = 'artifacts/afit-market-ui-audit'
 const BEFORE = process.env.UI_AUDIT_BEFORE ?? 'redesign-before'
 const AFTER = process.env.UI_AUDIT_AFTER ?? 'redesign-ch1-after'
 const TITLE = process.env.UI_AUDIT_TITLE ?? 'Frontend redesign'
+// Optional file-name prefix so several galleries (for example a channel delta) can sit side by side.
+const PREFIX = process.env.UI_AUDIT_OUT_PREFIX ?? ''
+const NARROW = process.env.UI_AUDIT_NARROW ?? AFTER
 const load = (phase, vp) => {
   const p = join(ROOT, phase, vp, 'inventory.json')
   return existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : []
@@ -36,6 +39,7 @@ for (const [name, phase] of [
 ])
   for (const vp of ['desktop', 'mobile'])
     data[`${name}/${vp}`] = new Map(load(phase, vp).map((r) => [key(r), r]))
+const narrow = new Map(load(NARROW, 'narrow-320').map((r) => [key(r), r]))
 const keys = [...new Set(Object.values(data).flatMap((m) => [...m.keys()]))].filter(
   (k) => !k.endsWith('/'),
 )
@@ -79,7 +83,17 @@ for (const k of keys) {
 <div class="grid"><div><figure><figcaption>Desktop: before | after</figcaption><div class="cols">${img('before', 'desktop', k)}${img('after', 'desktop', k)}</div></figure></div>
 <div><figure><figcaption>Mobile: before | after</figcaption><div class="cols">${img('before', 'mobile', k)}${img('after', 'mobile', k)}</div></figure></div></div></article>`
 }
-writeFileSync(join(ROOT, 'gallery.html'), html + `</main></html>`)
+if (narrow.size) {
+  html += `<h2 id="narrow">Narrow screens (320 px, after)</h2><p>WCAG 1.4.10 reflow check: the same screens at 320 CSS px wide. ${narrow.size} captures.</p><div class="cols">`
+  for (const r of [...narrow.values()].sort((a, b) => a.role.localeCompare(b.role)))
+    html += `<article><h3>${esc(r.role)}: ${esc(r.state)}</h3><div class="route">${esc(maskId(r.route))}</div>${
+      r.file
+        ? `<a href="${esc(rel(r.file))}"><img loading="lazy" src="${esc(rel(r.file))}" alt="320 px ${esc(r.role)} ${esc(r.state)}"></a>`
+        : '<div class="none">not captured</div>'
+    }</article>`
+  html += '</div>'
+}
+writeFileSync(join(ROOT, `${PREFIX}gallery.html`), html + `</main></html>`)
 
 const yn = (n, vp, k) => (data[`${n}/${vp}`].get(k)?.file ? 'yes' : 'NO')
 let md = `# Page inventory (${TITLE})\n\nBuilt from \`${ROOT}/{${BEFORE},${AFTER}}/{desktop,mobile}/inventory.json\`: what was actually rendered. Routes with ids are shown with \`[id]\`. "yes" means a screenshot file exists.\n\n| Role | Route | State | HTTP | Desk before | Desk after | Mob before | Mob after | Note |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n`
@@ -106,7 +120,9 @@ for (const name of ['before', 'after'])
 md += `\nBy role (both viewports): ${Object.entries(byRole)
   .map(([k, v]) => `${k}=${v}`)
   .join(', ')}.\n`
-writeFileSync(join(ROOT, 'page-inventory.md'), md)
+if (narrow.size)
+  md += `\nNarrow screens (320 px, after): ${[...narrow.values()].filter((r) => r.file).length} captured of ${narrow.size} attempted: ${[...narrow.values()].map((r) => `${r.role}/${r.state}`).join(', ')}.\n`
+writeFileSync(join(ROOT, `${PREFIX}page-inventory.md`), md)
 
 const failures = []
 for (const name of ['before', 'after'])
@@ -117,7 +133,7 @@ for (const name of ['before', 'after'])
           `- ${name}/${vp}: ${r.role} ${maskId(r.route)} (${r.state}): ${maskId(r.note ?? 'no file')}`,
         )
 writeFileSync(
-  join(ROOT, 'capture-failures.md'),
+  join(ROOT, `${PREFIX}capture-failures.md`),
   `# Capture failures (${TITLE})\n\n${failures.length ? failures.join('\n') : 'None: every attempted page/state produced a screenshot in both viewports.'}\n\nPages that redirect (for example an anonymous visitor to /login) are real rendered states and are noted in the inventory, not counted as failures. Screens that need fixtures the audit does not create (real payment provider pages, real map tiles, a hosted file store) are not captured and are listed in docs/known-issues.md.\n`,
 )
 console.log(
