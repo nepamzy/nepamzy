@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button, ButtonLink } from '@/components/ui/button'
 import { Alert } from '@/components/ui/alert'
 import { PageHeader } from '@/components/ui/card'
-import { DataTable } from '@/components/ui/data-table'
+import { Card } from '@/components/ui/card'
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { NoImageTile } from '@/components/ui/product-card'
 import { Money } from '@/components/ui/money'
@@ -52,32 +52,27 @@ export default async function Catalogue() {
         simple placeholder tile for each item.
       </Alert>
       <div className="mt-4">
-        <DataTable
-          caption="Your catalogue"
-          rows={products}
-          rowKey={(p) => p.id}
-          empty={
-            <EmptyState
-              title="Your menu is empty"
-              action={<ButtonLink href="/vendor/catalogue/new">Add your first item</ButtonLink>}
-            >
-              Customers can only see items you add here.
-            </EmptyState>
-          }
-          columns={[
-            {
-              header: 'Item',
-              cell: (p) => (
-                <span className="flex items-center gap-3">
-                  <NoImageTile icon="bag" className="aspect-square! w-10! shrink-0 rounded-lg" />
-                  <span className="min-w-0">
+        {products.length === 0 ? (
+          <EmptyState
+            title="Your menu is empty"
+            action={<ButtonLink href="/vendor/catalogue/new">Add your first item</ButtonLink>}
+          >
+            Customers can only see items you add here.
+          </EmptyState>
+        ) : (
+          <ul className="space-y-3">
+            {products.map((p) => (
+              <li key={p.id}>
+                <Card className="flex flex-wrap items-center justify-between gap-3">
+                  <NoImageTile icon="bag" className="aspect-square! w-12! shrink-0 rounded-lg" />
+                  <div className="min-w-0 flex-1">
                     <Link
                       href={`/vendor/catalogue/${p.id}`}
                       className="font-semibold hover:underline"
                     >
                       {p.name}
                     </Link>
-                    <span className="block text-sm text-muted">
+                    <p className="text-sm text-muted">
                       {[
                         p.section,
                         p.stock_quantity === null
@@ -86,51 +81,41 @@ export default async function Catalogue() {
                       ]
                         .filter(Boolean)
                         .join(' · ')}
-                    </span>
-                  </span>
-                </span>
-              ),
-            },
-            {
-              header: 'Price',
-              align: 'right',
-              cell: (p) => <Money kobo={p.price_kobo} className="font-semibold" />,
-            },
-            {
-              header: 'Status',
-              cell: (p) => (
-                <Badge tone={p.is_available && p.stock_quantity !== 0 ? 'success' : 'neutral'}>
-                  {p.is_available && p.stock_quantity !== 0 ? 'On sale' : 'Sold out'}
-                </Badge>
-              ),
-            },
-            {
-              header: 'Actions',
-              cell: (p) => (
-                <span className="flex flex-wrap items-center gap-2">
-                  <form action={toggleAvailabilityAction}>
-                    <input type="hidden" name="productId" value={p.id} />
-                    <input type="hidden" name="available" value={p.is_available ? '0' : '1'} />
-                    <Button type="submit" variant="secondary" disabled={!approved}>
-                      {p.is_available ? 'Mark sold out' : 'Put back on sale'}
-                    </Button>
-                  </form>
-                  <form action={archiveProductAction}>
-                    <input type="hidden" name="productId" value={p.id} />
-                    <Button
-                      type="submit"
-                      variant="ghost"
-                      disabled={!approved}
-                      aria-label={`Remove ${p.name} from menu`}
-                    >
-                      Remove
-                    </Button>
-                  </form>
-                </span>
-              ),
-            },
-          ]}
-        />
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Money kobo={p.price_kobo} className="font-semibold" />
+                    <Badge tone={p.is_available && p.stock_quantity !== 0 ? 'success' : 'neutral'}>
+                      {p.is_available && p.stock_quantity !== 0 ? 'On sale' : 'Sold out'}
+                    </Badge>
+                    <form action={toggleAvailabilityAction}>
+                      <input type="hidden" name="productId" value={p.id} />
+                      <input type="hidden" name="available" value={p.is_available ? '0' : '1'} />
+                      <Button
+                        type="submit"
+                        variant="secondary"
+                        disabled={vendor.status !== 'approved'}
+                      >
+                        {p.is_available ? 'Mark sold out' : 'Put back on sale'}
+                      </Button>
+                    </form>
+                    <form action={archiveProductAction}>
+                      <input type="hidden" name="productId" value={p.id} />
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        disabled={vendor.status !== 'approved'}
+                        aria-label={`Remove ${p.name} from menu`}
+                      >
+                        Remove
+                      </Button>
+                    </form>
+                  </div>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </>
   )

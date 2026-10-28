@@ -96,13 +96,13 @@ export default async function VendorHome() {
       <MetricGrid>
         <MetricCard
           label="Orders today"
-          value={<span data-testid="paid-count">{todays.length}</span>}
+          value={todays.length}
           note={`${sales.length} paid orders in total`}
           icon="package"
         />
         <MetricCard
           label="Waiting for you"
-          value={count(NEEDS_ACTION)}
+          value={<span data-testid="paid-count">{count(NEEDS_ACTION)}</span>}
           note="Paid orders to accept"
           icon="clipboard"
           accent="gold"

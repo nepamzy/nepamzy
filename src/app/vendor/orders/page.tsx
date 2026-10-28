@@ -5,7 +5,7 @@ import { OrderStatusPill } from '@/components/domain/order-status'
 import { PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
-import { DataTable } from '@/components/ui/data-table'
+import { Table, Td } from '@/components/ui/table'
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { Pager } from '@/components/ui/pager'
 import {
@@ -28,37 +28,34 @@ function OrdersTable({
   items: Awaited<ReturnType<typeof listItemsForOrders>>
 }) {
   return (
-    <DataTable
-      caption={caption}
-      rows={orders}
-      rowKey={(o) => o.id}
-      columns={[
-        { header: 'Order', cell: (o) => <span className="font-semibold">{o.order_number}</span> },
-        { header: 'Type', cell: (o) => (o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup') },
-        {
-          header: 'Items',
-          cell: (o) => (
-            <>
-              <ul className="space-y-0.5 text-sm">
-                {(items.get(o.id) ?? []).map((i) => (
-                  <li key={i.id}>
-                    {i.quantity} × {i.product_name}
-                    {i.options.length > 0 && ` (${i.options.map((x) => x.name).join(', ')})`}
-                  </li>
-                ))}
-              </ul>
-              <Money kobo={o.items_total_kobo} className="font-semibold" />
-            </>
-          ),
-        },
-        { header: 'Placed', cell: (o) => new Date(o.created_at).toLocaleString('en-NG') },
-        { header: 'Status', cell: (o) => <OrderStatusPill code={o.status} /> },
-        {
-          header: 'Next step',
-          cell: (o) => <VendorOrderActions orderId={o.id} status={o.status} />,
-        },
-      ]}
-    />
+    <Table caption={caption} head={['Order', 'Type', 'Items', 'Placed', 'Status', 'Next step']}>
+      {orders.map((o) => (
+        <tr key={o.id}>
+          <Td>
+            <span className="font-semibold">{o.order_number}</span>
+          </Td>
+          <Td>{o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup'}</Td>
+          <Td>
+            <ul className="space-y-0.5 text-sm">
+              {(items.get(o.id) ?? []).map((i) => (
+                <li key={i.id}>
+                  {i.quantity} × {i.product_name}
+                  {i.options.length > 0 && ` (${i.options.map((x) => x.name).join(', ')})`}
+                </li>
+              ))}
+            </ul>
+            <Money kobo={o.items_total_kobo} className="font-semibold" />
+          </Td>
+          <Td>{new Date(o.created_at).toLocaleString('en-NG')}</Td>
+          <Td>
+            <OrderStatusPill code={o.status} />
+          </Td>
+          <Td>
+            <VendorOrderActions orderId={o.id} status={o.status} />
+          </Td>
+        </tr>
+      ))}
+    </Table>
   )
 }
 
