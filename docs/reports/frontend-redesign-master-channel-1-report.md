@@ -59,9 +59,11 @@ New tests also cover: security allowlists (anon-callable functions, unbounded li
 5. Several specs referenced renamed copy (checkout button, delivery-point label clash, item search moved to `/products`).
 6. **Remote CI** showed horizontal overflow at 320/360 px (admin home, checkout) that did not reproduce locally; layouts were hardened (explicit single-column tracks, wrapping metric values, constrained form controls). The CI run on that commit is the proof (section 6).
 
-## 6. Remote CI status (honest)
+## 6. Remote CI status
 
-Earlier CI runs on commits `5d131ca`, `383f69c`, `1eb0d7c` and `02ffb2a` failed in `db-and-e2e` (the first before the DB and spec fixes; the last on the three overflow cases above). The hardening commit `e0537fc` and later commits were pushed; at the time of writing the result for them was not yet reported. **This channel is not claimed green until that check passes.** The next session step is to read it and fix anything it shows.
+CI first failed (`db-and-e2e`) on commits `5d131ca` to `2252f7c`: first the DB/spec fixes this report describes, then three horizontal-overflow cases at 320/360 px that did not reproduce locally. A first hardening attempt (`e0537fc`) did not change the result, so the cause was found by reproduction rather than guessing: the CI runner falls back to a wider system font than the development container (which resolves `system-ui` to Inter). Forcing a wide font locally reproduced the exact CI numbers (6 px on admin home at 320 px, 32 px on checkout at 360 px). Real causes: the screen-reader-only table inside the bar chart (`sr-only` does not clip a table element) and the checkout stepper. Fixed in `023b1e4`.
+
+**Result: CI is green on `023b1e4`** (`checks` and `db-and-e2e` both succeeded, push and pull-request runs). This report's own commit only changes documentation.
 
 ## 7. Screenshots
 
