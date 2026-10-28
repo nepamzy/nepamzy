@@ -539,11 +539,36 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
 
   // ---------------------------------------------------------------- earnings, settlements, data requests, menus
   await shot(v, 'vendor', '/vendor/earnings', 'earnings')
+  await shot(v, 'vendor', '/vendor/reviews', 'reviews')
+  await shot(v, 'vendor', '/vendor/help', 'help')
+  await shot(v, 'vendor', '/account/security', 'account-security')
   await shot(v, 'vendor', '/vendor/menu', 'more-menu')
   await shot(ad, 'admin', '/admin/settlements', 'settlements')
   await shot(ad, 'admin', '/admin/data-requests', 'data-requests')
   await shot(ad, 'admin', '/admin/menu', 'more-menu')
   await shot(c, 'customer', '/account/data-requests', 'data-requests')
+
+  // ---------------------------------------------------------------- narrow screens (WCAG 1.4.10 reflow, 320 CSS px); phone project only
+  if (vp === 'mobile') {
+    const narrow = join(ROOT, PHASE, 'narrow-320')
+    mkdirSync(narrow, { recursive: true })
+    writeFileSync(join(narrow, 'inventory.jsonl'), '')
+    OUT = narrow
+    vp = 'narrow-320'
+    for (const pg of [v, r, pr, c, ad]) await pg.setViewportSize({ width: 320, height: 700 })
+    await shot(v, 'vendor', '/vendor', 'dashboard')
+    await shot(v, 'vendor', '/vendor/orders', 'orders')
+    await shot(v, 'vendor', '/vendor/catalogue', 'catalogue')
+    await shot(v, 'vendor', '/vendor/earnings', 'earnings')
+    await shot(r, 'rider', '/rider', 'home')
+    await shot(r, 'rider', '/rider/jobs', 'jobs')
+    await shot(pr, 'rider', '/rider/payments', 'payments')
+    await shot(c, 'customer', '/cart', 'cart')
+    await shot(c, 'customer', '/checkout', 'checkout')
+    await shot(c, 'customer', `/orders/${dfpA}/delivery-fee`, 'pay-delivery-fee')
+    await shot(ad, 'admin', '/admin', 'dashboard')
+    await shot(ad, 'admin', '/admin/users', 'users')
+  }
 
   // ---------------------------------------------------------------- health / API pages that render something
   for (const s of Object.values(sessions)) await s.context.close()
