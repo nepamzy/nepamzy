@@ -35,7 +35,9 @@ export function MetricCard({
       )}
       <div className="min-w-0">
         <p className="text-sm font-semibold text-muted">{label}</p>
-        <p className="mt-0.5 text-2xl font-extrabold tracking-tight text-ink">{value}</p>
+        <p className="mt-0.5 text-xl font-extrabold tracking-tight text-ink [overflow-wrap:anywhere] sm:text-2xl">
+          {value}
+        </p>
         {note && <p className="mt-0.5 text-sm text-muted">{note}</p>}
       </div>
     </div>
@@ -52,5 +54,5 @@ export function MetricCard({
 }
 
 export function MetricGrid({ children }: { children: ReactNode }) {
-  return <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{children}</div>
+  return <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">{children}</div>
 }

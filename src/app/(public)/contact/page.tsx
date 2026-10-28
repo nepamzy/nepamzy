@@ -11,7 +11,7 @@ export default function Contact() {
       title="Contact us"
       intro="Send us a message and we will reply by email. For a problem with an order, open the order and choose Report a problem."
     >
-      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <aside className="space-y-3 rounded-[var(--radius-card)] border border-line bg-card p-5 shadow-[var(--shadow-card)]">
           <p className="flex items-start gap-3">
             <Icon name="mail" className="mt-0.5 text-brand-700" />
