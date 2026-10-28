@@ -36,6 +36,7 @@ export default async function CartPage() {
       </>
     )
   const warnings = describeProblems(q.problems)
+  const itemCount = q.lines.reduce((n, l) => n + l.quantity, 0)
   const qtyForm = (itemId: string, qty: number, label: string, icon: 'plus' | 'minus') => (
     <form action={setQuantityAction}>
       <input type="hidden" name="itemId" value={itemId} />
@@ -56,7 +57,7 @@ export default async function CartPage() {
         title="Your cart"
         subtitle={
           q.vendor_name
-            ? `From ${q.vendor_name} · ${q.lines.reduce((n, l) => n + l.quantity, 0)} items`
+            ? `From ${q.vendor_name} · ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`
             : undefined
         }
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Cart' }]}
