@@ -12,6 +12,7 @@ export function ActionForm({
   pendingLabel = 'Saving…',
   className,
   hideSubmit,
+  variant,
 }: {
   action: (prev: ActionState, fd: FormData) => Promise<ActionState>
   children: ReactNode
@@ -19,6 +20,8 @@ export function ActionForm({
   pendingLabel?: string
   className?: string
   hideSubmit?: boolean
+  /** The main action of a screen may use the gold button. */
+  variant?: 'primary' | 'gold'
 }) {
   const [state, formAction, pending] = useActionState(action, {} as ActionState)
   return (
@@ -41,7 +44,7 @@ export function ActionForm({
       )}
       {children}
       {!hideSubmit && (
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" variant={variant} disabled={pending}>
           {pending ? pendingLabel : submitLabel}
         </Button>
       )}

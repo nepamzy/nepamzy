@@ -94,6 +94,7 @@ export function ReportTransferForm({ paymentId }: { paymentId: string }) {
     <ActionForm
       action={reportDeliveryFeeAction}
       submitLabel="I Have Made the Transfer"
+      variant="gold"
       pendingLabel="Saving…"
     >
       <input type="hidden" name="paymentId" value={paymentId} />

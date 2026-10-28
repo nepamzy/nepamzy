@@ -1,6 +1,6 @@
-# Page inventory (Frontend redesign: master channel 1)
+# Page inventory (Frontend redesign: master channel 2 (original before / final after))
 
-Built from `artifacts/afit-market-ui-audit/{redesign-before,redesign-m1-after}/{desktop,mobile}/inventory.json`: what was actually rendered. Routes with ids are shown with `[id]`. "yes" means a screenshot file exists.
+Built from `artifacts/afit-market-ui-audit/{redesign-before,channel2-final}/{desktop,mobile}/inventory.json`: what was actually rendered. Routes with ids are shown with `[id]`. "yes" means a screenshot file exists.
 
 | Role | Route | State | HTTP | Desk before | Desk after | Mob before | Mob after | Note |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -79,6 +79,7 @@ Built from `artifacts/afit-market-ui-audit/{redesign-before,redesign-m1-after}/{
 | customer | `/rider-apply` | rider-application-form | 200 | yes | yes | yes | yes |  |
 | customer | `/vendor` | forbidden-for-customer | 403 | yes | yes | yes | yes |  |
 | vendor | `/account` | account | 200 | yes | yes | yes | yes |  |
+| vendor | `/account/security` | account-security | 200 | NO | yes | NO | yes |  |
 | vendor | `/notifications` | notifications | 200 | yes | yes | yes | yes |  |
 | vendor | `/vendor` | dashboard | 200 | yes | yes | yes | yes |  |
 | vendor | `/vendor` | forbidden-for-non-vendor | 403 | yes | yes | yes | yes |  |
@@ -87,10 +88,12 @@ Built from `artifacts/afit-market-ui-audit/{redesign-before,redesign-m1-after}/{
 | vendor | `/vendor/catalogue/new` | new-product-form | 200 | yes | yes | yes | yes |  |
 | vendor | `/vendor/earnings` | earnings | 200 | yes | yes | yes | yes |  |
 | vendor | `/vendor/handover` | pickup-handover | 200 | yes | yes | yes | yes |  |
+| vendor | `/vendor/help` | help | 200 | NO | yes | NO | yes |  |
 | vendor | `/vendor/menu` | more-menu | 200 | yes | yes | yes | yes |  |
 | vendor | `/vendor/orders` | incoming-orders | 200 | yes | yes | yes | yes |  |
 | vendor | `/vendor/profile` | shop-profile-and-hours | 200 | yes | yes | yes | yes |  |
 | vendor | `/vendor/returns` | returns | 200 | yes | yes | yes | yes |  |
+| vendor | `/vendor/reviews` | reviews | 200 | NO | yes | NO | yes |  |
 | rider | `/notifications` | notifications | 200 | yes | yes | yes | yes |  |
 | rider | `/rider` | dashboard-active-shift | 200 | yes | yes | yes | yes |  |
 | rider | `/rider` | dashboard-inactive | 200 | yes | yes | yes | yes |  |
@@ -141,8 +144,10 @@ Built from `artifacts/afit-market-ui-audit/{redesign-before,redesign-m1-after}/{
 | admin | `/admin/vendors` | platform-admin | 200 | yes | yes | yes | yes |  |
 | admin | `/notifications` | notifications | 200 | yes | yes | yes | yes |  |
 
-Total pages/states: 136. Missing in at least one of the four captures: 22 (public/about__about.png, public/contact__contact.png, public/delivery__delivery.png, public/faq__faq.png, public/payments__payments.png, public/privacy__privacy.png, public/products__items-browse.png, public/products-q-zzzz-no-such-item__items-no-results.png, public/products-sort-price-asc-q-Fixture__items-sorted-search.png, public/refunds__refunds.png, public/terms__terms.png, customer/account-addresses__saved-places.png, customer/account-profile__profile.png, customer/account-wishlist__wishlist.png, admin/admin-messages__platform-admin.png, admin/admin-orders__platform-admin.png, admin/admin-orders-ID__order-detail.png, admin/admin-products__platform-admin.png, admin/admin-reports__platform-admin.png, admin/admin-users__platform-admin.png, admin/admin-users-ID__user-detail.png, admin/admin-users-q-au__users-filtered.png).
+Total pages/states: 139. Missing in at least one of the four captures: 25 (public/about__about.png, public/contact__contact.png, public/delivery__delivery.png, public/faq__faq.png, public/payments__payments.png, public/privacy__privacy.png, public/products__items-browse.png, public/products-q-zzzz-no-such-item__items-no-results.png, public/products-sort-price-asc-q-Fixture__items-sorted-search.png, public/refunds__refunds.png, public/terms__terms.png, customer/account-addresses__saved-places.png, customer/account-profile__profile.png, customer/account-wishlist__wishlist.png, vendor/account-security__account-security.png, vendor/vendor-help__help.png, vendor/vendor-reviews__reviews.png, admin/admin-messages__platform-admin.png, admin/admin-orders__platform-admin.png, admin/admin-orders-ID__order-detail.png, admin/admin-products__platform-admin.png, admin/admin-reports__platform-admin.png, admin/admin-users__platform-admin.png, admin/admin-users-ID__user-detail.png, admin/admin-users-q-au__users-filtered.png).
 
-Screenshot counts, before (redesign-before): desktop: 114, mobile: 114. After (redesign-m1-after): desktop: 136, mobile: 136.
+Screenshot counts, before (redesign-before): desktop: 114, mobile: 114. After (channel2-final): desktop: 139, mobile: 139.
 
-By role (both viewports): before/public=44, before/customer=76, before/vendor=26, before/rider=22, before/admin=60, after/public=66, after/customer=82, after/vendor=26, after/rider=22, after/admin=76.
+By role (both viewports): before/public=44, before/customer=76, before/vendor=26, before/rider=22, before/admin=60, after/public=66, after/customer=82, after/vendor=32, after/rider=22, after/admin=76.
+
+Narrow screens (320 px, after): 12 captured of 12 attempted: vendor/dashboard, vendor/orders, vendor/catalogue, vendor/earnings, rider/home, rider/jobs, rider/payments, customer/cart, customer/checkout, customer/pay-delivery-fee, admin/dashboard, admin/users.

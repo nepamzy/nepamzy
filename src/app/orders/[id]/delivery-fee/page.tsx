@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
   BANK_NOTE,
@@ -27,11 +26,6 @@ export default async function PayDeliveryFee({ params }: { params: Promise<{ id:
   if (!v) notFound()
   return (
     <>
-      <p className="mb-2">
-        <Link href={`/orders/${id}`} className="font-semibold text-brand-700 underline">
-          ← Back to the order
-        </Link>
-      </p>
       <PageHeader
         breadcrumbs={[
           { label: 'Orders', href: '/orders' },

@@ -1,0 +1,1392 @@
+[
+  {
+    "role": "public",
+    "route": "/",
+    "actualUrl": "/",
+    "state": "landing",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/home__landing.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors",
+    "actualUrl": "/vendors",
+    "state": "list",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/vendors__list.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors?q=zzzz-no-such-item",
+    "actualUrl": "/vendors?q=zzzz-no-such-item",
+    "state": "search-no-results",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/vendors-q-zzzz-no-such-item__search-no-results.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors?q=Fixture",
+    "actualUrl": "/vendors?q=Fixture",
+    "state": "search-results",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/vendors-q-Fixture__search-results.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors/shop-ve3xdk",
+    "actualUrl": "/vendors/shop-ve3xdk",
+    "state": "vendor-menu",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/vendors-shop-ve3xdk__vendor-menu.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/products/4d0e5c8e-6193-443d-a7bd-436f15b91dc0",
+    "actualUrl": "/products/4d0e5c8e-6193-443d-a7bd-436f15b91dc0",
+    "state": "product-detail",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/products-ID__product-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/vendors/no-such-shop",
+    "actualUrl": "/vendors/no-such-shop",
+    "state": "not-found-404",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/vendors-no-such-shop__not-found-404.png",
+    "http": 404,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/products",
+    "actualUrl": "/products",
+    "state": "items-browse",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/products__items-browse.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/products?sort=price_asc&q=Fixture",
+    "actualUrl": "/products?sort=price_asc&q=Fixture",
+    "state": "items-sorted-search",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/products-sort-price-asc-q-Fixture__items-sorted-search.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/products?q=zzzz-no-such-item",
+    "actualUrl": "/products?q=zzzz-no-such-item",
+    "state": "items-no-results",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/products-q-zzzz-no-such-item__items-no-results.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/about",
+    "actualUrl": "/about",
+    "state": "about",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/about__about.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/faq",
+    "actualUrl": "/faq",
+    "state": "faq",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/faq__faq.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/contact",
+    "actualUrl": "/contact",
+    "state": "contact",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/contact__contact.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/terms",
+    "actualUrl": "/terms",
+    "state": "terms",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/terms__terms.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/privacy",
+    "actualUrl": "/privacy",
+    "state": "privacy",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/privacy__privacy.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/refunds",
+    "actualUrl": "/refunds",
+    "state": "refunds",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/refunds__refunds.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/delivery",
+    "actualUrl": "/delivery",
+    "state": "delivery",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/delivery__delivery.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/payments",
+    "actualUrl": "/payments",
+    "state": "payments",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/payments__payments.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/login",
+    "actualUrl": "/login",
+    "state": "empty-form",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/login__empty-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/login",
+    "actualUrl": "/login",
+    "state": "wrong-password-error",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/login__wrong-password-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/signup",
+    "actualUrl": "/signup",
+    "state": "empty-form",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/signup__empty-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/signup",
+    "actualUrl": "/signup",
+    "state": "validation-error",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/signup__validation-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/offline",
+    "actualUrl": "/offline",
+    "state": "offline-fallback",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/offline__offline-fallback.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/design",
+    "actualUrl": "/design",
+    "state": "design-system-page",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/design__design-system-page.png",
+    "http": 200,
+    "note": "internal design reference page"
+  },
+  {
+    "role": "public",
+    "route": "/orders",
+    "actualUrl": "/login?next=%2Forders",
+    "state": "anonymous-redirected-to-login",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/orders__anonymous-redirected-to-login.png",
+    "http": 200,
+    "note": " redirected to /login?next=%2Forders"
+  },
+  {
+    "role": "public",
+    "route": "/admin",
+    "actualUrl": "/login?next=%2Fadmin",
+    "state": "anonymous-redirected-to-login",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/admin__anonymous-redirected-to-login.png",
+    "http": 200,
+    "note": " redirected to /login?next=%2Fadmin"
+  },
+  {
+    "role": "public",
+    "route": "/cart",
+    "actualUrl": "/login?next=%2Fcart",
+    "state": "anonymous-cart",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/cart__anonymous-cart.png",
+    "http": 200,
+    "note": " redirected to /login?next=%2Fcart"
+  },
+  {
+    "role": "public",
+    "route": "/",
+    "actualUrl": "/",
+    "state": "signed-in-no-factor-home",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/home__signed-in-no-factor-home.png",
+    "http": null,
+    "note": "a customer without a factor can browse after sign-in (K15)"
+  },
+  {
+    "role": "public",
+    "route": "/mfa/enroll",
+    "actualUrl": "/mfa/enroll",
+    "state": "enrol-first-factor",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/mfa-enroll__enrol-first-factor.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/mfa/challenge",
+    "actualUrl": "/mfa/challenge?next=%2F",
+    "state": "challenge",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/mfa-challenge__challenge.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/mfa/challenge",
+    "actualUrl": "/mfa/challenge?next=%2F",
+    "state": "wrong-code-error",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/mfa-challenge__wrong-code-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cart",
+    "actualUrl": "/cart",
+    "state": "empty-cart",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/cart__empty-cart.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/products/4d0e5c8e-6193-443d-a7bd-436f15b91dc0",
+    "actualUrl": "/products/4d0e5c8e-6193-443d-a7bd-436f15b91dc0",
+    "state": "product-detail-signed-in",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/products-ID__product-detail-signed-in.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/products/4d0e5c8e-6193-443d-a7bd-436f15b91dc0",
+    "actualUrl": "/cart",
+    "state": "after-add-to-cart",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/products-ID__after-add-to-cart.png",
+    "http": null,
+    "note": " redirected to /cart"
+  },
+  {
+    "role": "customer",
+    "route": "/cart",
+    "actualUrl": "/cart",
+    "state": "populated-cart",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/cart__populated-cart.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/checkout",
+    "actualUrl": "/checkout",
+    "state": "checkout-form",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/checkout__checkout-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders",
+    "actualUrl": "/orders",
+    "state": "order-history",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders__order-history.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb",
+    "actualUrl": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb",
+    "state": "completed-order-with-review-form",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__completed-order-with-review-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb/help",
+    "actualUrl": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb/help",
+    "state": "help-refund-and-report-forms",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID-help__help-refund-and-report-forms.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/15fc663c-f82c-49e9-804c-f2aab66ea53e",
+    "actualUrl": "/orders/15fc663c-f82c-49e9-804c-f2aab66ea53e",
+    "state": "paid-order-waiting-for-shop",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__paid-order-waiting-for-shop.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/13332d75-4816-4aba-9564-a2491a322833",
+    "actualUrl": "/orders/13332d75-4816-4aba-9564-a2491a322833",
+    "state": "delivery-en-route-no-location-yet",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__delivery-en-route-no-location-yet.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications-with-unread",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/notifications__notifications-with-unread.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cases",
+    "actualUrl": "/cases",
+    "state": "reports-empty",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/cases__reports-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account",
+    "actualUrl": "/account",
+    "state": "account",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/account__account.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/profile",
+    "actualUrl": "/account/profile",
+    "state": "profile",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/account-profile__profile.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/wishlist",
+    "actualUrl": "/account/wishlist",
+    "state": "wishlist",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/account-wishlist__wishlist.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/addresses",
+    "actualUrl": "/account/addresses",
+    "state": "saved-places",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/account-addresses__saved-places.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/security",
+    "actualUrl": "/account/security",
+    "state": "account-security-mfa",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/account-security__account-security-mfa.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/apply",
+    "actualUrl": "/apply",
+    "state": "vendor-application-form",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/apply__vendor-application-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/rider-apply",
+    "actualUrl": "/rider-apply",
+    "state": "rider-application-form",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/rider-apply__rider-application-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb",
+    "actualUrl": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb",
+    "state": "review-published",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__review-published.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb/help",
+    "actualUrl": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb/help",
+    "state": "refund-requested",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID-help__refund-requested.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb/help",
+    "actualUrl": "/orders/a08c532d-f586-4448-9caa-f650b8ef54fb/help",
+    "state": "report-opened",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID-help__report-opened.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cases",
+    "actualUrl": "/cases",
+    "state": "reports-list",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/cases__reports-list.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cases/c036abc5-fee5-49c6-9ed3-5b9296f7d7b7",
+    "actualUrl": "/cases/c036abc5-fee5-49c6-9ed3-5b9296f7d7b7",
+    "state": "report-detail",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/cases-ID__report-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/1d0f51d3-dc92-4595-99d2-3727ffde3f37",
+    "actualUrl": "/orders/1d0f51d3-dc92-4595-99d2-3727ffde3f37",
+    "state": "rider-arrived-confirm-receipt",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__rider-arrived-confirm-receipt.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/1d0f51d3-dc92-4595-99d2-3727ffde3f37",
+    "actualUrl": "/orders/1d0f51d3-dc92-4595-99d2-3727ffde3f37",
+    "state": "signature-capture-empty",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__signature-capture-empty.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/1d0f51d3-dc92-4595-99d2-3727ffde3f37",
+    "actualUrl": "/orders/1d0f51d3-dc92-4595-99d2-3727ffde3f37",
+    "state": "signature-missing-error",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__signature-missing-error.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/vendor",
+    "actualUrl": "/vendor",
+    "state": "forbidden-for-customer",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/vendor__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/rider",
+    "actualUrl": "/rider",
+    "state": "forbidden-for-customer",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/rider__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "forbidden-for-customer",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/admin__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/admin/settings",
+    "actualUrl": "/admin/settings",
+    "state": "forbidden-for-customer",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/admin-settings__forbidden-for-customer.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders",
+    "actualUrl": "/orders",
+    "state": "orders-empty",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders__orders-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications-empty",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/notifications__notifications-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/cart",
+    "actualUrl": "/cart",
+    "state": "cart-empty",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/cart__cart-empty.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor",
+    "actualUrl": "/vendor",
+    "state": "dashboard",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor__dashboard.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/orders",
+    "actualUrl": "/vendor/orders",
+    "state": "incoming-orders",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-orders__incoming-orders.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/catalogue",
+    "actualUrl": "/vendor/catalogue",
+    "state": "catalogue",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-catalogue__catalogue.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/catalogue/new",
+    "actualUrl": "/vendor/catalogue/new",
+    "state": "new-product-form",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-catalogue-new__new-product-form.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/catalogue/4d0e5c8e-6193-443d-a7bd-436f15b91dc0",
+    "actualUrl": "/vendor/catalogue/4d0e5c8e-6193-443d-a7bd-436f15b91dc0",
+    "state": "edit-product",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-catalogue-ID__edit-product.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/profile",
+    "actualUrl": "/vendor/profile",
+    "state": "shop-profile-and-hours",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-profile__shop-profile-and-hours.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/handover",
+    "actualUrl": "/vendor/handover",
+    "state": "pickup-handover",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-handover__pickup-handover.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/returns",
+    "actualUrl": "/vendor/returns",
+    "state": "returns",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-returns__returns.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/notifications__notifications.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/account",
+    "actualUrl": "/account",
+    "state": "account",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/account__account.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor",
+    "actualUrl": "/vendor",
+    "state": "forbidden-for-non-vendor",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor__forbidden-for-non-vendor.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider",
+    "actualUrl": "/rider",
+    "state": "dashboard-active-shift",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider__dashboard-active-shift.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/jobs",
+    "actualUrl": "/rider/jobs",
+    "state": "jobs-with-arrived-delivery",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-jobs__jobs-with-arrived-delivery.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/profile",
+    "actualUrl": "/rider/profile",
+    "state": "profile",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-profile__profile.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/notifications__notifications.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider",
+    "actualUrl": "/rider",
+    "state": "dashboard-inactive",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider__dashboard-inactive.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/jobs",
+    "actualUrl": "/rider/jobs",
+    "state": "jobs-inactive-no-offers",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-jobs__jobs-inactive-no-offers.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/applications",
+    "actualUrl": "/admin/applications",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-applications__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/vendors",
+    "actualUrl": "/admin/vendors",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-vendors__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/delivery-points",
+    "actualUrl": "/admin/delivery-points",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-delivery-points__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/categories",
+    "actualUrl": "/admin/categories",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-categories__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/riders",
+    "actualUrl": "/admin/riders",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-riders__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/rider-issues",
+    "actualUrl": "/admin/rider-issues",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-rider-issues__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/payments",
+    "actualUrl": "/admin/payments",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-payments__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/refunds",
+    "actualUrl": "/admin/refunds",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-refunds__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases",
+    "actualUrl": "/admin/cases",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-cases__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/returns",
+    "actualUrl": "/admin/returns",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-returns__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/reviews",
+    "actualUrl": "/admin/reviews",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-reviews__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/jobs",
+    "actualUrl": "/admin/jobs",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-jobs__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/settings",
+    "actualUrl": "/admin/settings",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-settings__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/audit",
+    "actualUrl": "/admin/audit",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-audit__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/roles",
+    "actualUrl": "/admin/roles",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-roles__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/users",
+    "actualUrl": "/admin/users",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-users__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/orders",
+    "actualUrl": "/admin/orders",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-orders__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/products",
+    "actualUrl": "/admin/products",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-products__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/reports",
+    "actualUrl": "/admin/reports",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-reports__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/messages",
+    "actualUrl": "/admin/messages",
+    "state": "platform-admin",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-messages__platform-admin.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases/c036abc5-fee5-49c6-9ed3-5b9296f7d7b7",
+    "actualUrl": "/admin/cases/c036abc5-fee5-49c6-9ed3-5b9296f7d7b7",
+    "state": "case-detail",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-cases-ID__case-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/users/7195702d-f594-42e0-b3b7-4044b92185d4",
+    "actualUrl": "/admin/users/7195702d-f594-42e0-b3b7-4044b92185d4",
+    "state": "user-detail",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-users-ID__user-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/orders/a08c532d-f586-4448-9caa-f650b8ef54fb",
+    "actualUrl": "/admin/orders/a08c532d-f586-4448-9caa-f650b8ef54fb",
+    "state": "order-detail",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-orders-ID__order-detail.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/users?q=au-",
+    "actualUrl": "/admin/users?q=au-",
+    "state": "users-filtered",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-users-q-au__users-filtered.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/refunds?status=requested&q=AFM",
+    "actualUrl": "/admin/refunds?status=requested&q=AFM",
+    "state": "refunds-filtered",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-refunds-status-requested-q-AFM__refunds-filtered.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/notifications",
+    "actualUrl": "/notifications",
+    "state": "notifications",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/notifications__notifications.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "support-agent-overview",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin__support-agent-overview.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases",
+    "actualUrl": "/admin/cases",
+    "state": "support-agent-cases",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-cases__support-agent-cases.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/settings",
+    "actualUrl": "/admin/settings",
+    "state": "forbidden-for-support",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-settings__forbidden-for-support.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin",
+    "actualUrl": "/admin",
+    "state": "finance-admin-overview",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin__finance-admin-overview.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/refunds",
+    "actualUrl": "/admin/refunds",
+    "state": "finance-admin-refunds",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-refunds__finance-admin-refunds.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/cases",
+    "actualUrl": "/admin/cases",
+    "state": "forbidden-for-finance",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-cases__forbidden-for-finance.png",
+    "http": 403,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "no-bank-details-yet",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-payments__no-bank-details-yet.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "bank-details-saved",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-payments__bank-details-saved.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31",
+    "actualUrl": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31",
+    "state": "order-with-delivery-fee-notice",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID__order-with-delivery-fee-notice.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31/delivery-fee",
+    "actualUrl": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31/delivery-fee",
+    "state": "pay-delivery-fee-start",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID-delivery-fee__pay-delivery-fee-start.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31/delivery-fee",
+    "actualUrl": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31/delivery-fee",
+    "state": "pay-delivery-fee-details",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID-delivery-fee__pay-delivery-fee-details.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31/delivery-fee",
+    "actualUrl": "/orders/de735eba-ea6e-470f-8491-ca49ee100a31/delivery-fee",
+    "state": "transfer-reported-waiting",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID-delivery-fee__transfer-reported-waiting.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "customer-reported-awaiting-confirmation",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-payments__customer-reported-awaiting-confirmation.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "confirmed-with-receipt",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-payments__confirmed-with-receipt.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/receipts",
+    "actualUrl": "/account/receipts",
+    "state": "receipt-list",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/account-receipts__receipt-list.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/receipts/eeeeae654abd54b5f33ca33c085c7e72b292d366d3a48327",
+    "actualUrl": "/receipts/eeeeae654abd54b5f33ca33c085c7e72b292d366d3a48327",
+    "state": "public-receipt-check",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/receipts-eeeeae654abd54b5f33ca33c085c7e72b292d366d3a48327__public-receipt-check.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "public",
+    "route": "/receipts/000000000000000000000000000000000000000000000000",
+    "actualUrl": "/receipts/000000000000000000000000000000000000000000000000",
+    "state": "public-receipt-not-found",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/public/receipts-000000000000000000000000000000000000000000000000__public-receipt-not-found.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "rider",
+    "route": "/rider/payments",
+    "actualUrl": "/rider/payments",
+    "state": "disputed",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/rider/rider-payments__disputed.png",
+    "http": null,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/orders/dc03f8cc-ec2f-4d27-8c1a-d0c932ba6dbb/delivery-fee",
+    "actualUrl": "/orders/dc03f8cc-ec2f-4d27-8c1a-d0c932ba6dbb/delivery-fee",
+    "state": "disputed-customer-view",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/orders-ID-delivery-fee__disputed-customer-view.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/delivery-fee-payments",
+    "actualUrl": "/admin/delivery-fee-payments",
+    "state": "dispute-awaiting-decision",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-delivery-fee-payments__dispute-awaiting-decision.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/delivery-fee-payments",
+    "actualUrl": "/admin/delivery-fee-payments",
+    "state": "finance-admin-view",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-delivery-fee-payments__finance-admin-view.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/earnings",
+    "actualUrl": "/vendor/earnings",
+    "state": "earnings",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-earnings__earnings.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/reviews",
+    "actualUrl": "/vendor/reviews",
+    "state": "reviews",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-reviews__reviews.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/help",
+    "actualUrl": "/vendor/help",
+    "state": "help",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-help__help.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/account/security",
+    "actualUrl": "/account/security",
+    "state": "account-security",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/account-security__account-security.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "vendor",
+    "route": "/vendor/menu",
+    "actualUrl": "/vendor/menu",
+    "state": "more-menu",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/vendor/vendor-menu__more-menu.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/settlements",
+    "actualUrl": "/admin/settlements",
+    "state": "settlements",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-settlements__settlements.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/data-requests",
+    "actualUrl": "/admin/data-requests",
+    "state": "data-requests",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-data-requests__data-requests.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "admin",
+    "route": "/admin/menu",
+    "actualUrl": "/admin/menu",
+    "state": "more-menu",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/admin/admin-menu__more-menu.png",
+    "http": 200,
+    "note": ""
+  },
+  {
+    "role": "customer",
+    "route": "/account/data-requests",
+    "actualUrl": "/account/data-requests",
+    "state": "data-requests",
+    "viewport": "desktop",
+    "file": "artifacts/afit-market-ui-audit/channel2-final/desktop/customer/account-data-requests__data-requests.png",
+    "http": 200,
+    "note": ""
+  }
+]

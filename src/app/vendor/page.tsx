@@ -151,7 +151,7 @@ export default async function VendorHome() {
             </p>
           </form>
           <p className="text-sm text-muted">
-            {products.length} items on your menu
+            {products.length} {products.length === 1 ? 'item' : 'items'} on your menu
             {unavailable > 0 ? `, ${unavailable} marked unavailable` : ''}.{' '}
             <Link className="font-semibold text-brand-700 underline" href="/vendor/catalogue">
               Manage catalogue

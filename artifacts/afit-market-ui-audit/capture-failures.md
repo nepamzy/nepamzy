@@ -1,4 +1,4 @@
-# Capture failures (Frontend redesign: master channel 1)
+# Capture failures (Frontend redesign: master channel 2 (original before / final after))
 
 None: every attempted page/state produced a screenshot in both viewports.
 

@@ -93,7 +93,19 @@ async function shot(
 
 test.afterAll(async () => {
   await restorePlaceholderTerms()
-  writeFileSync(join(OUT, `inventory.json`), JSON.stringify(rows, null, 2))
+  // each viewport keeps its own inventory (the 320 px pass runs inside the phone project, so split by the recorded viewport)
+  for (const v of new Set(rows.map((r) => r.viewport))) {
+    const dir = join(ROOT, PHASE, v)
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      join(dir, `inventory.json`),
+      JSON.stringify(
+        rows.filter((r) => r.viewport === v),
+        null,
+        2,
+      ),
+    )
+  }
 })
 
 test('capture every implemented page, per role, with synthetic data', async ({ browser }, info) => {
