@@ -10,7 +10,7 @@ export function Stepper({ steps, current }: { steps: string[]; current: number }
           <li
             key={s}
             aria-current={state === 'current' ? 'step' : undefined}
-            className="flex flex-1 items-center gap-2"
+            className="flex min-w-0 flex-1 items-center gap-2"
           >
             <span
               className={cn(
@@ -22,11 +22,18 @@ export function Stepper({ steps, current }: { steps: string[]; current: number }
             >
               {state === 'done' ? '✓' : i + 1}
             </span>
-            <span className={state === 'todo' ? 'text-muted' : 'text-navy-900'}>
+            <span
+              className={cn(
+                'min-w-0 [overflow-wrap:anywhere]',
+                state === 'todo' ? 'text-muted' : 'text-navy-900',
+              )}
+            >
               {s}
               {state === 'current' && <span className="sr-only"> (current step)</span>}
             </span>
-            {i < steps.length - 1 && <span aria-hidden="true" className="h-0.5 flex-1 bg-line" />}
+            {i < steps.length - 1 && (
+              <span aria-hidden="true" className="hidden h-0.5 flex-1 bg-line sm:block" />
+            )}
           </li>
         )
       })}

@@ -59,23 +59,25 @@ export function BarChart({
         })}
       </svg>
       <figcaption className="sr-only">{label}</figcaption>
-      <table className="sr-only">
-        <caption>{label}</caption>
-        <thead>
-          <tr>
-            <th>Day</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((d, i) => (
-            <tr key={d.label + i}>
-              <td>{d.label}</td>
-              <td>{format(d.value)}</td>
+      <div className="sr-only">
+        <table>
+          <caption>{label}</caption>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Value</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((d, i) => (
+              <tr key={d.label + i}>
+                <td>{d.label}</td>
+                <td>{format(d.value)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   )
 }
