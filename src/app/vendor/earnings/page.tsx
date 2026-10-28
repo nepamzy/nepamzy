@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Alert } from '@/components/ui/alert'
+import { BarChart } from '@/components/ui/bar-chart'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -112,6 +113,25 @@ export default async function Earnings() {
           </p>
         </Card>
       </Section>
+
+      {s.recent.length > 0 && (
+        <Section
+          title="Amount due per completed order"
+          description="The most recent completed orders, oldest to newest. Calculated amounts, not payouts."
+          id="chart"
+        >
+          <Card>
+            <BarChart
+              label="Calculated amount due per recent completed order, in naira"
+              data={[...s.recent].reverse().map((o) => ({
+                label: o.order_number.slice(-4),
+                value: Math.round(o.payable_kobo / 100),
+              }))}
+              format={(n) => `₦${n.toLocaleString('en-NG')}`}
+            />
+          </Card>
+        </Section>
+      )}
 
       <Section
         title="Settlement history"

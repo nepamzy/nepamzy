@@ -9,6 +9,7 @@ import {
 } from '@/components/domain/rider-controls'
 import { OrderStatusPill } from '@/components/domain/order-status'
 import { Card, PageHeader } from '@/components/ui/card'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { EmptyState } from '@/components/ui/states'
 import {
   getAssignments,
@@ -53,6 +54,20 @@ export default async function Jobs() {
         title="Jobs"
         subtitle={`${assignments.length} of 5 active deliveries`}
       />
+      <MetricGrid>
+        <MetricCard
+          label="Active deliveries"
+          value={`${assignments.length} of 5`}
+          icon="truck"
+          accent="gold"
+        />
+        <MetricCard
+          label="Delivery offers"
+          value={offers.length}
+          note="Ready for collection near you"
+          icon="package"
+        />
+      </MetricGrid>
       <div className="mb-5">
         <LocationSharing
           enabled={assignments.length > 0}

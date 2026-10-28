@@ -21,6 +21,7 @@ export default async function RiderApply() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Account', href: '/account' }, { label: 'Deliver on AFIT Market' }]}
         title="Deliver on AFIT Market"
         subtitle="Apply to become an approved campus delivery rider"
       />

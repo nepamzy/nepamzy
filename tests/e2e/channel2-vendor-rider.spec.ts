@@ -5,6 +5,7 @@ import {
   makeShopWithPoint,
   openSession,
   openSessionFor,
+  restorePlaceholderTerms,
   seedPaidCompletedOrder,
   seedRider,
   tag,
@@ -15,6 +16,11 @@ import {
  * about rider commission. The mode cookie / forged client state can never reach another role's area.
  */
 test.describe.configure({ mode: 'serial' })
+
+// seedRider installs the approved-terms test fixture globally; put the shipped placeholder back for the specs that follow
+test.afterAll(async () => {
+  await restorePlaceholderTerms()
+})
 
 test('vendor area: every page renders for the shop owner with real figures, no serious a11y issues, no horizontal scroll', async ({
   browser,
