@@ -26,7 +26,7 @@ channel2-final/      FINAL set for master channel 2: desktop/ (139), mobile/ (13
   <viewport>/<role>/<route>__<state>.png      roles: public, customer, vendor, rider, admin
 ```
 
-`channel2-final` was captured from code commit `93bd991`. The older folders are kept as evidence of earlier states.
+`channel2-final` was captured from code commit `106dd3d`. The older folders are kept as evidence of earlier states.
 
 ## Limits
 
