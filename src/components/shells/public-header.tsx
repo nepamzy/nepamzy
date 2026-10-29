@@ -5,9 +5,9 @@ import { isPrivilegedRole } from '@/server/modules/identity-and-access/policy'
 import { cartItemCount } from '@/server/modules/cart-and-checkout/queries'
 import { ButtonLink } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icons'
-import { Logo } from '@/components/ui/logo'
 import { SearchField } from '@/components/ui/search-field'
 import { Menu } from './menu'
+import { StaffTapLogo } from './staff-tap-logo'
 import { ModePill, ModeSwitch } from './mode-switch'
 
 export async function PublicHeader() {
@@ -17,7 +17,7 @@ export async function PublicHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-line border-t-4 border-t-gold-400 bg-card/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
-        <Logo />
+        <StaffTapLogo />
         <SearchField
           action="/products"
           placeholder="Search food, shops and services"

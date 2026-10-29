@@ -180,7 +180,7 @@ export function policyFor(pathname: string): RoutePolicy | null {
 /** Only same-site relative paths are accepted as post-login redirect targets. */
 export function safeNextPath(next: string | null | undefined): string {
   if (!next || !next.startsWith('/') || next.startsWith('//') || next.includes('\\')) return '/'
-  if (/^\/(login|signup|auth)(\/|$)/.test(next)) return '/'
+  if (/^\/(login|signup|staff-login|auth)(\/|$)/.test(next)) return '/'
   return next
 }
 

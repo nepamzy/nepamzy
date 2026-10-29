@@ -35,7 +35,8 @@ function Notice({ state }: { state: FormState }) {
   return null
 }
 
-export function SignInForm({ next }: { next: string }) {
+/** `staff` is the hidden administrator entrance (/staff-login): it only picks the administrator interface for accounts that already hold a staff role. */
+export function SignInForm({ next, staff = false }: { next: string; staff?: boolean }) {
   const [state, action, pending] = useActionState(signInAction, initial)
   return (
     <form action={action} className="space-y-4" noValidate>
@@ -57,22 +58,7 @@ export function SignInForm({ next }: { next: string }) {
         autoComplete="current-password"
         required
       />
-      <fieldset className="rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
-        <legend className="px-1 text-sm font-bold text-navy-900">Sign in to (optional)</legend>
-        <div className="flex flex-wrap gap-x-5 gap-y-1">
-          <label className="touch-target flex items-center gap-2 font-semibold">
-            <input type="radio" name="mode" value="customer" /> Customer
-          </label>
-          <label className="touch-target flex items-center gap-2 font-semibold">
-            <input type="radio" name="mode" value="admin" /> Administrator
-          </label>
-        </div>
-        <p className="text-xs text-muted">
-          Only for accounts that have administrator access; everyone else is signed in as a
-          customer. Leave both unticked to sign in as usual. You can switch at any time after
-          signing in.
-        </p>
-      </fieldset>
+      {staff && <input type="hidden" name="mode" value="admin" />}
       <Button type="submit" variant="gold" disabled={pending} className="w-full">
         {pending ? 'Signing in…' : 'Sign in'}
       </Button>
@@ -81,12 +67,14 @@ export function SignInForm({ next }: { next: string }) {
           Forgot your password?
         </Link>
       </p>
-      <p className="text-center text-sm text-muted">
-        New here?{' '}
-        <Link className="font-semibold text-brand-700 underline" href="/signup">
-          Create an account
-        </Link>
-      </p>
+      {!staff && (
+        <p className="text-center text-sm text-muted">
+          New here?{' '}
+          <Link className="font-semibold text-brand-700 underline" href="/signup">
+            Create an account
+          </Link>
+        </p>
+      )}
     </form>
   )
 }
@@ -120,6 +108,50 @@ export function SignUpForm() {
         autoComplete="new-password"
         required
       />
+      <fieldset className="rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
+        <legend className="px-1 text-sm font-bold text-navy-900">
+          I want to use AFIT Market as a
+        </legend>
+        <div className="space-y-1">
+          {(
+            [
+              [
+                'customer',
+                'Customer',
+                'Buy food and items and get them delivered or ready for pickup.',
+              ],
+              [
+                'vendor',
+                'Vendor',
+                'Sell items. You apply with your shop details and are approved before you can sell.',
+              ],
+              [
+                'rider',
+                'Rider',
+                'Deliver orders. You apply and are approved before you can deliver.',
+              ],
+            ] as const
+          ).map(([value, label, help]) => (
+            <label key={value} className="touch-target flex items-start gap-2">
+              <input
+                type="radio"
+                name="intent"
+                value={value}
+                defaultChecked={value === 'customer'}
+                className="mt-1.5"
+              />
+              <span>
+                <span className="font-semibold">{label}</span>
+                <span className="block text-sm text-muted">{help}</span>
+              </span>
+            </label>
+          ))}
+        </div>
+        <p className="text-xs text-muted">
+          Every account starts as a customer. Choosing Vendor or Rider takes you to the application
+          after you sign in; nothing is switched on until it is approved.
+        </p>
+      </fieldset>
       <Checkbox name="adult" label="I confirm that I am 18 years old or older." required />
       <p className="text-sm text-muted">
         AFIT Market is only for people aged 18 and over. This is your own confirmation: we record
