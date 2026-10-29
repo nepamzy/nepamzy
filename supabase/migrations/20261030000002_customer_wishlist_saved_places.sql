@@ -116,7 +116,7 @@ grant execute on function public.wishlist_toggle(uuid), public.wishlist_contains
   public.saved_place_save(uuid, text, uuid, boolean), public.saved_place_delete(uuid) to authenticated, service_role;
 
 -- Account erasure must also remove what this and the delivery migrations added: wishlist, saved places, pop-up devices, reset codes,
--- and the e-mail address / name on contact messages. The function text is patched in place so the rest of its behaviour is untouched.
+-- and the e-mail address, name, subject and text of contact messages (the replacement text must satisfy the 10 character minimum). The function text is patched in place so the rest of its behaviour is untouched.
 do $$
 declare v_def text; v_marker text := 'delete from public.notification_preferences where user_id = p_user;';
 begin
@@ -127,6 +127,6 @@ begin
   delete from public.saved_places where user_id = p_user;
   delete from public.push_subscriptions where user_id = p_user;
   delete from public.password_reset_codes where user_id = p_user;
-  update public.contact_messages set name = ''Erased'', email = ''erased@example.invalid'', message = ''Erased'', user_id = null where user_id = p_user;');
+  update public.contact_messages set name = ''Erased'', email = ''erased@example.invalid'', subject = ''Erased'', message = ''Erased by request'', user_id = null where user_id = p_user;');
   execute v_def;
 end $$;

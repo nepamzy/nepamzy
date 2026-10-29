@@ -377,3 +377,44 @@ describe('contact messages', () => {
     })
   })
 })
+
+describe('account erasure also clears what the redesign added', () => {
+  it('removes wishlist and saved places and anonymises the account holder’s contact messages without breaking the erasure', async () => {
+    await withTx(async (c) => {
+      const admin = await createUser(c, 'er-admin')
+      await giveRole(c, admin, 'platform_admin')
+      const victim = await createUser(c, 'er-victim')
+      const shop = await mkVendor(c)
+      const item = await mkProduct(c, shop.id)
+      const point = await mkDeliveryPoint(c, { label: 'Erasure point' })
+      await json(c, AAL2(victim), `select public.wishlist_toggle($1) r`, [item])
+      await json(c, AAL2(victim), `select public.saved_place_save(null, 'Hostel', $1, true) r`, [
+        point,
+      ])
+      await svc(c, () =>
+        c.query(
+          `insert into public.contact_messages (user_id, name, email, subject, message)
+           values ($1, 'Victim Person', 'victim@example.test', 'My question', 'A real message with enough words in it.')`,
+          [victim],
+        ),
+      )
+      const r = await json(
+        c,
+        AAL2(admin),
+        `select public.admin_erase_account($1, 'Requested by the account holder', null) r`,
+        [victim],
+      )
+      expect(r.erased).toBe(true)
+      const count = async (sql: string) => Number((await c.query(sql, [victim])).rows[0].n)
+      expect(await count(`select count(*) n from public.wishlist_items where user_id = $1`)).toBe(0)
+      expect(await count(`select count(*) n from public.saved_places where user_id = $1`)).toBe(0)
+      const m = await c.query(
+        `select name, email, subject, message, user_id from public.contact_messages where email like 'erased@%'`,
+      )
+      expect(m.rowCount).toBe(1)
+      expect(m.rows[0].name).toBe('Erased')
+      expect(m.rows[0].user_id).toBeNull()
+      expect(JSON.stringify(m.rows)).not.toMatch(/Victim|victim@|My question|real message/)
+    })
+  })
+})
