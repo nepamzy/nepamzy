@@ -38,6 +38,7 @@ const caseStatus = async (id: string) =>
 test('refund journey: request -> review -> approval (not paid) -> FAKE execution; every step is visible and labelled; others cannot see it', async ({
   browser,
 }, info) => {
+  test.setTimeout(120000) // five signed-in sessions and several role hand-overs: slow CI runners exceed the 30 s default
   const customer = await openSession(browser, info, 'scust')
   const owner = await openSession(browser, info, 'sowner', ['vendor_owner'])
   const support = await openSession(browser, info, 'ssup', ['support_agent'])
@@ -171,6 +172,7 @@ test('refund journey: request -> review -> approval (not paid) -> FAKE execution
 test('report -> support decision -> a refund REQUEST (not a refund); return approved by support and confirmed by the shop; parties see only their side', async ({
   browser,
 }, info) => {
+  test.setTimeout(120000)
   const customer = await openSession(browser, info, 'rcust')
   const owner = await openSession(browser, info, 'rowner', ['vendor_owner'])
   const support = await openSession(browser, info, 'rsup', ['support_agent'])
