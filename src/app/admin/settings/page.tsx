@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { SettingForm } from '@/components/domain/engagement-forms'
+import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { EDITABLE_SETTINGS, listSettings } from '@/server/modules/engagement/queries'
@@ -11,9 +12,14 @@ export default async function Settings() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Settings' }]}
         title="Settings"
         subtitle="Fees, limits and policies. The vendor commission rates are owner-approved; other values (for example the delivery fee and refund limits) are still development placeholders awaiting owner decisions. The old customer platform fee is retired and fixed at 0. Every change is validated by the database and written to the audit trail."
       />
+      <Alert plain tone="info" title="Handle with care" className="mb-4">
+        Settings change how the whole marketplace behaves. Each change is validated by the database
+        and written to the audit log with your account.
+      </Alert>
       <div className="space-y-3">
         {rows.map((r) => {
           const editable = (EDITABLE_SETTINGS as readonly string[]).includes(r.key)

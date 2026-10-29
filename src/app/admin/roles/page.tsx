@@ -7,6 +7,7 @@ export default function RolesPage() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Roles' }]}
         title="Roles"
         subtitle="Grant or revoke a role. You cannot change your own roles."
       />

@@ -83,7 +83,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
       </p>
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="space-y-2">
-          <h2 className="text-lg font-bold">What was reported</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">What was reported</h2>
           <p>{b.case.description}</p>
           {b.case.decision && (
             <p>
@@ -93,7 +93,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
           )}
         </Card>
         <Card className="space-y-2">
-          <h2 className="text-lg font-bold">Order and money</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Order and money</h2>
           <p>
             {b.order.vendor} · status <strong>{b.order.status}</strong> · total{' '}
             <Money kobo={b.order.total_kobo} />
@@ -121,7 +121,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
           )}
         </Card>
         <Card className="space-y-2">
-          <h2 className="text-lg font-bold">Delivery evidence (neutral)</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Delivery evidence (neutral)</h2>
           {b.assignments.length === 0 ? (
             <p className="text-sm">No rider was assigned.</p>
           ) : (
@@ -168,7 +168,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
           )}
         </Card>
         <Card className="space-y-2">
-          <h2 className="text-lg font-bold">Order timeline</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Order timeline</h2>
           <ul className="text-sm">
             {b.order_timeline.map((t, i) => (
               <li key={i}>
@@ -179,7 +179,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
           </ul>
         </Card>
         <Card className="space-y-3 lg:col-span-2">
-          <h2 className="text-lg font-bold">Statements</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Statements</h2>
           {b.statements.length === 0 ? (
             <p className="text-muted">No statements yet.</p>
           ) : (
@@ -198,7 +198,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
           {b.case.status !== 'closed' && <StatementForm caseId={b.case.id} staff />}
         </Card>
         <Card className="space-y-3 lg:col-span-2">
-          <h2 className="text-lg font-bold">Decision</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Decision</h2>
           <CaseStaffControls caseId={b.case.id} status={b.case.status} items={items} />
         </Card>
       </div>

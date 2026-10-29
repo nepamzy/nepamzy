@@ -25,6 +25,7 @@ export default async function AdminCases({
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Reports' }]}
         title="Reports"
         subtitle="Disputes and problems. No decision is ever automatic: every one is made by a person, with a reason."
       />

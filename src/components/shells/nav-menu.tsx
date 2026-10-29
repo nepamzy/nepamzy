@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Card, PageHeader } from '@/components/ui/card'
-import type { NavItem } from './nav-links'
+import { Icon } from '@/components/ui/icons'
+import type { NavItem } from './nav-config'
 
 /** Every destination of a shell as plain links. Showing a link never grants access: each page still enforces its own policy. */
 export function NavMenu({ title, items }: { title: string; items: NavItem[] }) {
@@ -16,7 +17,7 @@ export function NavMenu({ title, items }: { title: string; items: NavItem[] }) {
                   href={i.href}
                   className="touch-target flex items-center gap-3 px-2 py-3 text-base font-semibold text-ink hover:bg-brand-50"
                 >
-                  <span aria-hidden="true">{i.icon}</span>
+                  <Icon name={i.icon} />
                   {i.label}
                 </Link>
               </li>

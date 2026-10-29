@@ -14,6 +14,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
       signedInAs={data.user?.email}
       items={ADMIN_NAV}
       moreHref="/admin/menu"
+      theme="navy"
     >
       {children}
     </AppShell>

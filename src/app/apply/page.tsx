@@ -23,7 +23,11 @@ export default async function ApplyPage() {
   const pending = (apps ?? []).find((a) => a.status === 'pending')
   return (
     <>
-      <PageHeader title="Sell on AFIT Market" subtitle="Apply to sell on AFIT Market" />
+      <PageHeader
+        breadcrumbs={[{ label: 'Account', href: '/account' }, { label: 'Sell on AFIT Market' }]}
+        title="Sell on AFIT Market"
+        subtitle="Apply to sell on AFIT Market"
+      />
       {mine ? (
         <Card>
           <p>

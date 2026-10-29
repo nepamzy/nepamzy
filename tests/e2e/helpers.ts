@@ -120,6 +120,8 @@ export async function uiMfaChallenge(page: Page, secret: string) {
 export const alertIn = (page: Page) => page.locator('main [role="alert"]').first()
 
 export async function uiSignOut(page: Page) {
+  // Sign out lives in the account menu (a dropdown), so open it first when it is closed.
+  await page.locator('summary[aria-label="Account menu"]').click()
   await page.getByRole('button', { name: 'Sign out' }).click()
   await page.waitForURL('http://127.0.0.1:3000/')
 }

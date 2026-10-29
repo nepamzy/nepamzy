@@ -36,6 +36,7 @@ export default async function PaymentsAdmin() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Payments' }]}
         title="Payments"
         subtitle="Test mode only. Reconciliation flags need a human decision. Refunds are recorded as requests; nothing is sent to Paystack yet."
       />

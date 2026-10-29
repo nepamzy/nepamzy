@@ -18,16 +18,16 @@ export function Table({
     >
       <table className="w-full min-w-[32rem] text-left text-base">
         <caption className="sr-only">{caption}</caption>
-        <thead className="bg-brand-50 text-sm">
+        <thead className="bg-navy-900 text-sm text-white">
           <tr>
             {head.map((h) => (
-              <th key={h} scope="col" className="px-4 py-3 font-semibold">
+              <th key={h} scope="col" className="px-4 py-3 font-semibold whitespace-nowrap">
                 {h}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-line">{children}</tbody>
+        <tbody className="divide-y divide-line [&>tr:hover]:bg-brand-50/60">{children}</tbody>
       </table>
     </div>
   )

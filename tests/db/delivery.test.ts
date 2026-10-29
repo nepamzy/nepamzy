@@ -601,7 +601,9 @@ describe('Phase 9: who may and may not complete a delivery', () => {
     // DISPUTED / RETURN_*; none is granted to riders, which the next test proves from the grants.)
     // Batch 6 additions are read-only users of these states: admin_overview (counts), create_review/my_order_review (eligibility)
     expect(defs.rows.map((r) => r.proname as string)).toEqual([
+      'admin_dashboard', // redesign: read-only counts
       'admin_overview',
+      'admin_report', // redesign: read-only counts and sums
       'case_close',
       'complete_delivery',
       'complete_pickup',

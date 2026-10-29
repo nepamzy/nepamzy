@@ -2,7 +2,8 @@
 
 import { notifyWelcome } from '@/server/modules/engagement/dispatch'
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
-import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { forbidden, redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createHmac, randomInt } from 'node:crypto'
 import { after } from 'next/server'
@@ -13,7 +14,7 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { resetCodeEmail } from '@/server/modules/engagement/email-templates'
 import { mailConfig, sendMail } from '@/server/modules/engagement/mail'
 import { checkAccess, loadPrincipal } from './guard'
-import { isPrivilegedRole, safeNextPath, signUpOutcome } from './policy'
+import { MODE_COOKIE, isPrivilegedRole, safeNextPath, signUpOutcome } from './policy'
 import { clientIp, rateLimit, recordSecurityEvent, sha256Hex } from './security'
 
 export type FormState = { ok?: boolean; error?: string; message?: string; email?: string }
@@ -118,13 +119,28 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
     await recordSecurityEvent(null, 'auth.login_failed', { email_hash: emailKey.slice(0, 16) })
     return { error: 'Email or password is incorrect.', email }
   }
-  return finishSignIn(next)
+  return finishSignIn(
+    next,
+    formData.get('mode') === 'admin'
+      ? 'admin'
+      : formData.get('mode') === 'customer'
+        ? 'customer'
+        : null,
+  )
 }
 
 /** After a password was accepted: staff and people with an authenticator go to the second step; others are in. */
-async function finishSignIn(next: string): Promise<never> {
+async function finishSignIn(
+  next: string,
+  chosen: 'admin' | 'customer' | null = null,
+): Promise<never> {
   const who = await loadPrincipal()
   const staff = who.roles.some(isPrivilegedRole)
+  // The "sign in as" choice only picks the interface for accounts that already hold a staff role; for anyone else it is ignored.
+  if (staff && chosen) {
+    await setModeCookie(chosen)
+    if (chosen === 'admin' && next === '/') next = '/admin'
+  }
   if (who.hasVerifiedFactor) redirect(`/mfa/challenge?next=${encodeURIComponent(next)}`)
   if (staff) redirect(`/mfa/enroll?next=${encodeURIComponent(next)}`)
   redirect(next)
@@ -234,9 +250,43 @@ export async function resetPasswordAction(
   return finishSignIn('/')
 }
 
+async function setModeCookie(mode: 'admin' | 'customer') {
+  ;(await cookies()).set(MODE_COOKIE, mode, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30,
+  })
+}
+
+/**
+ * Switch a staff member between Administrator and Customer mode. The cookie only chooses which interface is shown;
+ * every staff area and action still checks the staff role and the second step on the server, so this cannot grant access.
+ * Going back to Administrator mode is refused for anyone without a staff role, and each switch is written to the audit trail.
+ */
+export async function switchModeAction(formData: FormData): Promise<void> {
+  const to = formData.get('to') === 'admin' ? 'admin' : 'customer'
+  const next = safeNextPath(String(formData.get('next') ?? ''))
+  const who = await loadPrincipal()
+  if (!who.authenticated || !who.userId) redirect(`/login?next=${encodeURIComponent('/account')}`)
+  const staff = who.roles.some(isPrivilegedRole)
+  if (to === 'admin' && !staff) forbidden()
+  if (!(await rateLimit(`mode:${who.userId}`, 600, 30))) redirect('/account/mode?error=rate')
+  if (to === 'admin' && who.aal !== 'aal2')
+    redirect(
+      `/${who.hasVerifiedFactor ? 'mfa/challenge' : 'mfa/enroll'}?next=${encodeURIComponent('/admin')}`,
+    )
+  await setModeCookie(to)
+  await recordSecurityEvent(who.userId, 'auth.mode_switched', { to })
+  const adminPath = next === '/admin' || next.startsWith('/admin/')
+  redirect(to === 'admin' ? (adminPath ? next : '/admin') : adminPath ? '/' : next)
+}
+
 export async function signOutAction(): Promise<void> {
   const supabase = await createSupabaseServerClient()
   await supabase.auth.signOut({ scope: 'local' })
+  ;(await cookies()).delete(MODE_COOKIE)
   redirect('/')
 }
 

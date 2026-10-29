@@ -17,13 +17,22 @@ const filterSchema = z.object({
     .catch(undefined),
   open: z.enum(['1']).optional().catch(undefined),
   max: z.coerce.number().int().min(1).max(100000000).optional().catch(undefined), // kobo
+  sort: z
+    .enum(['recommended', 'price_asc', 'price_desc', 'name', 'newest'])
+    .catch('recommended')
+    .default('recommended'),
   page: z.coerce.number().int().min(1).max(200).catch(1).default(1),
 })
 export type BrowseFilters = z.infer<typeof filterSchema>
-export const parseFilters = (sp: Record<string, string | string[] | undefined>): BrowseFilters =>
-  filterSchema.parse(
-    Object.fromEntries(Object.entries(sp).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v])),
+export const parseFilters = (sp: Record<string, string | string[] | undefined>): BrowseFilters => {
+  const flat = Object.fromEntries(
+    Object.entries(sp).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]),
   )
+  const f = filterSchema.parse(flat)
+  // the filter form takes naira (`maxn`); `max` stays in kobo for existing links
+  const naira = /^\d{1,7}$/.test(flat.maxn ?? '') ? Number(flat.maxn) : null
+  return naira && naira >= 1 ? { ...f, max: naira * 100 } : f
+}
 
 async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T | null> {
   const sb = await createSupabaseServerClient()
@@ -59,6 +68,25 @@ export async function searchProducts(f: BrowseFilters): Promise<ProductHit[] | n
     p_open_only: f.open === '1',
     p_limit: PAGE_SIZE + 1,
     p_offset: (f.page - 1) * PAGE_SIZE,
+  })
+}
+export type BrowseProduct = ProductHit & {
+  category_slug: string | null
+  category_name: string | null
+}
+/** Products for the shop pages and the landing page; unlike `searchProducts` it needs no search text. */
+export async function browseProducts(
+  f: BrowseFilters,
+  limit = PAGE_SIZE,
+): Promise<BrowseProduct[] | null> {
+  return rpc<BrowseProduct[]>('browse_products', {
+    p_q: f.q || null,
+    p_category: f.category ?? null,
+    p_open_only: f.open === '1',
+    p_max_price: f.max ?? null,
+    p_sort: f.sort,
+    p_limit: limit + 1,
+    p_offset: (f.page - 1) * limit,
   })
 }
 export const getMenu = (slug: string) =>

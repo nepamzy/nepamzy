@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { DecideRiderForm, RiderStatusForm } from '@/components/domain/rider-admin-forms'
-import { Badge } from '@/components/ui/badge'
+import { Icon } from '@/components/ui/icons'
+import { StatusBadge } from '@/components/ui/status-badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { EmptyState } from '@/components/ui/states'
 import { listRiderApplications, listRiderProfiles } from '@/server/modules/riders/queries'
@@ -13,11 +14,12 @@ export default async function Riders() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Riders' }]}
         title="Riders"
         subtitle="Approve applications and suspend riders. Every decision is recorded."
       />
       <section aria-labelledby="pending" className="mb-8 space-y-3">
-        <h2 id="pending" className="text-lg font-bold">
+        <h2 id="pending" className="text-lg font-extrabold text-navy-900">
           Waiting for review
         </h2>
         {pending.length === 0 ? (
@@ -38,23 +40,33 @@ export default async function Riders() {
         )}
       </section>
       <section aria-labelledby="all" className="space-y-3">
-        <h2 id="all" className="text-lg font-bold">
+        <h2 id="all" className="text-lg font-extrabold text-navy-900">
           Riders
         </h2>
         {riders.length === 0 ? (
           <EmptyState title="No riders yet">Approved riders appear here.</EmptyState>
         ) : (
-          riders.map((r) => (
-            <Card key={r.user_id} className="space-y-2">
-              <p className="flex flex-wrap items-center gap-2">
-                <span className="font-bold">{r.full_name}</span>
-                <Badge tone={r.status === 'approved' ? 'success' : 'danger'}>
-                  {r.status === 'approved' ? 'Approved' : 'Suspended'}
-                </Badge>
-              </p>
-              <RiderStatusForm id={r.user_id} status={r.status} />
-            </Card>
-          ))
+          <ul className="grid gap-4 lg:grid-cols-2">
+            {riders.map((r) => (
+              <li key={r.user_id}>
+                <Card className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-navy-900 text-gold-400">
+                      <Icon name="bike" size={22} />
+                    </span>
+                    <p className="flex flex-wrap items-center gap-2">
+                      <span className="font-extrabold text-navy-900">{r.full_name}</span>
+                      <StatusBadge
+                        status={r.status === 'approved' ? 'active' : 'suspended'}
+                        label={r.status === 'approved' ? 'Approved' : 'Suspended'}
+                      />
+                    </p>
+                  </div>
+                  <RiderStatusForm id={r.user_id} status={r.status} />
+                </Card>
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </>

@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
-import { Card, PageHeader } from '@/components/ui/card'
-import { Money } from '@/components/ui/money'
+import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { Card } from '@/components/ui/card'
+import { Icon } from '@/components/ui/icons'
+import { NoImageTile, ProductCard, categoryIcon } from '@/components/ui/product-card'
+import { Section } from '@/components/ui/section'
+import { EmptyState } from '@/components/ui/states'
 import { ReportReviewForm } from '@/components/domain/engagement-forms'
 import { Pager } from '@/components/ui/pager'
 import { pageParam, vendorReviews } from '@/server/modules/engagement/queries'
@@ -33,23 +36,46 @@ export default async function VendorPage({
   const signedIn = Boolean((await (await createSupabaseServerClient()).auth.getUser()).data.user)
   return (
     <>
-      <p className="mb-2">
-        <Link href="/vendors" className="font-semibold text-brand-700 underline">
-          ← All vendors
-        </Link>
-      </p>
-      <PageHeader
-        title={vendor.name}
-        subtitle={[vendor.category, `Ready in about ${vendor.prep_minutes} min`]
-          .filter(Boolean)
-          .join(' · ')}
-        actions={
+      <Breadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Shops', href: '/vendors' },
+          { label: vendor.name },
+        ]}
+      />
+      <div className="mb-6 overflow-hidden rounded-[var(--radius-card)] border border-line bg-card shadow-[var(--shadow-card)]">
+        <NoImageTile
+          icon={categoryIcon(null)}
+          className="aspect-[16/4] rounded-none"
+          label="No banner photo yet"
+        />
+        <div className="flex flex-wrap items-start justify-between gap-3 p-5">
+          <div className="min-w-0">
+            <h1 className="text-3xl font-extrabold tracking-tight text-navy-900">{vendor.name}</h1>
+            <p className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-muted">
+              {vendor.category && <span>{vendor.category}</span>}
+              <span className="inline-flex items-center gap-1">
+                <Icon name="clock" size={16} /> Ready in about {vendor.prep_minutes} min
+              </span>
+              {reviews && reviews.count > 0 && (
+                <span className="inline-flex items-center gap-1">
+                  <Icon name="star" size={16} className="text-accent-600" />
+                  {((reviews.average_tenths ?? 0) / 10).toFixed(1)} ({reviews.count})
+                </span>
+              )}
+            </p>
+            {vendor.description && <p className="mt-2 max-w-2xl">{vendor.description}</p>}
+            {vendor.pickup_location_text && (
+              <p className="mt-2 inline-flex items-center gap-1 text-sm">
+                <Icon name="pin" size={16} /> Pickup: {vendor.pickup_location_text}
+              </p>
+            )}
+          </div>
           <Badge tone={vendor.open_now ? 'success' : 'neutral'}>
             {vendor.open_now ? 'Open now' : 'Closed now'}
           </Badge>
-        }
-      />
-      {vendor.description && <p className="mb-4">{vendor.description}</p>}
+        </div>
+      </div>
       {!vendor.open_now && (
         <p
           role="status"
@@ -61,43 +87,27 @@ export default async function VendorPage({
         </p>
       )}
       {products.length === 0 ? (
-        <Card>
-          <p className="text-muted">This vendor has not added any items yet.</p>
-        </Card>
+        <EmptyState title="No items yet" icon="package">
+          This shop has not added any items yet.
+        </EmptyState>
       ) : (
         [...bySection.entries()].map(([section, items]) => (
-          <section key={section} className="mb-6" aria-labelledby={`s-${section}`}>
-            <h2 id={`s-${section}`} className="mb-2 text-xl font-bold">
-              {section}
-            </h2>
-            <ul className="space-y-2">
+          <Section key={section} title={section} id={`s-${section.replace(/\W+/g, '-')}`}>
+            <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
               {items.map((p) => (
                 <li key={p.id}>
-                  <Card className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-3">
-                    <div className="min-w-0">
-                      <Link href={`/products/${p.id}`} className="font-semibold hover:underline">
-                        {p.name}
-                      </Link>
-                      {p.description && <p className="text-sm text-muted">{p.description}</p>}
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Money kobo={p.price_kobo} className="font-semibold" />
-                      {p.available ? (
-                        <Link
-                          href={`/products/${p.id}`}
-                          className="touch-target inline-flex items-center rounded-[var(--radius-control)] border border-line-strong px-3 font-semibold hover:bg-brand-50"
-                        >
-                          Choose
-                        </Link>
-                      ) : (
-                        <Badge>Sold out</Badge>
-                      )}
-                    </div>
-                  </Card>
+                  <ProductCard
+                    href={`/products/${p.id}`}
+                    name={p.name}
+                    vendorName={vendor.name}
+                    priceKobo={p.price_kobo}
+                    available={p.available}
+                    openNow={vendor.open_now}
+                  />
                 </li>
               ))}
             </ul>
-          </section>
+          </Section>
         ))
       )}
       <section aria-labelledby="reviews" className="mt-8">

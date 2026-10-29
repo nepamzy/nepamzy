@@ -93,7 +93,19 @@ async function shot(
 
 test.afterAll(async () => {
   await restorePlaceholderTerms()
-  writeFileSync(join(OUT, `inventory.json`), JSON.stringify(rows, null, 2))
+  // each viewport keeps its own inventory (the 320 px pass runs inside the phone project, so split by the recorded viewport)
+  for (const v of new Set(rows.map((r) => r.viewport))) {
+    const dir = join(ROOT, PHASE, v)
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      join(dir, `inventory.json`),
+      JSON.stringify(
+        rows.filter((r) => r.viewport === v),
+        null,
+        2,
+      ),
+    )
+  }
 })
 
 test('capture every implemented page, per role, with synthetic data', async ({ browser }, info) => {
@@ -188,6 +200,20 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
   await shot(ap, 'public', `/vendors/${shop.slug}`, 'vendor-menu')
   await shot(ap, 'public', `/products/${prod}`, 'product-detail')
   await shot(ap, 'public', '/vendors/no-such-shop', 'not-found-404')
+  await shot(ap, 'public', '/products', 'items-browse')
+  await shot(ap, 'public', '/products?sort=price_asc&q=Fixture', 'items-sorted-search')
+  await shot(ap, 'public', '/products?q=zzzz-no-such-item', 'items-no-results')
+  for (const info2 of [
+    'about',
+    'faq',
+    'contact',
+    'terms',
+    'privacy',
+    'refunds',
+    'delivery',
+    'payments',
+  ])
+    await shot(ap, 'public', `/${info2}`, info2)
   await shot(ap, 'public', '/login', 'empty-form')
   await ap.getByLabel('Email').fill('nobody@example.test')
   await ap.getByLabel('Password').fill('wrong-password-123')
@@ -255,6 +281,9 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
     ['/notifications', 'notifications-with-unread'],
     ['/cases', 'reports-empty'],
     ['/account', 'account'],
+    ['/account/profile', 'profile'],
+    ['/account/wishlist', 'wishlist'],
+    ['/account/addresses', 'saved-places'],
     ['/account/security', 'account-security-mfa'],
     ['/apply', 'vendor-application-form'],
     ['/rider-apply', 'rider-application-form'],
@@ -408,9 +437,17 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
     '/admin/settings',
     '/admin/audit',
     '/admin/roles',
+    '/admin/users',
+    '/admin/orders',
+    '/admin/products',
+    '/admin/reports',
+    '/admin/messages',
   ])
     await shot(ad, 'admin', p, 'platform-admin')
   if (caseRow) await shot(ad, 'admin', `/admin/cases/${caseRow.id}`, 'case-detail')
+  await shot(ad, 'admin', `/admin/users/${cust}`, 'user-detail')
+  await shot(ad, 'admin', `/admin/orders/${done.id}`, 'order-detail')
+  await shot(ad, 'admin', '/admin/users?q=au-', 'users-filtered')
   await shot(ad, 'admin', '/admin/refunds?status=requested&q=AFM', 'refunds-filtered')
   await shot(ad, 'admin', '/notifications', 'notifications')
   // role-scoped views of the same pages
@@ -479,7 +516,7 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
   await shot(c, 'customer', `/orders/${dfpA}/delivery-fee`, 'pay-delivery-fee-details', {
     goto: false,
   })
-  await c.getByRole('button', { name: 'I have made this transfer' }).click()
+  await c.getByRole('button', { name: 'I Have Made the Transfer' }).click()
   await c.waitForTimeout(1200)
   await shot(c, 'customer', `/orders/${dfpA}/delivery-fee`, 'transfer-reported-waiting', {
     goto: false,
@@ -498,7 +535,7 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
   await c.goto(`/orders/${dfpB}/delivery-fee`)
   await c.getByRole('button', { name: 'Show payment details' }).click()
   await c.waitForTimeout(1000)
-  await c.getByRole('button', { name: 'I have made this transfer' }).click()
+  await c.getByRole('button', { name: 'I Have Made the Transfer' }).click()
   await c.waitForTimeout(1200)
   await pr.goto('/rider/payments')
   await pr
@@ -514,11 +551,36 @@ test('capture every implemented page, per role, with synthetic data', async ({ b
 
   // ---------------------------------------------------------------- earnings, settlements, data requests, menus
   await shot(v, 'vendor', '/vendor/earnings', 'earnings')
+  await shot(v, 'vendor', '/vendor/reviews', 'reviews')
+  await shot(v, 'vendor', '/vendor/help', 'help')
+  await shot(v, 'vendor', '/account/security', 'account-security')
   await shot(v, 'vendor', '/vendor/menu', 'more-menu')
   await shot(ad, 'admin', '/admin/settlements', 'settlements')
   await shot(ad, 'admin', '/admin/data-requests', 'data-requests')
   await shot(ad, 'admin', '/admin/menu', 'more-menu')
   await shot(c, 'customer', '/account/data-requests', 'data-requests')
+
+  // ---------------------------------------------------------------- narrow screens (WCAG 1.4.10 reflow, 320 CSS px); phone project only
+  if (vp === 'mobile') {
+    const narrow = join(ROOT, PHASE, 'narrow-320')
+    mkdirSync(narrow, { recursive: true })
+    writeFileSync(join(narrow, 'inventory.jsonl'), '')
+    OUT = narrow
+    vp = 'narrow-320'
+    for (const pg of [v, r, pr, c, ad]) await pg.setViewportSize({ width: 320, height: 700 })
+    await shot(v, 'vendor', '/vendor', 'dashboard')
+    await shot(v, 'vendor', '/vendor/orders', 'orders')
+    await shot(v, 'vendor', '/vendor/catalogue', 'catalogue')
+    await shot(v, 'vendor', '/vendor/earnings', 'earnings')
+    await shot(r, 'rider', '/rider', 'home')
+    await shot(r, 'rider', '/rider/jobs', 'jobs')
+    await shot(pr, 'rider', '/rider/payments', 'payments')
+    await shot(c, 'customer', '/cart', 'cart')
+    await shot(c, 'customer', '/checkout', 'checkout')
+    await shot(c, 'customer', `/orders/${dfpA}/delivery-fee`, 'pay-delivery-fee')
+    await shot(ad, 'admin', '/admin', 'dashboard')
+    await shot(ad, 'admin', '/admin/users', 'users')
+  }
 
   // ---------------------------------------------------------------- health / API pages that render something
   for (const s of Object.values(sessions)) await s.context.close()

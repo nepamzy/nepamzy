@@ -8,7 +8,7 @@ import {
 import { cn } from './cn'
 
 const control =
-  'touch-target block w-full rounded-[var(--radius-control)] border border-line-strong bg-card px-3 py-2.5 text-base text-ink placeholder:text-muted aria-[invalid=true]:border-danger-700'
+  'touch-target block w-full min-w-0 max-w-full rounded-[var(--radius-control)] border border-line-strong bg-card px-3 py-2.5 text-base text-ink placeholder:text-muted aria-[invalid=true]:border-danger-700'
 
 type FieldShell = {
   label: string

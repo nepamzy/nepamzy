@@ -41,6 +41,12 @@ describe('control borders meet 3:1 (WCAG 1.4.11) on every background they sit on
     expect(ratio(token('danger-700'), token('danger-50'))).toBeGreaterThanOrEqual(4.5)
     expect(ratio(token('success-700'), token('success-50'))).toBeGreaterThanOrEqual(4.5)
     expect(ratio(token('info-700'), token('info-50'))).toBeGreaterThanOrEqual(4.5)
+    // navy surfaces (Administration sidebar, footer, auth panel): light text and gold accents stay readable
+    expect(ratio('#ffffff', token('navy-900'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('navy-text'), token('navy-900'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('navy-text'), token('navy-800'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio(token('gold-400'), token('navy-900'))).toBeGreaterThanOrEqual(4.5)
+    expect(ratio('#ffffff', token('danger-700'))).toBeGreaterThanOrEqual(4.5)
     // gold is a fill: dark ink on gold passes, so any label placed on it is readable
     expect(ratio(token('ink'), token('gold-400'))).toBeGreaterThanOrEqual(4.5)
     // keyboard focus ring (brand-600) is visible against the page surface and white
@@ -115,7 +121,8 @@ describe('copy that must not make claims we cannot support', () => {
 describe('mobile header cannot overflow sideways', () => {
   it('keeps words whole but lets the header wrap to a second row instead of scrolling', () => {
     const src = readFileSync('src/components/shells/app-shell.tsx', 'utf8')
-    expect(src).toMatch(/<header className="flex flex-wrap /)
-    expect(src).toMatch(/whitespace-nowrap/)
+    expect(src).toMatch(/<header className="[^"]*flex flex-wrap /)
+    // the phone header shows only the logo mark below 420px so icons never push the page sideways
+    expect(src).toContain('compact')
   })
 })

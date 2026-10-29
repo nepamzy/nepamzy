@@ -1,63 +1,116 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { OrderStatusPill, ORDER_STATES } from '@/components/domain/order-status'
+import { OrderStatusPill } from '@/components/domain/order-status'
 import { ButtonLink } from '@/components/ui/button'
-import { Card, PageHeader } from '@/components/ui/card'
+import { PageHeader } from '@/components/ui/card'
+import { cn } from '@/components/ui/cn'
+import { DataTable } from '@/components/ui/data-table'
 import { Money } from '@/components/ui/money'
-import { EmptyState } from '@/components/ui/states'
 import { Pager } from '@/components/ui/pager'
+import { EmptyState } from '@/components/ui/states'
 import { listOrdersPage } from '@/server/modules/orders-and-state-machine/queries'
 
 export const metadata: Metadata = { title: 'My orders' }
 
+const VIEWS = [
+  ['all', 'All orders'],
+  ['active', 'In progress'],
+  ['finished', 'Finished'],
+] as const
+
 export default async function OrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>
+  searchParams: Promise<{ page?: string; view?: string }>
 }) {
-  const n = Number((await searchParams).page)
+  const sp = await searchParams
+  const n = Number(sp.page)
   const page = Number.isInteger(n) && n >= 1 ? n : 1
-  const { orders, hasMore } = await listOrdersPage({ page, pageSize: 25 })
+  const view = VIEWS.some(([v]) => v === sp.view) ? sp.view! : 'all'
+  const { orders, hasMore } = await listOrdersPage({
+    page,
+    pageSize: 25,
+    ...(view === 'active' ? { finished: false } : view === 'finished' ? { finished: true } : {}),
+  })
   return (
     <>
-      <PageHeader title="My orders" />
-      {orders.length === 0 && page === 1 ? (
-        <EmptyState
-          title="No orders yet"
-          action={<ButtonLink href="/vendors">Browse vendors</ButtonLink>}
-        >
-          Your orders will appear here.
-        </EmptyState>
-      ) : (
-        <ul className="space-y-3">
-          {orders.map((o) => (
-            <li key={o.id}>
-              <Card>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-bold">
-                    <Link className="hover:underline" href={`/orders/${o.id}`}>
-                      {o.order_number}
-                    </Link>{' '}
-                    · {o.vendor_name}
-                  </p>
-                  <OrderStatusPill code={o.status} />
-                </div>
-                <p className="mt-1 text-muted">
-                  {o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup'} ·{' '}
-                  <Money kobo={o.total_kobo} /> · {new Date(o.created_at).toLocaleString('en-NG')}
-                </p>
-                <p className="mt-1 text-sm">
-                  {ORDER_STATES.find((s) => s.code === o.status)?.meaning}
-                </p>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      )}
-      {orders.length === 0 && page > 1 && (
-        <p className="text-muted">There are no orders on this page.</p>
-      )}
-      <Pager basePath="/orders" page={page} hasMore={hasMore} />
+      <PageHeader
+        title="My orders"
+        subtitle="Track and manage your orders"
+        breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Orders' }]}
+      />
+      <nav aria-label="Order filter" className="mb-4 flex flex-wrap gap-2">
+        {VIEWS.map(([v, label]) => (
+          <Link
+            key={v}
+            href={v === 'all' ? '/orders' : `/orders?view=${v}`}
+            aria-current={view === v ? 'true' : undefined}
+            className={cn(
+              'touch-target inline-flex items-center rounded-full border px-4 text-sm font-bold',
+              view === v
+                ? 'border-navy-900 bg-navy-900 text-white'
+                : 'border-line-strong bg-card text-navy-900 hover:bg-brand-50',
+            )}
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+      <DataTable
+        caption="Your orders"
+        rows={orders}
+        rowKey={(o) => o.id}
+        empty={
+          page === 1 ? (
+            <EmptyState
+              title={view === 'all' ? 'No orders yet' : 'No orders here'}
+              icon="package"
+              action={
+                <ButtonLink href="/products" variant="gold">
+                  Browse items
+                </ButtonLink>
+              }
+            >
+              {view === 'all' ? 'Your orders will appear here.' : 'Try another filter.'}
+            </EmptyState>
+          ) : (
+            <p className="text-muted">There are no orders on this page.</p>
+          )
+        }
+        columns={[
+          {
+            header: 'Order',
+            cell: (o) => (
+              <Link className="font-bold text-brand-700 hover:underline" href={`/orders/${o.id}`}>
+                {o.order_number}
+              </Link>
+            ),
+          },
+          { header: 'Shop', cell: (o) => o.vendor_name },
+          { header: 'Type', cell: (o) => (o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup') },
+          { header: 'Date', cell: (o) => new Date(o.created_at).toLocaleDateString('en-NG') },
+          {
+            header: 'Total',
+            align: 'right',
+            cell: (o) => <Money kobo={o.total_kobo} className="font-bold" />,
+          },
+          { header: 'Status', cell: (o) => <OrderStatusPill code={o.status} /> },
+          {
+            header: 'Actions',
+            cell: (o) => (
+              <Link className="font-bold text-brand-700 hover:underline" href={`/orders/${o.id}`}>
+                View
+              </Link>
+            ),
+          },
+        ]}
+      />
+      <Pager
+        basePath="/orders"
+        page={page}
+        hasMore={hasMore}
+        params={view === 'all' ? {} : { view }}
+      />
     </>
   )
 }

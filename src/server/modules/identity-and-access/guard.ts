@@ -1,12 +1,14 @@
 import 'server-only'
 import { cache } from 'react'
-import { headers } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { forbidden, redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import {
   ANONYMOUS,
   ROUTE_POLICIES,
   decideAccess,
+  isPrivilegedRole,
+  MODE_COOKIE,
   safeNextPath,
   type AccessRequirement,
   type AppRole,
@@ -23,10 +25,15 @@ export const loadPrincipal = cache(async (): Promise<Principal> => {
     supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
     supabase.rpc('my_roles'),
   ])
+  const roleList = (roles ?? []) as AppRole[]
+  // The mode cookie can only choose the lighter interface. A non-staff account is always `customer`.
+  const staff = roleList.some(isPrivilegedRole)
+  const chosen = (await cookies()).get(MODE_COOKIE)?.value
   return {
     authenticated: true,
     userId: data.user.id,
-    roles: (roles ?? []) as AppRole[],
+    roles: roleList,
+    mode: staff && chosen !== 'customer' ? 'admin' : 'customer',
     aal: aal?.currentLevel === 'aal2' ? 'aal2' : 'aal1',
     hasVerifiedFactor: aal?.nextLevel === 'aal2' || aal?.currentLevel === 'aal2',
   }
@@ -49,6 +56,8 @@ export async function requireAuth(req: AccessRequirement): Promise<Principal> {
       redirect(`/mfa/enroll?next=${next}`)
     case 'mfa-challenge':
       redirect(`/mfa/challenge?next=${next}`)
+    case 'switch-mode':
+      redirect(`/account/mode?next=${next}`)
     case 'forbidden':
       forbidden()
   }

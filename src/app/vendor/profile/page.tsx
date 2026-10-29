@@ -18,7 +18,11 @@ export default async function ShopPage() {
   const disabled = me.status !== 'approved'
   return (
     <>
-      <PageHeader title="Shop settings" subtitle={vendor.name} />
+      <PageHeader
+        breadcrumbs={[{ label: 'Shop', href: '/vendor' }, { label: 'Settings' }]}
+        title="Shop settings"
+        subtitle={vendor.name}
+      />
       <div className="space-y-5">
         <Card className="flex flex-wrap items-center justify-between gap-3">
           <p>

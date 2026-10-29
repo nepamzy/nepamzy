@@ -13,7 +13,11 @@ export default async function Settlements() {
   const t = s.totals
   return (
     <>
-      <PageHeader title="Settlements" subtitle={s.note} />
+      <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Settlements' }]}
+        title="Settlements"
+        subtitle={s.note}
+      />
       <Card className="mb-6">
         <dl className="grid grid-cols-[1fr_auto] gap-y-1">
           <dt>Completed orders with a settlement line</dt>

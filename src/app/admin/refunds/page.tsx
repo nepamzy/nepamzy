@@ -38,6 +38,7 @@ export default async function Refunds({
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Refunds' }]}
         title="Refunds"
         subtitle="Request, approval and execution are three separate steps. Only a FAKE provider exists: no real refund is sent anywhere."
       />

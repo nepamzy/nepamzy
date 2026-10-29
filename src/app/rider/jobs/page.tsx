@@ -9,6 +9,7 @@ import {
 } from '@/components/domain/rider-controls'
 import { OrderStatusPill } from '@/components/domain/order-status'
 import { Card, PageHeader } from '@/components/ui/card'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { EmptyState } from '@/components/ui/states'
 import {
   getAssignments,
@@ -28,7 +29,10 @@ export default async function Jobs() {
   if (!me.active)
     return (
       <>
-        <PageHeader title="Jobs" />
+        <PageHeader
+          breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Jobs' }]}
+          title="Jobs"
+        />
         <EmptyState title="You are off duty">
           Go active from{' '}
           <Link className="font-semibold underline" href="/rider">
@@ -45,7 +49,25 @@ export default async function Jobs() {
   ])
   return (
     <>
-      <PageHeader title="Jobs" subtitle={`${assignments.length} of 5 active deliveries`} />
+      <PageHeader
+        breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Jobs' }]}
+        title="Jobs"
+        subtitle={`${assignments.length} of 5 active deliveries`}
+      />
+      <MetricGrid>
+        <MetricCard
+          label="Active deliveries"
+          value={`${assignments.length} of 5`}
+          icon="truck"
+          accent="gold"
+        />
+        <MetricCard
+          label="Delivery offers"
+          value={offers.length}
+          note="Ready for collection near you"
+          icon="package"
+        />
+      </MetricGrid>
       <div className="mb-5">
         <LocationSharing
           enabled={assignments.length > 0}

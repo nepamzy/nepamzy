@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
 import { Table, Td } from '@/components/ui/table'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { Pager } from '@/components/ui/pager'
 import {
   listItemsForOrders,
@@ -79,7 +80,26 @@ export default async function VendorOrders({
   const items = await listItemsForOrders([...open, ...done.orders].map((o) => o.id))
   return (
     <>
-      <PageHeader title="Orders" subtitle="Accept paid orders, prepare them and mark them ready." />
+      <PageHeader
+        breadcrumbs={[{ label: 'Shop', href: '/vendor' }, { label: 'Orders' }]}
+        title="Orders"
+        subtitle="Accept paid orders, prepare them and mark them ready."
+      />
+      <MetricGrid>
+        <MetricCard
+          label="Needs your attention"
+          value={open.length}
+          icon="clipboard"
+          accent="gold"
+        />
+        <MetricCard
+          label="Finished on this page"
+          value={done.orders.length}
+          note="Completed, cancelled, refunded or unpaid"
+          icon="check-circle"
+          accent="success"
+        />
+      </MetricGrid>
       {open.length === 0 && done.orders.length === 0 && page === 1 ? (
         <EmptyState title="No orders yet">New orders will appear here.</EmptyState>
       ) : (

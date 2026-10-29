@@ -25,6 +25,7 @@ describe('schema hygiene (asserted from the catalog)', () => {
   const ANON_ALLOWLIST = [
     'public.list_categories',
     'public.browse_vendors',
+    'public.browse_products', // redesign: public item browsing; active items of approved shops, no personal data
     'public.get_vendor_menu',
     'public.get_product',
     'public.search_products',

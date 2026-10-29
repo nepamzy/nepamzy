@@ -22,6 +22,7 @@ export default async function AdminDataRequests() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Data requests' }]}
         title="Data requests"
         subtitle="Closure, access, correction and deletion requests. Handle each by hand, then record the outcome. Nothing is deleted automatically."
       />

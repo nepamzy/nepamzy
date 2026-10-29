@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { GoActiveForm, GoInactiveForm, TermsForm } from '@/components/domain/rider-controls'
 import { Badge } from '@/components/ui/badge'
+import { RiderFreeNotice } from '@/components/domain/rider-free-notice'
 import { Card, PageHeader } from '@/components/ui/card'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { EmptyState } from '@/components/ui/states'
 import { getMyRider } from '@/server/modules/riders/queries'
 
@@ -18,18 +20,41 @@ export default async function RiderHome() {
     )
   return (
     <>
-      <PageHeader title="Rider home" subtitle={me.full_name} />
-      <Card className="mb-5 max-w-xl space-y-1">
-        <p className="font-semibold">Rider earnings: Free of charge.</p>
-        <p className="font-semibold">Delivery commission features: Coming Soon</p>
-        <p className="text-sm text-muted">
-          AFIT Market takes no commission from riders.{' '}
+      <PageHeader
+        breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Home' }]}
+        title="Rider home"
+        subtitle={me.full_name}
+      />
+      <MetricGrid>
+        <MetricCard
+          label="Availability"
+          value={me.active ? 'Active' : 'Off duty'}
+          icon="truck"
+          accent={me.active ? 'success' : 'gold'}
+        />
+        <MetricCard
+          label="Active deliveries"
+          value={`${me.active_deliveries} of 5`}
+          note="You can carry up to five at once"
+          icon="package"
+          href="/rider/jobs"
+        />
+        <MetricCard
+          label="Location sharing"
+          value={me.active && me.active_deliveries > 0 ? 'On' : 'Off'}
+          note="Only while you carry a delivery"
+          icon="shield"
+        />
+      </MetricGrid>
+      <div className="mb-5 max-w-3xl">
+        <RiderFreeNotice extra="Delivery fees that are not collected online are paid to you directly by the customer." />
+        <p className="mt-2 text-sm">
           <Link className="font-semibold text-brand-700 underline" href="/rider/payments">
             Bank details and delivery fee payments
           </Link>
         </p>
-      </Card>
-      <Card className="max-w-xl space-y-4">
+      </div>
+      <Card className="max-w-3xl space-y-4">
         <p className="flex items-center gap-2 text-lg font-semibold">
           Status:{' '}
           <Badge tone={me.active ? 'success' : 'neutral'}>

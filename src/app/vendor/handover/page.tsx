@@ -26,6 +26,7 @@ export default async function Handover() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Shop', href: '/vendor' }, { label: 'Handover' }]}
         title="Confirm handover"
         subtitle="The customer shows a pickup code, then signs for the order."
       />

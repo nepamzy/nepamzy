@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { DeliveryProofPanel } from '@/components/domain/delivery-proof-panel'
 import { OrderStatusPill, ORDER_STATES } from '@/components/domain/order-status'
 import { OrderTracking } from '@/components/domain/order-tracking'
+import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
@@ -40,21 +41,23 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const label = (c: string) => ORDER_STATES.find((s) => s.code === c)?.label ?? c
   return (
     <>
-      <p className="mb-2">
-        <Link href="/orders" className="font-semibold text-brand-700 underline">
-          ← My orders
-        </Link>
-      </p>
       <PageHeader
         title={order.order_number}
         subtitle={`${order.vendor_name} · ${order.fulfilment === 'delivery' ? 'Delivery' : 'Pickup'}`}
         actions={<OrderStatusPill code={order.status} />}
+        breadcrumbs={[
+          { label: 'Home', href: '/' },
+          { label: 'Orders', href: '/orders' },
+          { label: order.order_number },
+        ]}
       />
-      <p className="mb-4">{ORDER_STATES.find((s) => s.code === order.status)?.meaning}</p>
+      <Alert tone="info" className="mb-5">
+        {ORDER_STATES.find((s) => s.code === order.status)?.meaning}
+      </Alert>
 
       {unpaid && (
-        <Card className="mb-5 space-y-3 border-warning-700">
-          <h2 className="text-lg font-bold">Payment needed</h2>
+        <Card className="mb-5 space-y-3 border-2 border-gold-400 bg-accent-50/50">
+          <h2 className="text-lg font-extrabold text-navy-900">Payment needed</h2>
           <p>
             Total to pay: <Money kobo={order.total_kobo} className="font-bold" />
             {order.expires_at && (
@@ -106,7 +109,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
       {dfp && dfp.state !== 'not_applicable' && (
         <Card className="mb-5 space-y-2 border-brand-700">
-          <h2 className="text-lg font-bold">Delivery fee</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Delivery fee</h2>
           <p>
             {dfp.state === 'payment'
               ? 'You pay this delivery fee directly to your rider by bank transfer.'
@@ -125,7 +128,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
       {pickup && (
         <Card className="mb-5 space-y-2 border-brand-700">
-          <h2 className="text-lg font-bold">Your pickup code</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Your pickup code</h2>
           <p
             className="text-3xl font-bold tracking-widest"
             aria-label={`Pickup code ${pickup.code.split('').join(' ')}`}
@@ -144,7 +147,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           order.status,
         ) && (
           <Card className="mb-5 space-y-2">
-            <h2 className="text-lg font-bold">Delivery tracking</h2>
+            <h2 className="text-lg font-extrabold text-navy-900">Delivery tracking</h2>
             <OrderTracking orderId={order.id} />
           </Card>
         )}
@@ -171,21 +174,21 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
       {review?.can_review && (
         <Card className="mb-5 space-y-2">
-          <h2 className="text-lg font-bold">Review this order</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Review this order</h2>
           <ReviewForm orderId={order.id} />
         </Card>
       )}
       {review?.review && (
         <Card className="mb-5 space-y-1">
-          <h2 className="text-lg font-bold">Your review</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Your review</h2>
           <p aria-label={`${review.review.rating} out of 5`}>{'★'.repeat(review.review.rating)}</p>
           {review.review.comment && <p>{review.review.comment}</p>}
         </Card>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <Card className="space-y-3">
-          <h2 className="text-lg font-bold">Items</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">Items</h2>
           <ul className="space-y-2">
             {items.map((i) => (
               <li key={i.id} className="flex justify-between gap-2">
@@ -285,7 +288,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           )}
         </Card>
         <Card>
-          <h2 className="mb-3 text-lg font-bold">Progress</h2>
+          <h2 className="mb-3 text-lg font-extrabold text-navy-900">Order timeline</h2>
           <Timeline
             steps={history.map((h, i) => ({
               label: label(h.to_status),

@@ -35,11 +35,13 @@ export function ProductForm({
       action={saveProductAction}
       submitLabel={product ? 'Save changes' : 'Add to menu'}
       hideSubmit={disabled}
+      variant="gold"
     >
       <input type="hidden" name="vendorId" value={vendorId} />
       {product && <input type="hidden" name="productId" value={product.id} />}
       <input type="hidden" name="options" value={JSON.stringify(groups)} />
       <fieldset disabled={disabled} className="space-y-4">
+        <h2 className="text-lg font-extrabold text-navy-900">1. About the item</h2>
         <Input
           label="Name"
           name="name"
@@ -54,7 +56,10 @@ export function ProductForm({
           maxLength={300}
           defaultValue={product?.description ?? ''}
         />
-        <div className="grid gap-4 sm:grid-cols-3">
+        <h2 className="border-t border-line pt-4 text-lg font-extrabold text-navy-900">
+          2. Price and stock
+        </h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Input
             label="Price (₦)"
             name="price"
@@ -80,8 +85,8 @@ export function ProductForm({
         </div>
         <Checkbox label="On sale" name="available" defaultChecked={product?.is_available ?? true} />
         <section aria-labelledby="opts" className="space-y-3">
-          <h2 id="opts" className="text-lg font-bold">
-            Options and add-ons
+          <h2 id="opts" className="border-t border-line pt-4 text-lg font-extrabold text-navy-900">
+            3. Options and add-ons
           </h2>
           <p className="text-sm text-muted">
             For choices such as size or extras. “At least” 1 makes a choice required.

@@ -46,3 +46,9 @@ export async function listDeliveryPoints(): Promise<DeliveryPoint[]> {
   const { data } = await sb.rpc('list_delivery_points')
   return (data as DeliveryPoint[] | null) ?? []
 }
+
+/** Number of items in the signed-in customer's cart, for the header badge. 0 when empty, signed out or not allowed. */
+export async function cartItemCount(): Promise<number> {
+  const q = await getQuote('pickup', null)
+  return q && !q.empty ? q.lines.reduce((n, l) => n + l.quantity, 0) : 0
+}

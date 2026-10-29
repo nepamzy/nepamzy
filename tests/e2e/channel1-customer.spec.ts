@@ -54,7 +54,8 @@ test('logout ends the session in every tab of that browser and the back button d
 }, info) => {
   const s = await openSession(browser, info, 'c1-out')
   await s.page.goto('/account')
-  await s.page.getByRole('button', { name: 'Sign out' }).first().click()
+  await s.page.locator('summary[aria-label="Account menu"]').click()
+  await s.page.getByRole('button', { name: 'Sign out' }).click()
   await s.page.waitForURL((u) => !/\/account/.test(u.pathname))
   await s.page.goBack().catch(() => undefined)
   await s.page.goto('/account')

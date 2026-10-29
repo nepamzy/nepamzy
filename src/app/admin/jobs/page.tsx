@@ -15,7 +15,11 @@ export default async function Jobs() {
   if (!h) return <EmptyState title="Unavailable">Job health could not be loaded.</EmptyState>
   return (
     <>
-      <PageHeader title="Background jobs" subtitle={h.note} />
+      <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Background jobs' }]}
+        title="Background jobs"
+        subtitle={h.note}
+      />
       {h.problems.length === 0 ? (
         <p
           role="status"

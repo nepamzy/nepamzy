@@ -1,7 +1,13 @@
 import type { Metadata } from 'next'
 import { PublicHeader } from '@/components/shells/public-header'
 import { ORDER_STATES, OrderStatusPill } from '@/components/domain/order-status'
+import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
+import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { ICON_NAMES, Icon } from '@/components/ui/icons'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { Table, Td } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
 import { Checkbox, Input, Select, Textarea } from '@/components/ui/fields'
@@ -37,6 +43,64 @@ export default function DesignPage() {
               </Badge>
             ))}
           </div>
+        </section>
+        <section className="space-y-3">
+          <h2 className="text-xl font-bold">Gold action, metrics and status</h2>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="gold">Gold action</Button>
+          </div>
+          <MetricGrid>
+            <MetricCard label="Orders (sample)" value="1,248" icon="package" note="Sample number" />
+            <MetricCard label="Revenue (sample)" value="₦0" icon="coins" accent="gold" />
+            <MetricCard label="Vendors (sample)" value="56" icon="store" accent="success" />
+            <MetricCard label="Open cases (sample)" value="3" icon="alert" accent="danger" />
+          </MetricGrid>
+          <div className="flex flex-wrap gap-2">
+            {['paid', 'pending_payment', 'out_for_delivery', 'cancelled', 'draft'].map((s) => (
+              <StatusBadge key={s} status={s} />
+            ))}
+          </div>
+          <Alert tone="info" title="Information">
+            Plain notes use the information style.
+          </Alert>
+          <Alert tone="success">Saved.</Alert>
+          <Alert tone="warning" title="Check this">
+            Warnings are announced to screen readers.
+          </Alert>
+          <Alert tone="danger" title="Something failed">
+            Errors say what to do next.
+          </Alert>
+          <Breadcrumbs
+            items={[
+              { label: 'Home', href: '/' },
+              { label: 'Section', href: '/vendors' },
+              { label: 'Page' },
+            ]}
+          />
+          <Table caption="Example table" head={['Order', 'Status', 'Total']}>
+            <tr>
+              <Td>#1001</Td>
+              <Td>
+                <StatusBadge status="paid" />
+              </Td>
+              <Td>₦3,600</Td>
+            </tr>
+            <tr>
+              <Td>#1002</Td>
+              <Td>
+                <StatusBadge status="awaiting_confirmation" />
+              </Td>
+              <Td>₦4,100</Td>
+            </tr>
+          </Table>
+          <ul className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+            {ICON_NAMES.map((n) => (
+              <li key={n} className="flex flex-col items-center gap-1 text-xs text-muted">
+                <Icon name={n} size={22} />
+                {n}
+              </li>
+            ))}
+          </ul>
         </section>
         <section className="space-y-3">
           <h2 className="text-xl font-bold">Form controls</h2>

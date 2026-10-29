@@ -9,19 +9,19 @@
 
   --color-ink: #131c2b;
   --color-muted: #44536a;
-  --color-surface: #f6f8fc;
+  --color-surface: #f3f7fc;
   --color-card: #ffffff;
   --color-line: #cdd6e4;
   --color-line-strong: #70819c;
 
-  --color-brand-50: #e9f0fc;
-  --color-brand-100: #d2e1f8;
-  --color-brand-600: #1d57b8;
-  --color-brand-700: #174a9c;
-  --color-brand-800: #10346f;
+  --color-brand-50: #e8f1fb;
+  --color-brand-100: #d0e3f7;
+  --color-brand-600: #1261b0;
+  --color-brand-700: #0b4c99;
+  --color-brand-800: #073b7a;
 
   /* Gold: decorative fills and rules only (never text on white); text uses accent-600/700. */
-  --color-gold-400: #f4b400;
+  --color-gold-400: #ffc928;
   --color-accent-50: #fff4cf;
   --color-accent-600: #8f6400;
   --color-accent-700: #7a5400;
@@ -30,6 +30,7 @@
   --color-success-700: #17673a;
   --color-warning-50: #fff4cf;
   --color-warning-700: #7a5400;
+  --color-red-500: #d92d3a; /* errors / destructive fills only; text uses danger-700 */
   --color-danger-50: #fdebe9;
   --color-danger-700: #a3211a;
   --color-danger-800: #82170f;
@@ -37,9 +38,17 @@
   --color-info-50: #e6eefa;
   --color-info-700: #1a4a8a;
 
+  /* Navy: the Administration sidebar, hero bands and footer. Light text on navy is checked in visual-fixes.test.ts. */
+  --color-navy-950: #052a58;
+  --color-navy-900: #073b7a;
+  --color-navy-800: #0d4a94;
+  --color-navy-700: #1261b0;
+  --color-navy-text: #dbe8f8;
+
   --radius-card: 0.875rem;
   --radius-control: 0.625rem;
   --shadow-card: 0 1px 2px rgb(19 28 43 / 0.06), 0 2px 8px rgb(19 28 43 / 0.05);
+  --shadow-pop: 0 8px 28px rgb(8 28 69 / 0.18);
   --text-base: 1rem;
 }
 

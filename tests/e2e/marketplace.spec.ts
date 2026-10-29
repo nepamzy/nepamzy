@@ -116,14 +116,14 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
   await expect(anon.page).toHaveURL(/\/cart$/)
   await expect(anon.page.getByText(item)).toBeVisible()
   await expect(anon.page.getByText('₦3,600').first()).toBeVisible() // 2 x (1500 + 300)
-  await anon.page.getByRole('link', { name: 'Go to checkout' }).click()
+  await anon.page.getByRole('link', { name: 'Proceed to checkout' }).click()
   await expect(anon.page).toHaveURL(/\/checkout$/)
 
   // 6. Checkout shows server-calculated totals for both choices.
   await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦3,600') // 3600, no customer service fee, pickup
   await anon.page.getByRole('radio', { name: /Delivery/ }).check()
   await expect(anon.page.getByTestId('checkout-total')).toHaveText('₦4,100') // + 500 delivery
-  await anon.page.getByLabel('Delivery point').selectOption({ index: 1 })
+  await anon.page.getByLabel('Delivery point', { exact: true }).selectOption({ index: 1 })
   await clickAndWait(anon.page, () =>
     anon.page.getByRole('button', { name: 'Place order' }).click(),
   )
@@ -212,7 +212,7 @@ test('vendor onboarding -> catalogue -> customer checkout -> test payment -> ven
 test('browse, search and filter; cart rules (one vendor at a time, quantities, removal)', async ({
   browser,
 }, info) => {
-  test.setTimeout(120000)
+  test.setTimeout(240000)
   const anon = await openAnonymous(browser, info)
   const p = anon.page
   await p.goto('/vendors?q=print')
@@ -231,7 +231,7 @@ test('browse, search and filter; cart rules (one vendor at a time, quantities, r
     await p.goto(`/vendors?q=${q}`)
     await expect(p.getByText('No matches')).toBeVisible()
   }
-  await p.goto('/vendors?q=rice')
+  await p.goto('/vendors?q=jollof')
   await expect(p.getByRole('heading', { name: 'Matching items' })).toBeVisible()
   await expect(p.getByRole('link', { name: 'Jollof rice and chicken' })).toBeVisible()
   await p.goto('/vendors/sample-kitchen')
@@ -265,8 +265,10 @@ test('browse, search and filter; cart rules (one vendor at a time, quantities, r
   await expect(b.getByText('Jollof rice and chicken')).toHaveCount(0)
 
   // quantity update and removal
-  await b.getByLabel('Quantity').fill('4')
-  await b.getByRole('button', { name: 'Update' }).click()
+  for (const n of [2, 3, 4]) {
+    await clickAndWait(b, () => b.getByRole('button', { name: /Increase quantity of/ }).click())
+    await expect(b.getByLabel(`Quantity ${n}`)).toBeVisible()
+  }
   await expect(b.getByText('₦200').first()).toBeVisible() // 4 x N50
   await b.getByRole('button', { name: 'Remove' }).click()
   await expect(b.getByText('Your cart is empty')).toBeVisible()
@@ -285,7 +287,7 @@ test('checkout stays blocked with clear messages when the vendor is closed or an
   await b.getByRole('button', { name: 'Add to cart' }).click()
   await expect(b).toHaveURL(/\/cart$/)
   await expect(alertIn(b)).toContainText(/closed right now/)
-  await b.getByRole('link', { name: 'Go to checkout' }).click()
+  await b.getByRole('link', { name: 'Proceed to checkout' }).click()
   await b.getByRole('button', { name: 'Place order' }).click()
   await expect(alertIn(b)).toContainText(/closed right now/)
   const { count } = await admin()

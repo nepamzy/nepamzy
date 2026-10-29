@@ -52,6 +52,7 @@ async function succeedsWithNulls(c: PoolClient, who: Principal, f: Fn): Promise<
 
 // Functions that are public by design: published catalogue and published reviews. Nothing else may skip an identity check.
 const NO_IDENTITY_CHECK = [
+  'browse_products', // redesign: public item browsing with sort/filter; active items of approved shops only
   'browse_vendors',
   'get_product',
   'get_vendor_menu',
@@ -118,6 +119,7 @@ describe('catalogue-wide authorisation regression', () => {
       // Only harmless self-scoped reads / the published reads may return. Pin them so a new function must be added consciously.
       expect([...new Set(ok)].sort()).toMatchInlineSnapshot(`
         [
+          "browse_products",
           "browse_vendors",
           "cart_clear",
           "cart_quote",
@@ -136,10 +138,13 @@ describe('catalogue-wide authorisation regression', () => {
           "my_roles",
           "my_vendor",
           "notification_mark_read",
+          "saved_places_list",
           "search_products",
           "vendor_commission_terms",
           "vendor_pending_rider_pickups",
           "verify_delivery_fee_receipt",
+          "wishlist_contains",
+          "wishlist_list",
         ]
       `)
     })
@@ -218,6 +223,9 @@ describe('boundedness: list functions that aggregate rows without a LIMIT are pi
     vendor_pending_rider_pickups: 'bounded by riders x five active deliveries for one shop',
     my_order_item_balances: 'items of one order',
     my_order_refunds: 'refunds of one order (capped by the refundable balance)',
+    browse_products: 'windowed by row_number: at most 50 rows per call',
+    saved_places_list: 'at most five saved places per person (enforced by the save function)',
+    wishlist_list: 'at most 100 wishlist items per person (enforced by the toggle function)',
     get_case: 'one case',
     staff_case_bundle: 'one case',
     vendor_find_pickup_by_code: 'at most the orders matching one code',

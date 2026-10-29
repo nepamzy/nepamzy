@@ -67,6 +67,8 @@ export type ListOrdersOpts = {
   /** Only these exact statuses. */
   statuses?: string[]
   oldestFirst?: boolean
+  /** Order-number search (letters, digits and dashes only). */
+  q?: string
 }
 
 /** RLS decides what is visible: a customer gets their own orders; a vendor member its vendor's; staff all. */
@@ -85,6 +87,8 @@ export async function listOrdersPage(
   if (opts.statuses) q = q.in('status', opts.statuses)
   if (opts.finished === true) q = q.in('status', [...FINISHED_ORDER_STATUSES])
   if (opts.finished === false) q = q.not('status', 'in', finished)
+  const needle = (opts.q ?? '').replace(/[^A-Za-z0-9-]/g, '').slice(0, 30)
+  if (needle) q = q.ilike('order_number', `%${needle}%`)
   const from = (page - 1) * pageSize
   const { data } = await q.range(from, from + pageSize) // one extra row tells whether another page exists
   const rows = (data as OrderRow[] | null) ?? []

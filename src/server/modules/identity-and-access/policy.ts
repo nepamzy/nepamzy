@@ -3,6 +3,8 @@
  * unit-testable. The database enforces the same rules independently (RLS + aal2 policies).
  */
 export type Aal = 'aal1' | 'aal2'
+/** Cookie that remembers a staff member's chosen interface (see Principal.mode). */
+export const MODE_COOKIE = 'afit_mode'
 export type AppRole =
   | 'customer'
   | 'vendor_owner'
@@ -35,6 +37,11 @@ export type Principal = {
   aal: Aal | null
   /** The user has at least one verified TOTP factor. */
   hasVerifiedFactor: boolean
+  /**
+   * Which interface a staff member is using. It only ever REMOVES access (customer mode hides staff areas); it never adds any:
+   * every staff area still requires the staff role, and the second step, whatever this says. Undefined means `admin`.
+   */
+  mode?: 'admin' | 'customer'
 }
 export const ANONYMOUS: Principal = {
   authenticated: false,
@@ -53,7 +60,8 @@ export type AccessRequirement = {
 }
 
 export type Decision =
-  { allow: true } | { allow: false; action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' }
+  | { allow: true }
+  | { allow: false; action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' | 'switch-mode' }
 
 export function decideAccess(req: AccessRequirement, who: Principal): Decision {
   if (!who.authenticated) return { allow: false, action: 'login' }
@@ -61,6 +69,9 @@ export function decideAccess(req: AccessRequirement, who: Principal): Decision {
     return { allow: false, action: 'forbidden' }
   }
   const staff = who.roles.some((r) => isPrivilegedRole(r))
+  // A staff-only area is closed while the person is browsing in Customer mode: they switch back on purpose.
+  if (req.roles && req.roles.every((r) => isPrivilegedRole(r)) && who.mode === 'customer')
+    return { allow: false, action: 'switch-mode' }
   const needsAal2 = req.aal === 'aal2' || (!req.mfaSetup && staff)
   // The second step counts as satisfied when it was completed, or when it is optional for this person:
   // not staff and no authenticator set up.
@@ -75,6 +86,23 @@ export type RoutePolicy = { prefix: string; requirement: AccessRequirement }
 
 /** Longest matching prefix wins. Paths not listed here are public. */
 export const ROUTE_POLICIES: RoutePolicy[] = [
+  { prefix: '/admin/users', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  {
+    prefix: '/admin/orders',
+    requirement: { roles: ['platform_admin', 'support_agent', 'finance_admin'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/products',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/reports',
+    requirement: { roles: ['platform_admin', 'finance_admin'], aal: 'aal2' },
+  },
+  {
+    prefix: '/admin/messages',
+    requirement: { roles: ['platform_admin', 'support_agent'], aal: 'aal2' },
+  },
   { prefix: '/admin/roles', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/applications', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/vendors', requirement: { roles: ['platform_admin'], aal: 'aal2' } },

@@ -17,6 +17,7 @@ export default async function Categories() {
   return (
     <>
       <PageHeader
+        breadcrumbs={[{ label: 'Administration', href: '/admin' }, { label: 'Categories' }]}
         title="Categories"
         subtitle="Shown to applicants and as customer filters. Inactive ones are hidden from the public."
       />

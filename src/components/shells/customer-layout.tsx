@@ -18,7 +18,13 @@ export async function CustomerLayout({
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase.auth.getUser()
   return (
-    <AppShell area={area} signedInAs={data.user?.email} items={CUSTOMER_NAV}>
+    <AppShell
+      area={area}
+      signedInAs={data.user?.email}
+      items={CUSTOMER_NAV}
+      showCart
+      search={{ action: '/products', placeholder: 'Search food, shops and services' }}
+    >
       {children}
     </AppShell>
   )

@@ -204,3 +204,44 @@ describe('signUpOutcome', () => {
     ).toBe('check_email')
   })
 })
+
+describe('Administrator / Customer mode', () => {
+  const staff = (mode?: 'admin' | 'customer'): Principal => ({
+    ...who(['platform_admin', 'customer'], 'aal2'),
+    mode,
+  })
+  it('staff areas close in Customer mode and open again in Administrator mode', () => {
+    for (const p of ROUTE_POLICIES.filter(
+      (r) => r.requirement.roles && r.requirement.roles.every(isPrivilegedRole),
+    )) {
+      expect(decideAccess(p.requirement, staff('customer')), p.prefix).toEqual({
+        allow: false,
+        action: 'switch-mode',
+      })
+      expect(decideAccess(p.requirement, staff('admin')).allow, p.prefix).toBe(true)
+      expect(decideAccess(p.requirement, staff(undefined)).allow, p.prefix).toBe(true)
+    }
+  })
+  it('Customer mode still shows the normal customer experience', () => {
+    for (const prefix of ['/orders', '/cart', '/checkout', '/account', '/notifications'])
+      expect(decideAccess(policyFor(prefix)!.requirement, staff('customer')).allow, prefix).toBe(
+        true,
+      )
+  })
+  it('mode never adds access: a customer, vendor or rider cannot enter staff areas whatever it says', () => {
+    for (const r of ['customer', 'vendor_owner', 'rider'] as const)
+      for (const mode of ['admin', 'customer'] as const)
+        expect(
+          decideAccess(policyFor('/admin')!.requirement, { ...who([r], 'aal2'), mode }).allow,
+          `${r}/${mode}`,
+        ).toBe(false)
+  })
+  it('mode never lifts the second step for staff', () => {
+    expect(
+      decideAccess(policyFor('/admin')!.requirement, {
+        ...who(['platform_admin'], 'aal1', true),
+        mode: 'admin',
+      }),
+    ).toEqual({ allow: false, action: 'mfa-challenge' })
+  })
+})

@@ -1,15 +1,47 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 import { signOutAction } from '@/server/modules/identity-and-access/actions'
-import { BottomNav, SidebarNav, type NavItem } from './nav-links'
-import { Button } from '@/components/ui/button'
+import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
+import { isPrivilegedRole } from '@/server/modules/identity-and-access/policy'
+import { cartItemCount } from '@/server/modules/cart-and-checkout/queries'
+import { unreadCount } from '@/server/modules/engagement/queries'
+import { Icon } from '@/components/ui/icons'
+import { Logo } from '@/components/ui/logo'
+import { SearchField } from '@/components/ui/search-field'
+import { MobileDrawer } from './drawer'
+import { Menu } from './menu'
+import { ModeBar, ModePill, ModeSwitch } from './mode-switch'
+import type { NavItem } from './nav-config'
+import { BottomNav, SidebarNav } from './nav-links'
 
-export function AppShell({
+const initials = (email?: string) => (email?.trim()[0] ?? '?').toUpperCase()
+
+function Badge({ n, label }: { n: number; label: string }) {
+  if (n <= 0) return null
+  return (
+    <span
+      aria-label={label}
+      className="absolute -right-1 -top-1 grid min-w-5 place-items-center rounded-full bg-danger-700 px-1 text-[0.7rem] font-bold leading-5 text-white"
+    >
+      {n > 99 ? '99+' : n}
+    </span>
+  )
+}
+
+/**
+ * The signed-in frame for every role: sidebar (desktop), header with search / cart / notifications / account menu,
+ * navigation drawer and bottom bar (phone). Administration uses the navy look; the other areas use the light look.
+ * Nothing here grants access: every area still enforces its own policy.
+ */
+export async function AppShell({
   area,
   items,
   moreHref,
   children,
   signedInAs,
+  theme = 'light',
+  search,
+  showCart = false,
 }: {
   area: string
   items: NavItem[]
@@ -17,50 +49,126 @@ export function AppShell({
   moreHref?: string
   children: ReactNode
   signedInAs?: string
+  theme?: 'light' | 'navy'
+  /** Where the header search sends people (customer areas). Omitted where no real search exists. */
+  search?: { action: string; placeholder: string }
+  showCart?: boolean
 }) {
+  const who = await loadPrincipal()
+  const staff = who.roles.some(isPrivilegedRole)
+  const [unread, cart] = await Promise.all([unreadCount(), showCart ? cartItemCount() : 0])
+  const navy = theme === 'navy'
+  const email = signedInAs
   return (
-    <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
-      <aside className="hidden border-r border-line border-t-4 border-t-gold-400 bg-card p-4 md:block">
-        <Link href="/" className="mb-6 block text-xl font-extrabold text-brand-800">
-          AFIT Market
-        </Link>
-        <p className="mb-2 px-3 text-xs font-bold uppercase tracking-wide text-muted">{area}</p>
-        <SidebarNav items={items} />
+    <div className="min-h-dvh md:grid md:grid-cols-[16rem_1fr]">
+      <aside
+        className={`hidden md:flex md:flex-col ${navy ? 'bg-navy-900 text-white' : 'border-r border-line bg-card'} sticky top-0 h-dvh overflow-y-auto p-4`}
+      >
+        <Logo tone={navy ? 'light' : 'dark'} className="mb-5" />
+        <p
+          className={`mb-3 px-3 text-xs font-bold uppercase tracking-wider ${navy ? 'text-navy-text/80' : 'text-muted'}`}
+        >
+          {area}
+        </p>
+        <div className="flex-1">
+          <SidebarNav items={items} theme={theme} />
+        </div>
+        {staff && (
+          <div className={`mt-4 border-t pt-4 ${navy ? 'border-white/10' : 'border-line'}`}>
+            <ModeSwitch who={who} dark={navy} />
+          </div>
+        )}
       </aside>
       <div className="min-w-0">
-        <header className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-b border-line border-t-4 border-t-gold-400 bg-card px-4 py-3 sm:gap-x-3">
-          <Link
-            href="/"
-            className="text-base font-extrabold whitespace-nowrap text-brand-800 sm:text-lg md:hidden"
-          >
-            AFIT Market
-          </Link>
+        <header className="sticky top-0 z-30 flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-3 border-b border-line border-t-4 border-t-gold-400 bg-card/95 px-4 py-2.5 backdrop-blur">
+          <MobileDrawer items={items} theme={theme} area={area}>
+            {staff && <ModeSwitch who={who} dark={navy} />}
+          </MobileDrawer>
+          <Logo className="md:hidden" compact />
           <span className="hidden text-sm font-semibold text-muted md:inline">{area}</span>
-          <form action={signOutAction} className="ml-auto flex items-center gap-2 sm:gap-3">
+          {search && (
+            <SearchField
+              action={search.action}
+              placeholder={search.placeholder}
+              label="Search the marketplace"
+              className="hidden max-w-md flex-1 md:block"
+            />
+          )}
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <ModePill who={who} />
+            {showCart && (
+              <Link
+                href="/cart"
+                aria-label={cart > 0 ? `Cart, ${cart} items` : 'Cart'}
+                className="touch-target relative grid place-items-center rounded-full text-navy-900 hover:bg-brand-50"
+              >
+                <Icon name="cart" size={22} />
+                <Badge n={cart} label={`${cart} items in your cart`} />
+              </Link>
+            )}
             <Link
               href="/notifications"
-              className="touch-target inline-flex items-center text-sm font-semibold whitespace-nowrap text-brand-700 underline sm:text-base"
+              aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
+              className="touch-target relative grid place-items-center rounded-full text-navy-900 hover:bg-brand-50"
             >
-              Notifications
+              <Icon name="bell" size={22} />
+              <Badge n={unread} label={`${unread} unread notifications`} />
             </Link>
-            {signedInAs && (
-              <span
-                className="hidden max-w-48 truncate text-sm text-muted sm:inline"
-                title={signedInAs}
-              >
-                {signedInAs}
-              </span>
-            )}
-            <Button
-              type="submit"
-              variant="secondary"
-              className="px-3 py-1.5 text-sm whitespace-nowrap sm:px-4 sm:text-base"
+            <Menu
+              label="Account menu"
+              summary={
+                <>
+                  <span
+                    aria-hidden="true"
+                    className="grid size-9 place-items-center rounded-full bg-navy-900 text-sm font-bold text-white"
+                  >
+                    {initials(email)}
+                  </span>
+                  <Icon name="chevron-down" size={16} className="hidden sm:block" />
+                </>
+              }
             >
-              Sign out
-            </Button>
-          </form>
+              {email && (
+                <p className="truncate px-3 py-2 text-sm text-muted" title={email}>
+                  Signed in as <span className="font-semibold text-ink">{email}</span>
+                </p>
+              )}
+              <ul>
+                <li>
+                  <Link
+                    href="/account"
+                    className="touch-target flex items-center gap-2 rounded-lg px-3 py-2 font-semibold hover:bg-brand-50"
+                  >
+                    <Icon name="user" size={18} /> My account
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/account/security"
+                    className="touch-target flex items-center gap-2 rounded-lg px-3 py-2 font-semibold hover:bg-brand-50"
+                  >
+                    <Icon name="shield" size={18} /> Security
+                  </Link>
+                </li>
+              </ul>
+              {staff && (
+                <div className="my-2 border-t border-line px-1 pt-3">
+                  <ModeSwitch who={who} />
+                </div>
+              )}
+              <form action={signOutAction} className="mt-1 border-t border-line pt-1">
+                <button
+                  type="submit"
+                  className="touch-target flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left font-semibold text-danger-700 hover:bg-danger-50"
+                >
+                  <Icon name="logout" size={18} /> Sign out
+                </button>
+              </form>
+            </Menu>
+          </div>
         </header>
-        <main id="main" className="mx-auto max-w-5xl px-4 py-6 pb-24 md:pb-8">
+        <ModeBar who={who} />
+        <main id="main" className="mx-auto max-w-6xl px-4 py-6 pb-24 md:pb-10">
           {children}
         </main>
       </div>
