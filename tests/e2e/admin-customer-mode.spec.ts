@@ -86,24 +86,23 @@ test('a vendor who is not staff gets no switch and no administrator access', asy
   await s.context.close()
 })
 
-test('the sign-in choice picks the interface for accounts with administrator access', async ({
+test('the hidden administrator sign-in opens the administrator interface; the public sign-in does not', async ({
   browser,
 }, info) => {
   const u = await createUser('mode-login', ['platform_admin'])
   const { secret } = await enrolFactorViaApi(u.email)
-  for (const [choice, landing] of [
-    ['Administrator', /\/admin$/],
-    ['Customer', /^http:\/\/127\.0\.0\.1:3000\/$/],
+  for (const [entrance, landing] of [
+    ['/staff-login', /\/admin$/],
+    ['/login', /^http:\/\/127\.0\.0\.1:3000\/$/],
   ] as const) {
     const context = await browser.newContext({
       viewport: info.project.use.viewport ?? undefined,
       extraHTTPHeaders: { 'x-forwarded-for': randIp() },
     })
     const page = await context.newPage()
-    await page.goto('/login')
+    await page.goto(entrance)
     await page.getByLabel('Email').fill(u.email)
     await page.getByLabel('Password').fill(PASSWORD)
-    await page.getByLabel(choice, { exact: true }).check()
     await page.getByRole('button', { name: 'Sign in' }).click()
     await uiMfaChallenge(page, secret)
     await expect(page).toHaveURL(landing)

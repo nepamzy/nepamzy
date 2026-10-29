@@ -37,6 +37,9 @@ const signUpSchema = z
     password: passwordSchema,
     confirm: z.string(),
     adult: z.literal('on', { error: 'Confirm that you are 18 years old or older to register.' }),
+    // What the person wants to do here. It only decides which application page they are shown after signing in;
+    // it never grants a role (vendors and riders are approved by an administrator).
+    intent: z.enum(['customer', 'vendor', 'rider']).catch('customer'),
   })
   .refine((v) => v.password === v.confirm, {
     message: 'Passwords do not match.',
@@ -51,9 +54,10 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     password: formData.get('password'),
     confirm: formData.get('confirm'),
     adult: formData.get('adult'),
+    intent: formData.get('intent'),
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check your details.' }
-  const { email, password } = parsed.data
+  const { email, password, intent } = parsed.data
   const ip = await clientIp()
   if (
     !(await rateLimit(`signup:ip:${ip}`, 3600, 10)) ||
@@ -67,7 +71,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     password,
     options: {
       emailRedirectTo: `${serverEnv().SITE_URL}/auth/confirm`,
-      data: { adult_declared: true },
+      data: { adult_declared: true, ...(intent === 'customer' ? {} : { intended_role: intent }) },
     },
   })
   if (error && error.status && error.status < 500 && error.code !== 'weak_password') {
@@ -83,10 +87,16 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   // E-mail confirmation is switched off in the provider settings: the person is already signed in.
   if (outcome === 'signed_in') {
     notifyWelcome(email)
-    redirect('/')
+    redirect(applicationPathFor(intent) ?? '/')
   }
   // Same message whether or not the address already exists (prevents account enumeration).
-  return { ok: true, message: 'Check your email. We sent a link to confirm your address.' }
+  return {
+    ok: true,
+    message:
+      intent === 'customer'
+        ? 'Check your email. We sent a link to confirm your address.'
+        : `Check your email. We sent a link to confirm your address. After you confirm and sign in, you will be taken to the ${intent} application.`,
+  }
 }
 
 export async function signInAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -126,16 +136,26 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
       : formData.get('mode') === 'customer'
         ? 'customer'
         : null,
+    data.user.user_metadata?.intended_role,
   )
+}
+
+/** Where a person who signed up as a vendor or rider continues (their application). Everyone else: null. */
+function applicationPathFor(intent: unknown): '/apply' | '/rider-apply' | null {
+  return intent === 'vendor' ? '/apply' : intent === 'rider' ? '/rider-apply' : null
 }
 
 /** After a password was accepted: staff and people with an authenticator go to the second step; others are in. */
 async function finishSignIn(
   next: string,
   chosen: 'admin' | 'customer' | null = null,
+  intent?: unknown,
 ): Promise<never> {
   const who = await loadPrincipal()
   const staff = who.roles.some(isPrivilegedRole)
+  // Someone who signed up to sell or deliver is taken to that application until they hold the role.
+  const holds = intent === 'vendor' ? 'vendor_owner' : intent === 'rider' ? 'rider' : null
+  if (next === '/' && holds && !who.roles.includes(holds)) next = applicationPathFor(intent) ?? next
   // The "sign in as" choice only picks the interface for accounts that already hold a staff role; for anyone else it is ignored.
   if (staff && chosen) {
     await setModeCookie(chosen)

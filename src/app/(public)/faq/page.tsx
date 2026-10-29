@@ -16,7 +16,7 @@ const FAQ: { q: string; a: string }[] = [
   },
   {
     q: 'Do I have to use an authenticator app?',
-    a: 'No. Two-step sign-in is optional for customers. You can switch it on from Account, then Security, if you want an extra lock on your account.',
+    a: 'No. Two-step sign-in is optional for customers, vendors and riders. You can switch it on from Account, then Security, if you want an extra lock on your account.',
   },
   {
     q: 'What if I forget my password?',
