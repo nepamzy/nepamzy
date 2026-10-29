@@ -130,3 +130,30 @@ test('three quick taps on the logo on the home page open the administrator sign-
   await expect(p2).toHaveURL(/\/admin$/)
   await ctx2.close()
 })
+
+test('the authenticator is optional for customers, vendors and riders: no setup screen is forced on them', async ({
+  browser,
+  page,
+}, info) => {
+  await page.goto('/signup')
+  await expect(page.getByText(/authenticator app for extra security is optional/i)).toBeVisible()
+  await expect(page.getByText(/before you can place orders/i)).toHaveCount(0)
+  for (const [role, area] of [
+    ['vendor_owner', '/vendor'],
+    ['rider', '/rider'],
+    [undefined, '/orders'],
+  ] as const) {
+    const u = await createUser(`optional-mfa-${role ?? 'customer'}`, role ? [role] : [])
+    const context = await browser.newContext({
+      viewport: info.project.use.viewport ?? undefined,
+      extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+    })
+    const p = await context.newPage()
+    await uiSignIn(p, u.email)
+    expect(p.url(), `${role ?? 'customer'} after sign-in`).not.toMatch(/\/mfa\//)
+    const res = await p.goto(area)
+    expect(res?.status(), `${role ?? 'customer'} on ${area}`).toBe(200)
+    expect(p.url(), `${role ?? 'customer'} on ${area}`).not.toMatch(/\/mfa\//)
+    await context.close()
+  }
+})

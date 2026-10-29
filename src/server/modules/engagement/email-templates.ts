@@ -86,7 +86,7 @@ export function welcomeEmail(siteUrl: string): RenderedEmail {
     paragraphs: [
       'Thank you for joining. Your account is ready.',
       'Browse food, printing and services from campus shops, order for pickup or delivery, and follow every step from your phone.',
-      'For your security, orders and payments are protected by a second step: an authenticator app on your phone. You will be asked to set it up the first time you need it.',
+      'If you would like an extra lock on your account, you can switch on two-step sign-in with an authenticator app from Account, then Security. It is optional.',
     ],
     button: { label: 'Start browsing', url: `${siteUrl.replace(/\/+$/, '')}/vendors` },
     siteUrl,

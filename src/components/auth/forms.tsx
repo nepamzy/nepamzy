@@ -162,7 +162,8 @@ export function SignUpForm() {
         {pending ? 'Creating account…' : 'Create account'}
       </Button>
       <p className="text-center text-sm text-muted">
-        You will set up a second step (an authenticator app) before you can place orders.
+        An authenticator app for extra security is optional. You can add one later from Account,
+        then Security.
       </p>
       <p className="text-center text-sm text-muted">
         Already registered?{' '}
