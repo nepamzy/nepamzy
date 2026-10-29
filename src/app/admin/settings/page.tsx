@@ -1,14 +1,16 @@
 import type { Metadata } from 'next'
-import { SettingForm } from '@/components/domain/engagement-forms'
+import { SettingForm, TestEmailForm } from '@/components/domain/engagement-forms'
 import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
+import { mailConfig } from '@/server/modules/engagement/mail'
 import { EDITABLE_SETTINGS, listSettings } from '@/server/modules/engagement/queries'
 
 export const metadata: Metadata = { title: 'Settings' }
 
 export default async function Settings() {
   const rows = await listSettings()
+  const mail = mailConfig()
   return (
     <>
       <PageHeader
@@ -20,6 +22,20 @@ export default async function Settings() {
         Settings change how the whole marketplace behaves. Each change is validated by the database
         and written to the audit log with your account.
       </Alert>
+      <Card className="mb-4 space-y-2" role="group" aria-label="E-mail delivery">
+        <h2 className="text-lg font-bold">E-mail delivery</h2>
+        <p className="flex flex-wrap items-center gap-2">
+          <Badge tone={mail ? 'success' : 'danger'}>
+            {mail ? 'Switched on' : 'Not switched on'}
+          </Badge>
+          {mail && (
+            <span className="text-sm text-muted">
+              Sending as {mail.fromName} &lt;{mail.from}&gt;
+            </span>
+          )}
+        </p>
+        <TestEmailForm />
+      </Card>
       <div className="space-y-3">
         {rows.map((r) => {
           const editable = (EDITABLE_SETTINGS as readonly string[]).includes(r.key)
