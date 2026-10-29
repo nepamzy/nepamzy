@@ -1,6 +1,7 @@
 import 'server-only'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
+import type { DfpPayment } from '@/server/modules/delivery-fee/queries'
 
 export type MyRider = {
   full_name: string
@@ -63,6 +64,30 @@ export async function getAssignments(): Promise<Assignment[]> {
   const sb = await createSupabaseServerClient()
   const { data, error } = await sb.rpc('my_assignments')
   return error ? [] : ((data as Assignment[]) ?? [])
+}
+
+export type HistoryRow = {
+  assignment_id: string
+  order_number: string
+  vendor_name: string
+  deliver_to: string | null
+  status: 'completed' | 'released'
+  finished_at: string
+  accepted_at: string
+  release_reason: string | null
+  delivery_fee_kobo: number
+  delivery_fee_collection: string | null
+  fee_payment_status: DfpPayment['status'] | null
+}
+export type DeliveryHistory = { completed: number; released: number; rows: HistoryRow[] }
+/** The signed-in rider's own finished assignments (the database function only ever returns the caller's). */
+export async function getDeliveryHistory(limit: number, offset: number): Promise<DeliveryHistory> {
+  const sb = await createSupabaseServerClient()
+  const { data, error } = await sb.rpc('rider_delivery_history', {
+    p_limit: limit,
+    p_offset: offset,
+  })
+  return error || !data ? { completed: 0, released: 0, rows: [] } : (data as DeliveryHistory)
 }
 
 /** Thresholds the browser needs for its own pre-checks and polling cadence (the database stays authoritative). */

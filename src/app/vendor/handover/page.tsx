@@ -3,6 +3,7 @@ import { RiderPickupForm } from '@/components/domain/rider-pickup-form'
 import { FindByCode } from '@/components/domain/find-by-code'
 import { HandoverForm } from '@/components/domain/handover-form'
 import { Card, PageHeader } from '@/components/ui/card'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { EmptyState } from '@/components/ui/states'
 import { typedSignatureEnabled } from '@/server/modules/orders-and-state-machine/actions'
 import { listPendingRiderPickups } from '@/server/modules/riders/queries'
@@ -30,6 +31,21 @@ export default async function Handover() {
         title="Confirm handover"
         subtitle="The customer shows a pickup code, then signs for the order."
       />
+      <MetricGrid>
+        <MetricCard
+          label="Customer pickups waiting"
+          value={waiting.length}
+          note="Customer shows a code, then signs"
+          icon="check-circle"
+          accent="gold"
+        />
+        <MetricCard
+          label="Riders collecting"
+          value={riderPickups.length}
+          note="Only hand over against the rider's code"
+          icon="truck"
+        />
+      </MetricGrid>
       {riderPickups.length > 0 && (
         <section aria-labelledby="rp" className="mb-8 space-y-4">
           <h2 id="rp" className="text-lg font-bold">

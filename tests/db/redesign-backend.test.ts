@@ -1,5 +1,7 @@
 import { afterAll, describe, expect, it } from 'vitest'
 import type { PoolClient } from 'pg'
+import { directPaidDelivery } from './delivery-fee-fixture'
+import { callFails, callJson, mkRider } from './rider-helpers'
 import {
   AAL1,
   AAL2,
@@ -415,6 +417,34 @@ describe('account erasure also clears what the redesign added', () => {
       expect(m.rows[0].name).toBe('Erased')
       expect(m.rows[0].user_id).toBeNull()
       expect(JSON.stringify(m.rows)).not.toMatch(/Victim|victim@|My question|real message/)
+    })
+  })
+})
+
+describe('rider delivery history', () => {
+  it('shows a rider only their own finished assignments, and nobody else can call it', async () => {
+    await withTx(async (c) => {
+      const d = await directPaidDelivery(c)
+      const other = await mkRider(c)
+      const mine = await callJson(c, AAL2(d.rider), `select public.rider_delivery_history() as r`)
+      expect(mine.completed).toBe(1)
+      expect(mine.rows).toHaveLength(1)
+      expect(mine.rows[0].status).toBe('completed')
+      expect(mine.rows[0].order_number).toBeTruthy()
+      expect(JSON.stringify(mine)).not.toMatch(/account_number|bank_name|email/)
+      const theirs = await callJson(
+        c,
+        AAL2(other.id),
+        `select public.rider_delivery_history() as r`,
+      )
+      expect(theirs.rows).toHaveLength(0)
+      expect((await callFails(c, null, `select public.rider_delivery_history()`)).code).toBe(
+        PRIV_DENIED,
+      )
+      const cust = await createUser(c, 'cust')
+      expect((await callFails(c, AAL2(cust), `select public.rider_delivery_history()`)).code).toBe(
+        PRIV_DENIED,
+      )
     })
   })
 })
