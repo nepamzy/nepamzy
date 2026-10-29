@@ -1,6 +1,10 @@
 'use server'
 
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
+import {
+  notifyApplicationDecision,
+  notifyApplicationReceived,
+} from '@/server/modules/engagement/dispatch'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
@@ -50,6 +54,7 @@ export async function submitApplicationAction(_p: ActionState, fd: FormData): Pr
       'Please check the form: name 2-80 characters, a valid phone number, a description of at least 10 characters.',
     )
   notifyAdmin({ type: 'vendor_application', businessName: text(fd, 'businessName', 80) })
+  notifyApplicationReceived((await sb.auth.getUser()).data.user?.email, 'vendor')
   revalidatePath('/apply')
   return done('Application received. An administrator will review it.')
 }
@@ -68,6 +73,12 @@ export async function decideApplicationAction(fd: FormData): Promise<void> {
     p_reason: text(fd, 'reason', 500) || null,
   })
   revalidatePath('/admin/applications')
+  if (!error)
+    notifyApplicationDecision('vendor_applications', id, {
+      kind: 'vendor',
+      approved: decision === 'approve',
+      reason: text(fd, 'reason', 500) || null,
+    })
   if (error)
     redirect(`/admin/applications?error=${encodeURIComponent(dbFailed(error).error ?? 'Failed')}`)
   redirect('/admin/applications?saved=1')
