@@ -8,9 +8,10 @@ export async function GET(request: NextRequest) {
   const base = serverEnv().SITE_URL
   const tokenHash = request.nextUrl.searchParams.get('token_hash')
   const type = request.nextUrl.searchParams.get('type')
-  if (!tokenHash || type !== 'email') return NextResponse.redirect(new URL('/login?error=1', base))
+  if (!tokenHash || (type !== 'email' && type !== 'signup' && type !== 'magiclink'))
+    return NextResponse.redirect(new URL('/login?error=1', base))
   const supabase = await createSupabaseServerClient()
-  const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: 'email' })
+  const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type })
   if (error) return NextResponse.redirect(new URL('/login?error=1', base))
   if (data.user?.email) notifyWelcome(data.user.email)
   // Do not keep the confirmation session: the user signs in normally (password + MFA).

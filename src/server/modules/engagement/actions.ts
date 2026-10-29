@@ -10,6 +10,8 @@ import type { AccessRequirement } from '@/server/modules/identity-and-access/pol
 import { EDITABLE_SETTINGS } from './queries'
 import { isAllowedPushEndpoint } from './push'
 import { notifyAdmin } from './admin-alerts'
+import { renderEmail } from './email-templates'
+import { mailConfig, sendMailDetailed } from './mail'
 import { clientIp, sha256Hex } from '@/server/modules/identity-and-access/security'
 import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
 import {
@@ -345,4 +347,43 @@ export async function setContactStatusAction(_p: ActionState, fd: FormData): Pro
   if (error) return dbFailed(error, 'Could not update the message.')
   revalidatePath('/admin/messages')
   return done(status === 'closed' ? 'Marked as closed.' : 'Marked as read.')
+}
+
+/**
+ * Sends ONE test e-mail to the signed-in administrator and says exactly what the mail provider answered, so a
+ * misconfigured key, sender or blocked server address can be seen at once. Rate limited; nothing but the provider's own
+ * short reason is shown, never the key.
+ */
+export async function sendTestEmailAction(): Promise<ActionState> {
+  const g = await gate(ADMIN)
+  if ('state' in g) return g.state
+  if (!g.who.userId || !(await rateLimit(`test-mail:${g.who.userId}`, 300, 5)))
+    return failed('Please wait a few minutes before sending another test.')
+  if (!mailConfig())
+    return failed(
+      'E-mail is not switched on: BREVO_API_KEY or MAIL_FROM is missing or invalid on the server.',
+    )
+  const sb = await createSupabaseServerClient()
+  const { data } = await sb.auth.getUser()
+  const to = data.user?.email
+  if (!to) return failed('Your account has no e-mail address to send to.')
+  const site = process.env.SITE_URL ?? 'http://localhost:3000'
+  const out = await sendMailDetailed(
+    to,
+    renderEmail({
+      subject: '\u2705 AFIT Market test e-mail',
+      preheader: 'If you can read this, e-mail delivery works.',
+      emoji: '\u2705',
+      heading: 'E-mail delivery works',
+      paragraphs: ['This is a test message from the AFIT Market settings page.'],
+      siteUrl: site,
+    }),
+  )
+  if (out.result === 'sent')
+    return done(
+      `Test e-mail accepted by the provider and sent to ${to}. Check the inbox and spam folder.`,
+    )
+  return failed(
+    `The provider did not accept the e-mail${out.status ? ` (HTTP ${out.status})` : ''}${out.reason ? `: ${out.reason}` : ''}.`,
+  )
 }

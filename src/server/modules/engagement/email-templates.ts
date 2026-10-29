@@ -8,9 +8,12 @@ const BRAND = {
   blue: '#174a9c',
   blueDark: '#10346f',
   gold: '#f4b400',
+  goldDark: '#c98f00',
   ink: '#16202e',
   muted: '#5b6676',
   page: '#eef3fb',
+  card: '#f7f9fd',
+  line: '#dde5f3',
 }
 
 export function escapeHtml(s: string): string {
@@ -35,74 +38,171 @@ export type RenderedEmail = { subject: string; html: string; text: string }
 type Layout = {
   subject: string
   preheader: string
+  /** A single emoji shown large above the heading. */
+  emoji?: string
   heading: string
   paragraphs: string[]
+  /** Label/value rows shown in a tinted box (for example time and device). */
+  details?: Array<[string, string]>
+  /** Highlighted line such as a one-time code. */
+  highlight?: string
   button?: { label: string; url: string } | null
+  /** Small grey line under the button. */
+  note?: string
   siteUrl: string
 }
 
+const FONT = "'Segoe UI',Roboto,Helvetica,Arial,sans-serif"
+
 export function renderEmail(l: Layout): RenderedEmail {
+  const site = l.siteUrl.replace(/\/+$/, '')
   const p = l.paragraphs
     .map(
       (t) =>
-        `<p style="margin:0 0 14px;font-size:16px;line-height:1.55;color:${BRAND.ink}">${escapeHtml(t)}</p>`,
+        `<p style="margin:0 0 14px;font-size:16px;line-height:1.6;color:${BRAND.ink}">${escapeHtml(t)}</p>`,
     )
     .join('')
-  const button = l.button
-    ? `<p style="margin:22px 0 6px"><a href="${escapeHtml(l.button.url)}" style="display:inline-block;background:${BRAND.blue};color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:13px 24px;border-radius:8px">${escapeHtml(l.button.label)}</a></p>`
+  const highlight = l.highlight
+    ? `<p style="margin:6px 0 18px;text-align:center"><span style="display:inline-block;background:${BRAND.card};border:2px dashed ${BRAND.gold};border-radius:12px;padding:14px 26px;font-size:34px;font-weight:800;letter-spacing:8px;color:${BRAND.blueDark}">${escapeHtml(l.highlight)}</span></p>`
     : ''
-  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(l.subject)}</title></head>
-<body style="margin:0;padding:0;background:${BRAND.page};font-family:Arial,Helvetica,sans-serif">
+  const details = l.details?.length
+    ? `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:6px 0 18px;background:${BRAND.card};border:1px solid ${BRAND.line};border-radius:10px">${l.details
+        .map(
+          ([k, v]) =>
+            `<tr><td style="padding:10px 14px;font-size:14px;color:${BRAND.muted};width:38%">${escapeHtml(k)}</td><td style="padding:10px 14px;font-size:14px;font-weight:600;color:${BRAND.ink}">${escapeHtml(v)}</td></tr>`,
+        )
+        .join('')}</table>`
+    : ''
+  const button = l.button
+    ? `<p style="margin:24px 0 8px;text-align:center"><a href="${escapeHtml(l.button.url)}" style="display:inline-block;background:${BRAND.blue};color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 30px;border-radius:10px;border-bottom:3px solid ${BRAND.blueDark}">${escapeHtml(l.button.label)}</a></p>`
+    : ''
+  const note = l.note
+    ? `<p style="margin:10px 0 0;text-align:center;font-size:13px;line-height:1.5;color:${BRAND.muted}">${escapeHtml(l.note)}</p>`
+    : ''
+  const emoji = l.emoji
+    ? `<p style="margin:0 0 6px;text-align:center;font-size:44px;line-height:1.1">${escapeHtml(l.emoji)}</p>`
+    : ''
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${escapeHtml(l.subject)}</title></head>
+<body style="margin:0;padding:0;background:${BRAND.page};font-family:${FONT}">
 <span style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(l.preheader)}</span>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.page}"><tr><td align="center" style="padding:24px 12px">
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px;background:#ffffff;border-radius:12px;overflow:hidden">
-<tr><td style="background:${BRAND.blueDark};padding:20px 28px"><span style="font-size:22px;font-weight:800;color:#ffffff">AFIT Market</span></td></tr>
-<tr><td style="height:4px;background:${BRAND.gold};font-size:0;line-height:0">&nbsp;</td></tr>
-<tr><td style="padding:28px">
-<h1 style="margin:0 0 16px;font-size:22px;line-height:1.3;color:${BRAND.blueDark}">${escapeHtml(l.heading)}</h1>
-${p}${button}
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.page}"><tr><td align="center" style="padding:28px 12px">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 14px rgba(16,52,111,.10)">
+<tr><td style="background:${BRAND.blueDark};padding:22px 30px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td style="font-size:24px;font-weight:800;color:#ffffff">&#128717;&#65039; AFIT <span style="color:${BRAND.gold}">Market</span></td><td align="right" style="font-size:12px;color:#c9d6f0">Your campus marketplace</td></tr></table></td></tr>
+<tr><td style="height:5px;background:${BRAND.gold};font-size:0;line-height:0">&nbsp;</td></tr>
+<tr><td style="padding:30px 30px 26px">
+${emoji}<h1 style="margin:0 0 18px;text-align:center;font-size:24px;line-height:1.3;color:${BRAND.blueDark}">${escapeHtml(l.heading)}</h1>
+${p}${highlight}${details}${button}${note}
 </td></tr>
-<tr><td style="padding:18px 28px;background:#f7f9fd;font-size:13px;line-height:1.5;color:${BRAND.muted}">
-You are receiving this because you have an AFIT Market account. This message is about your activity on the marketplace and does not contain payment details.
-<br>AFIT Market &middot; <a href="${escapeHtml(l.siteUrl)}" style="color:${BRAND.blue}">${escapeHtml(l.siteUrl.replace(/^https?:\/\//, ''))}</a>
+<tr><td style="padding:20px 30px;background:${BRAND.card};border-top:1px solid ${BRAND.line};font-size:12.5px;line-height:1.6;color:${BRAND.muted}">
+&#128274; We will never ask for your password, your card details or a code by phone or message. This e-mail is about your activity on AFIT Market and does not contain payment details.
+<br><br>&#127979; AFIT Market &middot; <a href="${escapeHtml(site)}" style="color:${BRAND.blue};text-decoration:none">${escapeHtml(site.replace(/^https?:\/\//, ''))}</a> &middot; Kaduna, Nigeria
 </td></tr></table></td></tr></table></body></html>`
   const text = [
-    l.heading,
+    `${l.emoji ? `${l.emoji} ` : ''}${l.heading}`,
     '',
     ...l.paragraphs,
+    ...(l.highlight ? ['', l.highlight] : []),
+    ...(l.details?.length ? ['', ...l.details.map(([k, v]) => `${k}: ${v}`)] : []),
     ...(l.button ? ['', `${l.button.label}: ${l.button.url}`] : []),
+    ...(l.note ? ['', l.note] : []),
     '',
     '--',
-    'AFIT Market. You are receiving this because you have an AFIT Market account.',
+    'AFIT Market, your campus marketplace. We will never ask for your password, card details or a code by phone or message.',
   ].join('\n')
   return { subject: l.subject, html, text }
 }
 
+const root = (siteUrl: string) => siteUrl.replace(/\/+$/, '')
+
+/** Sent at sign-up: the one-time link that confirms the address. */
+export function confirmEmail(confirmUrl: string, siteUrl: string): RenderedEmail {
+  return renderEmail({
+    subject: '\u2709\uFE0F Confirm your AFIT Market account',
+    preheader: 'One tap to confirm your e-mail and finish creating your account.',
+    emoji: '\u2709\uFE0F',
+    heading: 'Confirm your e-mail',
+    paragraphs: [
+      'Welcome! Tap the button below to confirm this e-mail address and finish creating your AFIT Market account.',
+      'After that you can sign in and start using the marketplace.',
+    ],
+    button: { label: '\u2705 Confirm my e-mail', url: confirmUrl },
+    note: 'This link works once and expires after a while. If you did not create an account, you can ignore this message and nothing will happen.',
+    siteUrl,
+  })
+}
+
 export function welcomeEmail(siteUrl: string): RenderedEmail {
   return renderEmail({
-    subject: 'Welcome to AFIT Market',
-    preheader: 'Your account is ready.',
-    heading: 'Welcome to AFIT Market',
+    subject: '\uD83C\uDF89 Welcome to AFIT Market',
+    preheader: 'Your account is ready. Here is what you can do next.',
+    emoji: '\uD83C\uDF89',
+    heading: 'Welcome to AFIT Market!',
     paragraphs: [
       'Thank you for joining. Your account is ready.',
-      'Browse food, printing and services from campus shops, order for pickup or delivery, and follow every step from your phone.',
+      '\uD83C\uDF54 Browse food, printing and services from campus shops.',
+      '\uD83D\uDE9A Order for pickup or delivery to an approved delivery point.',
+      '\uD83D\uDCF1 Follow every step of your order from your phone.',
       'If you would like an extra lock on your account, you can switch on two-step sign-in with an authenticator app from Account, then Security. It is optional.',
     ],
-    button: { label: 'Start browsing', url: `${siteUrl.replace(/\/+$/, '')}/vendors` },
+    button: { label: '\uD83D\uDECD\uFE0F Start browsing', url: `${root(siteUrl)}/vendors` },
     siteUrl,
   })
 }
 
 export function resetCodeEmail(code: string, siteUrl: string): RenderedEmail {
   return renderEmail({
-    subject: 'Your AFIT Market password reset code',
-    preheader: `Your code is ${code}`,
-    heading: `Your code is ${code}`,
+    subject: `\uD83D\uDD11 Your AFIT Market reset code: ${code}`,
+    preheader: `Your password reset code is ${code}`,
+    emoji: '\uD83D\uDD11',
+    heading: 'Reset your password',
     paragraphs: [
       'Enter this 6-digit code on the reset page to choose a new password. It works once and expires in 15 minutes.',
-      'If you did not ask for this, ignore this message. Your password has not changed and nobody can use this code without your e-mail.',
     ],
-    button: { label: 'Open the reset page', url: `${siteUrl.replace(/\/+$/, '')}/reset-password` },
+    highlight: code,
+    button: { label: '\uD83D\uDD12 Open the reset page', url: `${root(siteUrl)}/reset-password` },
+    note: 'If you did not ask for this, ignore this message. Your password has not changed and nobody can use this code without your e-mail.',
+    siteUrl,
+  })
+}
+
+/** Sent after a successful password sign-in, so the owner of the account would notice someone else. */
+export function signInAlertEmail(
+  info: { when: string; device: string },
+  siteUrl: string,
+): RenderedEmail {
+  return renderEmail({
+    subject: '\uD83D\uDD10 New sign-in to your AFIT Market account',
+    preheader: 'Was this you? Here are the details of the sign-in.',
+    emoji: '\uD83D\uDD10',
+    heading: 'New sign-in',
+    paragraphs: [
+      'Someone signed in to your AFIT Market account. If this was you, there is nothing to do.',
+    ],
+    details: [
+      ['When', info.when],
+      ['Device', info.device],
+    ],
+    button: {
+      label: '\uD83D\uDEE1\uFE0F Secure my account',
+      url: `${root(siteUrl)}/forgot-password`,
+    },
+    note: 'Not you? Choose "Secure my account" to set a new password right away.',
+    siteUrl,
+  })
+}
+
+/** Sent after a password was changed through the reset flow. */
+export function passwordChangedEmail(siteUrl: string): RenderedEmail {
+  return renderEmail({
+    subject: '\u2705 Your AFIT Market password was changed',
+    preheader: 'Your password was changed just now.',
+    emoji: '\u2705',
+    heading: 'Password changed',
+    paragraphs: [
+      'The password on your AFIT Market account was changed just now, and you were signed out everywhere else.',
+      'If this was not you, reset your password again straight away.',
+    ],
+    button: { label: '\uD83D\uDD11 Reset my password', url: `${root(siteUrl)}/forgot-password` },
     siteUrl,
   })
 }
@@ -111,20 +211,45 @@ type NotificationLike = { kind: string; title: string; body: string; link: strin
 
 function buttonLabel(link: string | null): string {
   if (!link) return 'Open AFIT Market'
-  if (link.startsWith('/orders')) return 'View your order'
-  if (link.startsWith('/vendor')) return 'Open your shop orders'
-  if (link.startsWith('/rider')) return 'Open rider area'
-  if (link.startsWith('/cases')) return 'View your report'
-  if (link.startsWith('/admin')) return 'Open admin area'
+  if (link.startsWith('/orders')) return '\uD83D\uDCE6 View your order'
+  if (link.startsWith('/vendor')) return '\uD83C\uDFEA Open your shop orders'
+  if (link.startsWith('/rider')) return '\uD83D\uDEB4 Open rider area'
+  if (link.startsWith('/cases')) return '\uD83D\uDEDF View your report'
+  if (link.startsWith('/admin')) return '\uD83D\uDEE0\uFE0F Open admin area'
   return 'Open AFIT Market'
+}
+
+const KIND_EMOJI: Record<string, string> = {
+  order: '\uD83D\uDCE6',
+  refund: '\uD83D\uDCB8',
+  return: '\u21A9\uFE0F',
+  case: '\uD83D\uDEDF',
+  review: '\u2B50',
+  admin: '\uD83D\uDEE0\uFE0F',
+}
+
+/** A fitting emoji for one notification: by what the title says, then by its kind. */
+export function emojiFor(n: Pick<NotificationLike, 'kind' | 'title'>): string {
+  const t = n.title.toLowerCase()
+  if (/pay|paid|receipt/.test(t)) return '\uD83D\uDCB3'
+  if (/deliver(ed|y complete)|completed|thank/.test(t)) return '\uD83C\uDF89'
+  if (/on the way|en route|rider|assigned|collect/.test(t)) return '\uD83D\uDE9A'
+  if (/ready|accepted|preparing/.test(t)) return '\uD83D\uDC68\u200D\uD83C\uDF73'
+  if (/approved|welcome/.test(t)) return '\u2705'
+  if (/reject|declin|cancel|fail|problem|dispute/.test(t)) return '\u26A0\uFE0F'
+  if (/refund/.test(t)) return '\uD83D\uDCB8'
+  if (/application|received|placed/.test(t)) return '\uD83D\uDCDD'
+  return KIND_EMOJI[n.kind] ?? '\uD83D\uDD14'
 }
 
 /** One e-mail for one in-app notification. */
 export function notificationEmail(n: NotificationLike, siteUrl: string): RenderedEmail {
   const url = appLink(siteUrl, n.link)
+  const emoji = emojiFor(n)
   return renderEmail({
-    subject: `AFIT Market: ${n.title}`,
+    subject: `${emoji} ${n.title}`,
     preheader: n.body,
+    emoji,
     heading: n.title,
     paragraphs: [n.body],
     button: url ? { label: buttonLabel(n.link), url } : null,

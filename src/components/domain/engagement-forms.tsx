@@ -7,6 +7,7 @@ import {
   moderateReportAction,
   reportReviewAction,
   setNotificationPreferenceAction,
+  sendTestEmailAction,
   setSettingAction,
   unhideReviewAction,
   requeueNotificationAction,
@@ -256,6 +257,21 @@ export function EraseAccountForm({ userId, requestId }: { userId: string; reques
         label="I understand: personal details are removed, the person can never sign in again, and payment and order records are kept without their details. This cannot be undone."
         required
       />
+    </ActionForm>
+  )
+}
+
+export function TestEmailForm() {
+  return (
+    <ActionForm
+      action={sendTestEmailAction}
+      submitLabel="Send a test e-mail to me"
+      pendingLabel="Sending…"
+    >
+      <p className="text-sm text-muted">
+        Sends one real message to your own address and shows exactly what the mail provider
+        answered.
+      </p>
     </ActionForm>
   )
 }

@@ -9,6 +9,8 @@ import type { RenderedEmail } from './email-templates'
  */
 export type MailConfig = { apiKey: string; from: string; fromName: string; replyTo: string }
 export type MailResult = 'sent' | 'disabled' | 'failed'
+/** The result plus, for a failure, the provider's HTTP status and its own short reason (never the key). */
+export type MailOutcome = { result: MailResult; status?: number; reason?: string }
 
 const EMAIL = /^[^\s@<>"',;]+@[^\s@<>"',;]+\.[^\s@<>"',;]+$/
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email'
@@ -26,15 +28,30 @@ export function mailConfig(
   return { apiKey, from, fromName, replyTo: EMAIL.test(replyTo) ? replyTo : from }
 }
 
-export async function sendMail(
+/** What the provider said, kept short and free of anything but its own error text. */
+function providerReason(raw: string): string | undefined {
+  try {
+    const j = JSON.parse(raw) as { code?: unknown; message?: unknown }
+    const code = typeof j.code === 'string' ? j.code : ''
+    const msg = typeof j.message === 'string' ? j.message : ''
+    return (
+      `${code}${code && msg ? ': ' : ''}${msg}`.replace(CONTROL, ' ').trim().slice(0, 200) ||
+      undefined
+    )
+  } catch {
+    return raw.replace(CONTROL, ' ').trim().slice(0, 120) || undefined
+  }
+}
+
+export async function sendMailDetailed(
   to: string,
   mail: RenderedEmail,
   deps: { config?: MailConfig | null; fetchImpl?: typeof fetch } = {},
-): Promise<MailResult> {
+): Promise<MailOutcome> {
   try {
     const config = deps.config === undefined ? mailConfig() : deps.config
-    if (!config) return 'disabled'
-    if (!EMAIL.test(to)) return 'failed'
+    if (!config) return { result: 'disabled' }
+    if (!EMAIL.test(to)) return { result: 'failed', reason: 'invalid recipient address' }
     const res = await (deps.fetchImpl ?? fetch)(BREVO_URL, {
       method: 'POST',
       headers: {
@@ -53,12 +70,22 @@ export async function sendMail(
       signal: AbortSignal.timeout(8000),
     })
     if (!res.ok) {
-      logger.warn('e-mail not accepted by the provider', { status: res.status })
-      return 'failed'
+      const reason = providerReason(await res.text().catch(() => ''))
+      logger.warn('e-mail not accepted by the provider', { status: res.status, reason })
+      return { result: 'failed', status: res.status, reason }
     }
-    return 'sent'
+    return { result: 'sent' }
   } catch (e) {
-    logger.warn('e-mail send failed', { err: e instanceof Error ? e.name : 'error' })
-    return 'failed'
+    const reason = e instanceof Error ? e.name : 'error'
+    logger.warn('e-mail send failed', { err: reason })
+    return { result: 'failed', reason }
   }
+}
+
+export async function sendMail(
+  to: string,
+  mail: RenderedEmail,
+  deps: { config?: MailConfig | null; fetchImpl?: typeof fetch } = {},
+): Promise<MailResult> {
+  return (await sendMailDetailed(to, mail, deps)).result
 }

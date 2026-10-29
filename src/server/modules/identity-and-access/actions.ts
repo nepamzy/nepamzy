@@ -1,8 +1,12 @@
 'use server'
 
-import { notifyWelcome } from '@/server/modules/engagement/dispatch'
+import {
+  notifyPasswordChanged,
+  notifySignIn,
+  notifyWelcome,
+} from '@/server/modules/engagement/dispatch'
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { forbidden, redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createHmac, randomInt } from 'node:crypto'
@@ -11,8 +15,8 @@ import { serverEnv, serviceEnv } from '@/lib/env'
 import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
-import { resetCodeEmail } from '@/server/modules/engagement/email-templates'
-import { mailConfig, sendMail } from '@/server/modules/engagement/mail'
+import { confirmEmail, resetCodeEmail } from '@/server/modules/engagement/email-templates'
+import { mailConfig, sendMail, sendMailDetailed } from '@/server/modules/engagement/mail'
 import { checkAccess, loadPrincipal } from './guard'
 import { MODE_COOKIE, isPrivilegedRole, safeNextPath, signUpOutcome } from './policy'
 import { clientIp, rateLimit, recordSecurityEvent, sha256Hex } from './security'
@@ -65,17 +69,52 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   ) {
     return { error: TOO_MANY }
   }
+  const metadata = {
+    adult_declared: true,
+    ...(intent === 'customer' ? {} : { intended_role: intent }),
+  }
+  const mail = mailConfig()
   const supabase = await createSupabaseServerClient()
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${serverEnv().SITE_URL}/auth/confirm`,
-      data: { adult_declared: true, ...(intent === 'customer' ? {} : { intended_role: intent }) },
-    },
-  })
-  if (error && error.status && error.status < 500 && error.code !== 'weak_password') {
-    logger.warn('signup rejected', { code: error.code })
+  let error: { code?: string; status?: number } | null = null
+  let data: { session?: unknown } | null = null
+  let sentByUs = false
+  if (mail) {
+    // Our own e-mail: the confirmation link is made here and sent through Brevo, so it does not depend on the auth
+    // provider's built-in mailer (which is heavily limited). The link is the same kind of one-time token.
+    const svc = createSupabaseServiceClient()
+    const gen = await svc.auth.admin.generateLink({
+      type: 'signup',
+      email,
+      password,
+      options: { data: metadata, redirectTo: `${serverEnv().SITE_URL}/auth/confirm` },
+    })
+    if (gen.error) {
+      error = { code: gen.error.code, status: gen.error.status }
+    } else {
+      const hashed = gen.data.properties?.hashed_token
+      const link = `${serverEnv().SITE_URL}/auth/confirm?token_hash=${encodeURIComponent(hashed ?? '')}&type=signup`
+      const out = await sendMailDetailed(email, confirmEmail(link, serverEnv().SITE_URL), {
+        config: mail,
+      })
+      sentByUs = out.result === 'sent'
+      if (!sentByUs) {
+        logger.warn('confirmation e-mail not sent', { status: out.status, reason: out.reason })
+        // Last resort: ask the auth provider's own mailer to send the confirmation instead.
+        await supabase.auth.resend({
+          type: 'signup',
+          email,
+          options: { emailRedirectTo: `${serverEnv().SITE_URL}/auth/confirm` },
+        })
+      }
+    }
+  } else {
+    const r = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${serverEnv().SITE_URL}/auth/confirm`, data: metadata },
+    })
+    error = r.error
+    data = r.data
   }
   const outcome = signUpOutcome({ error, hasSession: Boolean(data?.session) })
   if (outcome === 'weak_password') return { error: 'Choose a stronger password.' }
@@ -124,11 +163,17 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
   if (error || !data.user) {
     if (error?.code === 'email_not_confirmed') {
-      return { error: 'Please confirm your email first. Check your inbox for our message.', email }
+      await resendConfirmation(email)
+      return {
+        error:
+          'Please confirm your email first. We have just sent you a fresh confirmation link; check your inbox and spam folder.',
+        email,
+      }
     }
     await recordSecurityEvent(null, 'auth.login_failed', { email_hash: emailKey.slice(0, 16) })
     return { error: 'Email or password is incorrect.', email }
   }
+  notifySignIn(email, (await headers()).get('user-agent'))
   return finishSignIn(
     next,
     formData.get('mode') === 'admin'
@@ -138,6 +183,37 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
         : null,
     data.user.user_metadata?.intended_role,
   )
+}
+
+/** A fresh confirmation link for an address that signed up but never confirmed. At most one every 5 minutes per address. */
+async function resendConfirmation(email: string): Promise<void> {
+  try {
+    if (!(await rateLimit(`confirm-resend:${sha256Hex(email)}`, 300, 1))) return
+    const mail = mailConfig()
+    if (mail) {
+      const gen = await createSupabaseServiceClient().auth.admin.generateLink({
+        type: 'magiclink',
+        email,
+      })
+      const hashed = gen.data?.properties?.hashed_token
+      if (!gen.error && hashed) {
+        const link = `${serverEnv().SITE_URL}/auth/confirm?token_hash=${encodeURIComponent(hashed)}&type=magiclink`
+        const out = await sendMailDetailed(email, confirmEmail(link, serverEnv().SITE_URL), {
+          config: mail,
+        })
+        if (out.result === 'sent') return
+        logger.warn('confirmation e-mail not sent', { status: out.status, reason: out.reason })
+      }
+    }
+    const supabase = await createSupabaseServerClient()
+    await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${serverEnv().SITE_URL}/auth/confirm` },
+    })
+  } catch {
+    /* best effort */
+  }
 }
 
 /** Where a person who signed up as a vendor or rider continues (their application). Everyone else: null. */
@@ -264,6 +340,7 @@ export async function resetPasswordAction(
     return { error: 'We could not save your new password. Please try again.', email }
   }
   await recordSecurityEvent(uid, 'auth.password_reset_done', {})
+  notifyPasswordChanged(email)
   const supabase = await createSupabaseServerClient()
   const signedIn = await supabase.auth.signInWithPassword({ email, password })
   if (signedIn.error) redirect('/login?reset=1')

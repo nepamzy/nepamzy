@@ -3,7 +3,13 @@ import { after } from 'next/server'
 import { logger } from '@/lib/logger'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { rateLimit, sha256Hex } from '@/server/modules/identity-and-access/security'
-import { notificationEmail, welcomeEmail, type RenderedEmail } from './email-templates'
+import {
+  notificationEmail,
+  passwordChangedEmail,
+  signInAlertEmail,
+  welcomeEmail,
+  type RenderedEmail,
+} from './email-templates'
 import { mailConfig, sendMail, type MailConfig, type MailResult } from './mail'
 import {
   pushConfig,
@@ -223,4 +229,76 @@ export function notifyWelcome(email: string): void {
   } catch {
     void run()
   }
+}
+
+/** "Chrome on Windows" from a browser's user-agent text. Coarse on purpose: no version numbers, no addresses. */
+export function describeDevice(ua: string | null | undefined): string {
+  const u = ua ?? ''
+  const browser = /Edg\//.test(u)
+    ? 'Edge'
+    : /OPR\/|Opera/.test(u)
+      ? 'Opera'
+      : /Firefox\//.test(u)
+        ? 'Firefox'
+        : /Chrome\//.test(u)
+          ? 'Chrome'
+          : /Safari\//.test(u)
+            ? 'Safari'
+            : 'a web browser'
+  const os = /Windows/.test(u)
+    ? 'Windows'
+    : /Android/.test(u)
+      ? 'Android'
+      : /iPhone|iPad|iOS/.test(u)
+        ? 'iPhone or iPad'
+        : /Mac OS X|Macintosh/.test(u)
+          ? 'Mac'
+          : /Linux/.test(u)
+            ? 'Linux'
+            : 'an unknown device'
+  return `${browser} on ${os}`
+}
+
+function afterSafely(run: () => Promise<void>): void {
+  try {
+    after(run)
+  } catch {
+    void run()
+  }
+}
+
+/** "New sign-in" alert after a password sign-in: at most one per person every 30 minutes, so it never floods an inbox. */
+export function notifySignIn(email: string, userAgent: string | null | undefined): void {
+  afterSafely(async () => {
+    try {
+      if (!mailConfig()) return
+      if (!(await rateLimit(`signin-alert:${sha256Hex(email)}`, 1800, 1))) return
+      const when = `${new Date().toLocaleString('en-NG', {
+        timeZone: 'Africa/Lagos',
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })} (Nigeria time)`
+      await sendMail(
+        email,
+        signInAlertEmail(
+          { when, device: describeDevice(userAgent) },
+          process.env.SITE_URL ?? 'http://localhost:3000',
+        ),
+      )
+    } catch {
+      /* best effort */
+    }
+  })
+}
+
+/** Tells the owner of the account that the password was changed. */
+export function notifyPasswordChanged(email: string): void {
+  afterSafely(async () => {
+    try {
+      if (!mailConfig()) return
+      await sendMail(email, passwordChangedEmail(process.env.SITE_URL ?? 'http://localhost:3000'))
+    } catch {
+      /* best effort */
+    }
+  })
 }
