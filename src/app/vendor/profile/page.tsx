@@ -3,6 +3,8 @@ import { HoursForm, ProfileForm, StaffSection } from '@/components/domain/shop-f
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
+import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
+import { Section } from '@/components/ui/section'
 import { EmptyState } from '@/components/ui/states'
 import { setClosedAction } from '@/server/modules/vendors-and-catalogue/actions'
 import { getMyVendor, getShop } from '@/server/modules/vendors-and-catalogue/vendor-queries'
@@ -23,6 +25,26 @@ export default async function ShopPage() {
         title="Shop settings"
         subtitle={vendor.name}
       />
+      <MetricGrid>
+        <MetricCard
+          label="Shop status"
+          value={me.status === 'approved' ? 'Approved' : me.status}
+          icon="store"
+          accent={me.status === 'approved' ? 'success' : 'gold'}
+        />
+        <MetricCard
+          label="Taking orders"
+          value={vendor.temporarily_closed ? 'Paused' : 'Open'}
+          note="Within your opening hours"
+          icon="clock"
+        />
+        <MetricCard
+          label="Team"
+          value={staff.length}
+          note="People who can use this shop"
+          icon="users"
+        />
+      </MetricGrid>
       <div className="space-y-5">
         <Card className="flex flex-wrap items-center justify-between gap-3">
           <p>
@@ -39,26 +61,33 @@ export default async function ShopPage() {
             </Button>
           </form>
         </Card>
-        <Card>
-          <h2 className="mb-3 text-lg font-bold">Profile</h2>
-          {owner ? (
-            <ProfileForm vendor={vendor} disabled={disabled} />
-          ) : (
-            <p className="text-muted">Only the owner can edit the shop profile.</p>
-          )}
-        </Card>
-        <Card>
-          <h2 className="mb-3 text-lg font-bold">Opening hours</h2>
-          {owner ? (
-            <HoursForm vendorId={vendor.id} hours={hours} disabled={disabled} />
-          ) : (
-            <p className="text-muted">Only the owner can edit opening hours.</p>
-          )}
-        </Card>
-        <Card>
-          <h2 className="mb-3 text-lg font-bold">Staff</h2>
-          <StaffSection vendorId={vendor.id} staff={staff} isOwner={owner} disabled={disabled} />
-        </Card>
+        <Section id="profile" title="Profile" description="What customers see on your shop page.">
+          <Card>
+            {owner ? (
+              <ProfileForm vendor={vendor} disabled={disabled} />
+            ) : (
+              <p className="text-muted">Only the owner can edit the shop profile.</p>
+            )}
+          </Card>
+        </Section>
+        <Section
+          id="hours"
+          title="Opening hours"
+          description="Orders are only taken inside these hours."
+        >
+          <Card>
+            {owner ? (
+              <HoursForm vendorId={vendor.id} hours={hours} disabled={disabled} />
+            ) : (
+              <p className="text-muted">Only the owner can edit opening hours.</p>
+            )}
+          </Card>
+        </Section>
+        <Section id="staff" title="Staff" description="Who can manage orders for this shop.">
+          <Card>
+            <StaffSection vendorId={vendor.id} staff={staff} isOwner={owner} disabled={disabled} />
+          </Card>
+        </Section>
       </div>
     </>
   )

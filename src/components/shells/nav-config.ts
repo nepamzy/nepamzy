@@ -23,6 +23,7 @@ export const VENDOR_NAV: NavItem[] = [
 export const RIDER_NAV: NavItem[] = [
   { href: '/rider', label: 'Home', icon: 'home' },
   { href: '/rider/jobs', label: 'Jobs', icon: 'truck' },
+  { href: '/rider/history', label: 'History', icon: 'clock' },
   { href: '/rider/payments', label: 'Payments', icon: 'card' },
   { href: '/rider/profile', label: 'Profile', icon: 'user' },
   { href: '/account', label: 'Account', icon: 'shield' },

@@ -10,6 +10,7 @@ import {
 import { OrderStatusPill } from '@/components/domain/order-status'
 import { Card, PageHeader } from '@/components/ui/card'
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
+import { Stepper } from '@/components/ui/stepper'
 import { EmptyState } from '@/components/ui/states'
 import {
   getAssignments,
@@ -92,6 +93,18 @@ export default async function Jobs() {
                 </span>
                 <OrderStatusPill code={a.order_status} />
               </div>
+              <Stepper
+                steps={['Accepted', 'Picked up', 'On the way', 'Arrived']}
+                current={
+                  a.arrival_detected_at
+                    ? 3
+                    : a.status === 'en_route'
+                      ? 2
+                      : a.status === 'picked_up'
+                        ? 1
+                        : 0
+                }
+              />
               <p>
                 <strong>Collect from:</strong> {a.vendor_name}
                 {a.pickup ? ` · ${a.pickup}` : ''}

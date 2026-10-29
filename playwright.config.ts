@@ -12,6 +12,9 @@ export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: false,
   workers: 1,
+  // Several journeys sign in 3 to 5 roles and walk many screens; CI runners are slower than a developer machine, and two
+  // different long tests exceeded the 30 s default on otherwise identical commits. Individual expectations keep their own short timeouts.
+  timeout: 90_000,
   retries: 0,
   reporter: [['list']],
   use: { baseURL: 'http://127.0.0.1:3000', trace: 'retain-on-failure' },

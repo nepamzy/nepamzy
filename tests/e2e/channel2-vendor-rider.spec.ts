@@ -77,6 +77,7 @@ test('roles stay separate: customers, riders and vendors cannot open each otherâ
     '/vendor/earnings',
     '/rider',
     '/rider/payments',
+    '/rider/history',
   ]) {
     const res = await cust.page.goto(path)
     expect(res?.status(), `customer on ${path}`).toBe(403)
@@ -133,7 +134,7 @@ test('rider area: the commission-free notice is shown on every rider page and pr
 }, info) => {
   const rider = await seedRider()
   const rs = await openSessionFor(browser, info, rider)
-  for (const path of ['/rider', '/rider/payments', '/rider/profile']) {
+  for (const path of ['/rider', '/rider/payments', '/rider/profile', '/rider/history']) {
     await rs.page.goto(path)
     await expect(rs.page.getByText('Rider earnings: Free of charge.'), path).toBeVisible()
     await expect(rs.page.getByText('Delivery commission features: Coming Soon'), path).toBeVisible()
@@ -143,5 +144,9 @@ test('rider area: the commission-free notice is shown on every rider page and pr
   }
   await rs.page.goto('/rider/jobs')
   await expect(rs.page.getByRole('heading', { level: 1 })).toBeVisible()
+  // history shows only this rider's own records: a brand-new rider has none, and no one else's order numbers appear
+  await rs.page.goto('/rider/history')
+  await expect(rs.page.getByRole('heading', { level: 1, name: 'Delivery history' })).toBeVisible()
+  await expect(rs.page.getByText('No finished deliveries yet')).toBeVisible()
   await rs.context.close()
 })
