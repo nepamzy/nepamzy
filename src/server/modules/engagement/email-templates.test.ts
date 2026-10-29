@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  applicationDecisionEmail,
+  applicationReceivedEmail,
   confirmEmail,
   emojiFor,
   notificationEmail,
@@ -82,6 +84,27 @@ describe('branded e-mails', () => {
     expect(emojiFor({ kind: 'admin', title: "You're approved!" })).toBe('✅')
     expect(emojiFor({ kind: 'case', title: 'Problem reported' })).toBe('⚠️')
     expect(emojiFor({ kind: 'review', title: 'Something' })).toBe('⭐')
+  })
+})
+
+describe('application e-mails', () => {
+  it('confirm receipt, then approval or a polite decline with the reason, for shops and riders', () => {
+    const got = applicationReceivedEmail('vendor', SITE)
+    expect(got.subject).toMatch(/application/i)
+    expect(got.html).toContain(`${SITE}/apply`)
+    expect(applicationReceivedEmail('rider', SITE).html).toContain(`${SITE}/rider-apply`)
+    const ok = applicationDecisionEmail({ kind: 'vendor', approved: true }, SITE)
+    expect(ok.subject).toContain('approved')
+    expect(ok.html).toContain(`${SITE}/vendor`)
+    const rider = applicationDecisionEmail({ kind: 'rider', approved: true }, SITE)
+    expect(rider.html).toContain('free for riders')
+    const no = applicationDecisionEmail(
+      { kind: 'vendor', approved: false, reason: 'Phone number <b>invalid</b>' },
+      SITE,
+    )
+    expect(no.subject).toMatch(/About your AFIT Market shop application/)
+    expect(no.html).toContain('Phone number &lt;b&gt;invalid&lt;/b&gt;')
+    expect(no.html).not.toContain('<b>invalid</b>')
   })
 })
 

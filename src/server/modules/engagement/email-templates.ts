@@ -231,11 +231,11 @@ const KIND_EMOJI: Record<string, string> = {
 /** A fitting emoji for one notification: by what the title says, then by its kind. */
 export function emojiFor(n: Pick<NotificationLike, 'kind' | 'title'>): string {
   const t = n.title.toLowerCase()
-  if (/pay|paid|receipt/.test(t)) return '\uD83D\uDCB3'
-  if (/deliver(ed|y complete)|completed|thank/.test(t)) return '\uD83C\uDF89'
-  if (/on the way|en route|rider|assigned|collect/.test(t)) return '\uD83D\uDE9A'
+  if (/pay|paid|receipt|order received/.test(t)) return '\uD83D\uDCB3'
+  if (/deliver(ed|y complete)|complete|thank/.test(t)) return '\uD83C\uDF89'
+  if (/on the way|on its way|en route|arrived|rider|assigned|collect/.test(t)) return '\uD83D\uDE9A'
   if (/ready|accepted|preparing/.test(t)) return '\uD83D\uDC68\u200D\uD83C\uDF73'
-  if (/approved|welcome/.test(t)) return '\u2705'
+  if (/approved|welcome|confirmed/.test(t)) return '\u2705'
   if (/reject|declin|cancel|fail|problem|dispute/.test(t)) return '\u26A0\uFE0F'
   if (/refund/.test(t)) return '\uD83D\uDCB8'
   if (/application|received|placed/.test(t)) return '\uD83D\uDCDD'
@@ -253,6 +253,74 @@ export function notificationEmail(n: NotificationLike, siteUrl: string): Rendere
     heading: n.title,
     paragraphs: [n.body],
     button: url ? { label: buttonLabel(n.link), url } : null,
+    siteUrl,
+  })
+}
+
+const WHAT = { vendor: 'shop', rider: 'rider' } as const
+
+/** Sent to someone who just applied to sell or to deliver. */
+export function applicationReceivedEmail(kind: 'vendor' | 'rider', siteUrl: string): RenderedEmail {
+  const what = WHAT[kind]
+  return renderEmail({
+    subject: `\uD83D\uDCDD We received your ${what} application`,
+    preheader: 'An administrator will review it soon.',
+    emoji: '\uD83D\uDCDD',
+    heading: 'Application received',
+    paragraphs: [
+      `Thank you for applying to be a ${what === 'shop' ? 'seller' : 'rider'} on AFIT Market. An administrator will review your application soon.`,
+      'We will e-mail you as soon as there is a decision. You do not need to do anything else for now.',
+    ],
+    button: {
+      label: '\uD83D\uDD0E See my application',
+      url: `${root(siteUrl)}${kind === 'vendor' ? '/apply' : '/rider-apply'}`,
+    },
+    siteUrl,
+  })
+}
+
+/** Sent when an administrator approves or declines an application. */
+export function applicationDecisionEmail(
+  d: { kind: 'vendor' | 'rider'; approved: boolean; reason?: string | null },
+  siteUrl: string,
+): RenderedEmail {
+  const vendor = d.kind === 'vendor'
+  if (d.approved)
+    return renderEmail({
+      subject: "\uD83C\uDF89 You're approved on AFIT Market!",
+      preheader: vendor ? 'Your shop is approved. Add your items.' : 'You are approved as a rider.',
+      emoji: '\uD83C\uDF89',
+      heading: "You're approved!",
+      paragraphs: vendor
+        ? [
+            'Great news: your shop application was approved. You can now add your menu and start taking orders.',
+            '\uD83C\uDF7D\uFE0F Add items with a name, a price and a short description.',
+            '\uD83D\uDCE6 Accept, prepare and hand over each order from your shop dashboard.',
+          ]
+        : [
+            'Great news: your rider application was approved. Read and accept the rider terms, add your bank details, then go active to see delivery offers.',
+            '\uD83D\uDE9A AFIT Market is currently free for riders: no commission is deducted from your delivery earnings.',
+          ],
+      button: {
+        label: vendor ? '\uD83C\uDFEA Open my shop' : '\uD83D\uDEB4 Open the rider area',
+        url: `${root(siteUrl)}${vendor ? '/vendor' : '/rider'}`,
+      },
+      siteUrl,
+    })
+  return renderEmail({
+    subject: `\u26A0\uFE0F About your AFIT Market ${vendor ? 'shop' : 'rider'} application`,
+    preheader: 'Your application was not approved this time.',
+    emoji: '\u26A0\uFE0F',
+    heading: 'Application not approved',
+    paragraphs: [
+      `Thank you for applying. Your ${vendor ? 'shop' : 'rider'} application was not approved this time.`,
+      ...(d.reason ? [`Reason given: ${d.reason}`] : []),
+      'You are welcome to apply again once you have addressed this.',
+    ],
+    button: {
+      label: '\uD83D\uDD04 Apply again',
+      url: `${root(siteUrl)}${vendor ? '/apply' : '/rider-apply'}`,
+    },
     siteUrl,
   })
 }

@@ -4,6 +4,8 @@ import { logger } from '@/lib/logger'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { rateLimit, sha256Hex } from '@/server/modules/identity-and-access/security'
 import {
+  applicationDecisionEmail,
+  applicationReceivedEmail,
   notificationEmail,
   passwordChangedEmail,
   signInAlertEmail,
@@ -297,6 +299,55 @@ export function notifyPasswordChanged(email: string): void {
     try {
       if (!mailConfig()) return
       await sendMail(email, passwordChangedEmail(process.env.SITE_URL ?? 'http://localhost:3000'))
+    } catch {
+      /* best effort */
+    }
+  })
+}
+
+/** "We received your application" to the person who just applied (their own signed-in address). */
+export function notifyApplicationReceived(
+  email: string | null | undefined,
+  kind: 'vendor' | 'rider',
+): void {
+  if (!email) return
+  afterSafely(async () => {
+    try {
+      if (!mailConfig()) return
+      await sendMail(
+        email,
+        applicationReceivedEmail(kind, process.env.SITE_URL ?? 'http://localhost:3000'),
+      )
+    } catch {
+      /* best effort */
+    }
+  })
+}
+
+/** Tells the applicant about an administrator's decision. The address is looked up on the server from the application. */
+export function notifyApplicationDecision(
+  table: 'vendor_applications' | 'rider_applications',
+  applicationId: string,
+  d: { kind: 'vendor' | 'rider'; approved: boolean; reason?: string | null },
+): void {
+  afterSafely(async () => {
+    try {
+      if (!mailConfig()) return
+      const svc = createSupabaseServiceClient()
+      const { data: app } = await svc
+        .from(table)
+        .select('applicant_id')
+        .eq('id', applicationId)
+        .maybeSingle()
+      const applicant = (app as { applicant_id?: string } | null)?.applicant_id
+      if (!applicant) return
+      const { data: u } = await svc.auth.admin.getUserById(applicant)
+      const email = u.user?.email
+      if (!email) return
+      await sendMail(
+        email,
+        applicationDecisionEmail(d, process.env.SITE_URL ?? 'http://localhost:3000'),
+      )
     } catch {
       /* best effort */
     }

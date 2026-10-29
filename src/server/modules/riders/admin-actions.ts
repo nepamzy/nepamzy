@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { notifyApplicationDecision } from '@/server/modules/engagement/dispatch'
 import type { AccessRequirement } from '@/server/modules/identity-and-access/policy'
 import {
   dbFailed,
@@ -34,6 +35,11 @@ export async function decideRiderApplicationAction(
     p_reason: text(fd, 'reason', 500) || null,
   })
   if (error) return dbFailed(error)
+  notifyApplicationDecision('rider_applications', id, {
+    kind: 'rider',
+    approved: decision === 'approve',
+    reason: text(fd, 'reason', 500) || null,
+  })
   revalidatePath('/admin/riders')
   return done(decision === 'approve' ? 'Rider approved.' : 'Application rejected.')
 }

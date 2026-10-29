@@ -1,6 +1,7 @@
 'use server'
 
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
+import { notifyApplicationReceived } from '@/server/modules/engagement/dispatch'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -42,6 +43,7 @@ export async function submitRiderApplicationAction(
       'Check the form: name and phone are required, and you must accept the rules.',
     )
   notifyAdmin({ type: 'rider_application' })
+  notifyApplicationReceived((await sb.auth.getUser()).data.user?.email, 'rider')
   revalidatePath('/rider-apply')
   return done('Application sent. An administrator will review it.')
 }
