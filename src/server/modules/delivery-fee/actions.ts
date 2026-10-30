@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { FieldCryptoError, encryptField } from '@/server/security/field-crypto'
 import { logger } from '@/lib/logger'
@@ -85,6 +86,7 @@ export async function reportDeliveryFeeAction(_p: ActionState, fd: FormData): Pr
   })
   if (error) return dbFailed(error, 'Could not record your report.')
   revalidatePath('/orders', 'layout')
+  notifyAdmin({ type: 'delivery_fee', step: 'reported' })
   return done('Thank you. The rider has been asked to confirm they received it.')
 }
 
@@ -107,6 +109,7 @@ export async function respondDeliveryFeeAction(
   if (error)
     return dbFailed(error, 'Could not save your answer. A dispute needs a short explanation.')
   revalidatePath('/rider/payments')
+  notifyAdmin({ type: 'delivery_fee', step: decision === 'confirm' ? 'confirmed' : 'disputed' })
   return done(
     decision === 'confirm'
       ? 'Confirmed. A receipt has been issued.'

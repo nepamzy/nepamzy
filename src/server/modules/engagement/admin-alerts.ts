@@ -28,6 +28,7 @@ export type AdminAlertEvent =
   | { type: 'return_requested'; orderId: string }
   | { type: 'support_case'; caseNo: string; kind: string }
   | { type: 'contact_message' }
+  | { type: 'delivery_fee'; step: 'reported' | 'confirmed' | 'disputed' }
 
 export type AdminAlertConfig = { apiKey: string; to: string; from: string; fromName: string }
 export type AdminAlertResult = 'sent' | 'disabled' | 'capped' | 'failed'
@@ -127,6 +128,17 @@ export function buildAdminAlert(
       subject = '[AFIT Market] New contact message'
       lines.push('A message from the public contact form is waiting.')
       link = '/admin/messages'
+      break
+    case 'delivery_fee':
+      subject = '[AFIT Market] Delivery fee update'
+      lines.push(
+        event.step === 'reported'
+          ? 'A customer says they sent the delivery fee to their rider. The rider has been asked to confirm.'
+          : event.step === 'confirmed'
+            ? 'A rider confirmed they received the delivery fee. A receipt was issued.'
+            : 'A rider says a delivery fee did NOT arrive. It needs your decision.',
+      )
+      link = '/admin/delivery-fee-payments'
       break
     case 'support_case':
       subject = '[AFIT Market] New support report'

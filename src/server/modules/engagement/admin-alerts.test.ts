@@ -97,6 +97,21 @@ describe('message content', () => {
   })
 })
 
+describe('delivery fee alerts', () => {
+  it('say what happened, point at the delivery fee page and carry no personal data', () => {
+    for (const [step, words] of [
+      ['reported', /customer says they sent/],
+      ['confirmed', /rider confirmed/],
+      ['disputed', /did NOT arrive/],
+    ] as const) {
+      const m = buildAdminAlert({ type: 'delivery_fee', step }, 'https://x.test/')
+      expect(m.subject).toBe('[AFIT Market] Delivery fee update')
+      expect(m.text).toMatch(words)
+      expect(m.text).toContain('https://x.test/admin/delivery-fee-payments')
+    }
+  })
+})
+
 describe('sending', () => {
   const ev: AdminAlertEvent = { type: 'rider_application' }
   beforeEach(() => vi.clearAllMocks())
