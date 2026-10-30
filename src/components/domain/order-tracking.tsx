@@ -25,13 +25,13 @@ type Tracking =
     }
 
 const WHY: Record<string, string> = {
-  not_in_transit: 'Live tracking starts after the vendor hands your parcel to the rider.',
+  not_in_transit: 'Live tracking starts as soon as a rider accepts your order.',
   no_active_assignment: 'No rider is carrying your order right now.',
   rider_not_sharing: 'The rider is not sharing a location at the moment.',
   no_location_yet: 'Waiting for the rider’s first location update…',
 }
 
-/** Polls a protected server route (no direct database access, no Realtime) every 10 seconds. */
+/** Polls a protected server route (no direct database access, no Realtime) every 15 seconds. */
 export function OrderTracking({ orderId }: { orderId: string }) {
   const [t, setT] = useState<Tracking | null>(null)
   const [err, setErr] = useState(false)
@@ -51,7 +51,7 @@ export function OrderTracking({ orderId }: { orderId: string }) {
       }
     }
     void load()
-    const id = setInterval(load, 10_000)
+    const id = setInterval(load, 15_000)
     return () => {
       stop = true
       clearInterval(id)

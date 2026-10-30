@@ -75,7 +75,7 @@ export default async function Jobs() {
       <div className="mb-5">
         <LocationSharing
           enabled={assignments.length > 0}
-          minIntervalSeconds={Math.max(s.minIntervalSeconds, 5)}
+          minIntervalSeconds={Math.max(s.minIntervalSeconds, s.sendIntervalSeconds)}
           maxAccuracyM={s.maxAccuracyM}
           maxAgeSeconds={s.maxAgeSeconds}
         />

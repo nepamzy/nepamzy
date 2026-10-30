@@ -27,6 +27,14 @@ test.afterEach(async () => {
   await restorePlaceholderTerms()
 })
 
+// Real riders send a position every 30 s; the tests send every 5 s so they do not have to wait.
+test.beforeAll(async () => {
+  await admin()
+    .from('platform_settings')
+    .update({ value: 5 })
+    .eq('key', 'location_send_interval_seconds')
+})
+
 /** Chromium only emits a position event when the emulated position CHANGES, so nudge it first. */
 async function moveTo(
   context: import('@playwright/test').BrowserContext,
@@ -150,6 +158,17 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect.poll(status).toBe('RIDER_ASSIGNED')
   await r.reload()
   await expect(r.getByText('Location sharing is')).toBeVisible()
+
+  // ---- tracking starts the moment the rider accepts: the customer already sees the rider on the map ----
+  await expect
+    .poll(
+      async () => {
+        await c.goto(`/orders/${orderId}`)
+        return c.getByRole('region', { name: /Live map showing your rider/ }).isVisible()
+      },
+      { timeout: 60000, intervals: [3000] },
+    )
+    .toBe(true)
 
   // ---- vendor-to-rider handover token: wrong code refused, real one works once ----
   await r.getByRole('button', { name: 'Show handover code to vendor' }).click()
