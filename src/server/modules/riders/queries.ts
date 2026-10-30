@@ -99,12 +99,14 @@ export async function locationSettings() {
       'location_max_accuracy_m',
       'location_max_age_seconds',
       'location_min_interval_seconds',
+      'location_send_interval_seconds',
     ])
   const m = new Map((data ?? []).map((r) => [r.key as string, Number(r.value)]))
   return {
     maxAccuracyM: m.get('location_max_accuracy_m') ?? 100,
     maxAgeSeconds: m.get('location_max_age_seconds') ?? 120,
     minIntervalSeconds: m.get('location_min_interval_seconds') ?? 3,
+    sendIntervalSeconds: m.get('location_send_interval_seconds') ?? 30,
   }
 }
 

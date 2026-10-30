@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/components/ui/cn'
 import { Icon } from '@/components/ui/icons'
 import type { NavItem } from './nav-config'
+import { SHELL_THEMES, type ShellTheme } from './theme'
 
 export type { NavItem }
 
@@ -16,18 +17,18 @@ const isActive = (path: string, href: string, siblings: NavItem[]) => {
   )
 }
 
-/** Sidebar / drawer navigation. `navy` is the Administration look; `light` is used by customers, shops and riders. */
+/** Sidebar / drawer navigation. Each area has its own look (see theme.ts). */
 export function SidebarNav({
   items,
   theme = 'light',
   onNavigate,
 }: {
   items: NavItem[]
-  theme?: 'light' | 'navy'
+  theme?: ShellTheme
   onNavigate?: () => void
 }) {
   const path = usePathname()
-  const navy = theme === 'navy'
+  const t = SHELL_THEMES[theme]
   const groups: { name?: string; items: NavItem[] }[] = []
   for (const i of items) {
     const last = groups[groups.length - 1]
@@ -39,12 +40,7 @@ export function SidebarNav({
       {groups.map((g, gi) => (
         <div key={`${g.name ?? 'all'}-${gi}`}>
           {g.name && (
-            <p
-              className={cn(
-                'mb-1 px-3 text-xs font-bold uppercase tracking-wider',
-                navy ? 'text-navy-text/80' : 'text-muted',
-              )}
-            >
+            <p className={cn('mb-1 px-3 text-xs font-bold uppercase tracking-wider', t.label)}>
               {g.name}
             </p>
           )}
@@ -59,13 +55,7 @@ export function SidebarNav({
                     aria-current={active ? 'page' : undefined}
                     className={cn(
                       'touch-target flex items-center gap-3 rounded-[var(--radius-control)] px-3 py-2 text-[0.95rem] font-semibold transition-colors',
-                      navy
-                        ? active
-                          ? 'bg-gold-400 text-ink'
-                          : 'text-navy-text hover:bg-navy-800 hover:text-white'
-                        : active
-                          ? 'bg-gold-400 text-ink'
-                          : 'text-ink hover:bg-brand-50',
+                      active ? 'bg-gold-400 text-ink' : t.link,
                     )}
                   >
                     <Icon name={i.icon} size={19} />

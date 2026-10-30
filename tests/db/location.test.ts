@@ -278,11 +278,12 @@ describe('privacy of live location', () => {
     await isoTx(async (c) => {
       const s = await scenario(c)
       const before = await scenario(c, { state: 'assigned' })
+      // tracking opens as soon as a rider has accepted: there is no position yet, but the customer is told so
       expect(
         await callJson(c, AAL2(before.cust), `select public.get_order_tracking($1) r`, [
           before.order,
         ]),
-      ).toMatchObject({ tracking: false, reason: 'not_in_transit' })
+      ).toMatchObject({ tracking: false, reason: 'no_location_yet' })
       expect(
         await callJson(c, AAL2(s.cust), `select public.get_order_tracking($1) r`, [s.order]),
       ).toMatchObject({ tracking: false, reason: 'no_location_yet' })

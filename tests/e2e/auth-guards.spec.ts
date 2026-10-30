@@ -51,13 +51,14 @@ test.describe('wrong role -> 403', () => {
       denied: ['/vendor', '/rider', '/admin', '/admin/audit', '/admin/roles'],
       allowed: ['/orders', '/account'],
     },
-    // Note: every account also holds the default `customer` role, so /orders is open to all roles (at aal2).
+    // Every account also holds the default `customer` role, but a shop or a rider works in its own area:
+    // the shopping screens send them home (see role-separation.spec.ts).
     {
       role: 'vendor_owner',
       denied: ['/rider', '/admin', '/admin/roles'],
-      allowed: ['/vendor', '/account', '/orders'],
+      allowed: ['/vendor', '/account'],
     },
-    { role: 'rider', denied: ['/vendor', '/admin'], allowed: ['/rider', '/orders'] },
+    { role: 'rider', denied: ['/vendor', '/admin'], allowed: ['/rider', '/account'] },
     {
       role: 'support_agent',
       denied: ['/admin/roles', '/vendor', '/rider', '/admin/payments', '/admin/riders'],

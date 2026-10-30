@@ -5,6 +5,8 @@ import { forbidden, redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import {
   ANONYMOUS,
+  experienceOf,
+  homeFor,
   ROUTE_POLICIES,
   decideAccess,
   isPrivilegedRole,
@@ -58,6 +60,8 @@ export async function requireAuth(req: AccessRequirement): Promise<Principal> {
       redirect(`/mfa/challenge?next=${next}`)
     case 'switch-mode':
       redirect(`/account/mode?next=${next}`)
+    case 'go-home':
+      redirect(homeFor(experienceOf(who)))
     case 'forbidden':
       forbidden()
   }

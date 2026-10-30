@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { AutoRefresh } from '@/components/domain/auto-refresh'
 import { DeliveryProofPanel } from '@/components/domain/delivery-proof-panel'
 import { OrderStatusPill, ORDER_STATES } from '@/components/domain/order-status'
 import { OrderTracking } from '@/components/domain/order-tracking'
@@ -39,8 +40,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const dfp = order.fulfilment === 'delivery' ? await deliveryFeeForOrder(order.id) : null
   const hasReceipt = !['PENDING_PAYMENT', 'CANCELLED'].includes(order.status)
   const label = (c: string) => ORDER_STATES.find((s) => s.code === c)?.label ?? c
+  const settled = ['COMPLETED', 'CANCELLED', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(
+    order.status,
+  )
   return (
     <>
+      {!settled && <AutoRefresh />}
       <PageHeader
         title={order.order_number}
         subtitle={`${order.vendor_name} · ${order.fulfilment === 'delivery' ? 'Delivery' : 'Pickup'}`}
@@ -109,20 +114,33 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
 
       {dfp && dfp.state !== 'not_applicable' && (
         <Card className="mb-5 space-y-2 border-brand-700">
-          <h2 className="text-lg font-extrabold text-navy-900">Delivery fee</h2>
+          <h2 className="text-lg font-extrabold text-navy-900">
+            Delivery fee
+            {dfp.state === 'payment' && dfp.status === 'awaiting_transfer' && (
+              <Badge tone="warning" className="ml-2">
+                To do
+              </Badge>
+            )}
+          </h2>
           <p>
             {dfp.state === 'payment'
-              ? 'You pay this delivery fee directly to your rider by bank transfer.'
+              ? dfp.status === 'awaiting_transfer'
+                ? 'Your order was delivered. Send the delivery fee straight to your rider by bank transfer.'
+                : 'You pay this delivery fee directly to your rider by bank transfer. Open it to see where things stand.'
               : dfp.state === 'ready_to_open'
                 ? 'The delivery fee was not part of your online payment. You pay it to your rider by bank transfer.'
-                : 'Details about the delivery fee will appear here when they are available.'}
+                : dfp.state === 'rider_details_missing'
+                  ? 'Your rider has not added bank details yet. This page updates when they do; you have not been charged.'
+                  : 'You will pay the delivery fee to your rider by bank transfer after your order is delivered. It is not part of the online payment, and a button appears here when it is time.'}
           </p>
-          <Link
-            href={`/orders/${order.id}/delivery-fee`}
-            className="font-semibold text-brand-700 underline"
-          >
-            Pay Delivery Fee
-          </Link>
+          {(dfp.state === 'payment' || dfp.state === 'ready_to_open') && (
+            <Link
+              href={`/orders/${order.id}/delivery-fee`}
+              className="inline-block font-semibold text-brand-700 underline"
+            >
+              Pay Delivery Fee
+            </Link>
+          )}
         </Card>
       )}
 

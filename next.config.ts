@@ -23,7 +23,9 @@ const nextConfig: NextConfig = {
       { source: '/:path*', headers: commonHeaders },
       { source: '/rider', headers: [POLICY('(self)')] },
       { source: '/rider/:path*', headers: [POLICY('(self)')] },
-      { source: '/((?!rider(?:/|$)).*)', headers: [POLICY('()')] },
+      // A customer may choose to share where they are with the rider while a delivery is active.
+      { source: '/orders/:path*', headers: [POLICY('(self)')] },
+      { source: '/((?!rider(?:/|$)|orders(?:/|$)).*)', headers: [POLICY('()')] },
     ]
   },
 }

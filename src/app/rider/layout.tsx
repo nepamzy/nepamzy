@@ -9,7 +9,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const supabase = await createSupabaseServerClient()
   const { data } = await supabase.auth.getUser()
   return (
-    <AppShell area="Rider" signedInAs={data.user?.email} items={RIDER_NAV}>
+    <AppShell area="Rider" signedInAs={data.user?.email} items={RIDER_NAV} theme="rider">
       {children}
     </AppShell>
   )

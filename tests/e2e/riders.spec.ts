@@ -27,6 +27,14 @@ test.afterEach(async () => {
   await restorePlaceholderTerms()
 })
 
+// Real riders send a position every 30 s; the tests send every 5 s so they do not have to wait.
+test.beforeAll(async () => {
+  await admin()
+    .from('platform_settings')
+    .update({ value: 5 })
+    .eq('key', 'location_send_interval_seconds')
+})
+
 /** Chromium only emits a position event when the emulated position CHANGES, so nudge it first. */
 async function moveTo(
   context: import('@playwright/test').BrowserContext,
@@ -151,6 +159,12 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await r.reload()
   await expect(r.getByText('Location sharing is')).toBeVisible()
 
+  // ---- tracking starts the moment the rider accepts: the customer already sees the rider on the map ----
+  await c.goto(`/orders/${orderId}`)
+  await expect(c.getByRole('region', { name: /Live map showing your rider/ })).toBeVisible({
+    timeout: 60000,
+  })
+
   // ---- vendor-to-rider handover token: wrong code refused, real one works once ----
   await r.getByRole('button', { name: 'Show handover code to vendor' }).click()
   const codeEl = r.locator('p.tracking-widest').first()
@@ -196,10 +210,26 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect(r.getByText('Location sharing is ON')).toBeVisible()
   await c.goto(`/orders/${orderId}`)
   await expect(c.getByRole('heading', { name: 'Delivery tracking' })).toBeVisible()
-  await expect(c.getByText('SAMPLE MAP: synthetic data, not AFIT')).toBeVisible()
+  await expect(c.getByRole('region', { name: /Live map showing your rider/ })).toBeVisible()
   await expect(c.getByText(/about \d+ min/)).toBeVisible()
   await expect(c.getByText(/SAMPLE route service|approximation/)).toBeVisible()
   await a11yClean(c, '/orders/[id] (tracking)')
+
+  // ---- two-way map: the customer chooses to share where they are, and the rider sees it; stopping hides it ----
+  await customer.context.grantPermissions(['geolocation'])
+  await customer.context.setGeolocation({ latitude: 0.0103, longitude: 0.01, accuracy: 10 })
+  await c.getByRole('button', { name: 'Share my location with my rider' }).click()
+  await expect(c.getByText('Your rider can see where you are.')).toBeVisible({ timeout: 30000 })
+  await r.goto('/rider/jobs')
+  await expect(r.getByText(/The customer is sharing where they are/)).toBeVisible({
+    timeout: 30000,
+  })
+  await c.getByRole('button', { name: 'Stop sharing my location' }).click()
+  await expect(c.getByText('Sharing stopped.')).toBeVisible()
+  await r.reload()
+  await expect(r.getByText(/The customer has not shared their location/)).toBeVisible({
+    timeout: 30000,
+  })
 
   // privacy: other accounts cannot read this order's tracking
   const stranger = await openSession(browser, info, 'rs')
@@ -330,17 +360,9 @@ test('location is blocked by Permissions-Policy everywhere except the rider area
 }) => {
   const policy = async (path: string) =>
     (await request.get(path, { maxRedirects: 0 })).headers()['permissions-policy']
-  for (const p of [
-    '/',
-    '/vendors',
-    '/login',
-    '/orders',
-    '/checkout',
-    '/admin',
-    '/riders-not-a-route',
-  ])
+  for (const p of ['/', '/vendors', '/login', '/checkout', '/admin', '/riders-not-a-route'])
     expect(await policy(p), p).toContain('geolocation=()')
-  for (const p of ['/rider', '/rider/jobs', '/rider/profile'])
+  for (const p of ['/rider', '/rider/jobs', '/rider/profile', '/orders'])
     expect(await policy(p), p).toContain('geolocation=(self)')
 })
 

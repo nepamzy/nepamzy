@@ -45,6 +45,18 @@
   --color-navy-700: #1261b0;
   --color-navy-text: #dbe8f8;
 
+  /* Role looks, so nobody wonders which account they are in: shops are green, riders are teal, administration is navy. */
+  --color-vendor-900: #0f4a2a;
+  --color-vendor-800: #17673a;
+  --color-vendor-700: #1d7d47;
+  --color-vendor-50: #e5f4ea;
+  --color-vendor-text: #dff3e6;
+  --color-rider-900: #0b4a50;
+  --color-rider-800: #0e6b73;
+  --color-rider-700: #12808a;
+  --color-rider-50: #e1f3f4;
+  --color-rider-text: #dcf1f3;
+
   --radius-card: 0.875rem;
   --radius-control: 0.625rem;
   --shadow-card: 0 1px 2px rgb(19 28 43 / 0.06), 0 2px 8px rgb(19 28 43 / 0.05);
@@ -90,4 +102,30 @@ body {
 .touch-target {
   min-height: 44px;
   min-width: 44px;
+}
+
+/* Live map pins (see components/domain/live-map.tsx). Classes only: the page's CSP forbids inline style attributes in markup. */
+.afit-pin {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  border: 3px solid #fff;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.5);
+}
+.afit-pin-rider {
+  background: var(--color-rider-800);
+}
+.afit-pin-customer {
+  background: var(--color-brand-700);
+}
+.afit-pin-destination {
+  background: var(--color-danger-700);
+}
+.afit-pin-stale {
+  opacity: 0.55;
 }

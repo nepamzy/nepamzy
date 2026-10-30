@@ -1,3 +1,4 @@
+import { AutoRefresh } from '@/components/domain/auto-refresh'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
@@ -7,6 +8,7 @@ import {
   StartRouteButton,
   TokenCard,
 } from '@/components/domain/rider-controls'
+import { RiderJobMap } from '@/components/domain/rider-job-map'
 import { OrderStatusPill } from '@/components/domain/order-status'
 import { Card, PageHeader } from '@/components/ui/card'
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
@@ -50,6 +52,7 @@ export default async function Jobs() {
   ])
   return (
     <>
+      <AutoRefresh />
       <PageHeader
         breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Jobs' }]}
         title="Jobs"
@@ -72,7 +75,7 @@ export default async function Jobs() {
       <div className="mb-5">
         <LocationSharing
           enabled={assignments.length > 0}
-          minIntervalSeconds={Math.max(s.minIntervalSeconds, 5)}
+          minIntervalSeconds={Math.max(s.minIntervalSeconds, s.sendIntervalSeconds)}
           maxAccuracyM={s.maxAccuracyM}
           maxAgeSeconds={s.maxAgeSeconds}
         />
@@ -105,6 +108,7 @@ export default async function Jobs() {
                         : 0
                 }
               />
+              <RiderJobMap assignmentId={a.assignment_id} />
               <p>
                 <strong>Collect from:</strong> {a.vendor_name}
                 {a.pickup ? ` · ${a.pickup}` : ''}
