@@ -54,7 +54,7 @@ test('signing up as a vendor or rider records the choice; a customer sign-up rec
     await page.getByRole('radio', { name: new RegExp(choice) }).check()
     await page.getByLabel(/I confirm that I am 18/).check()
     await page.getByRole('button', { name: 'Create account' }).click()
-    await expect(page.getByText(/Check your email/)).toBeVisible()
+    await expect(page.getByTestId('signup-done')).toBeVisible()
     if (expected) await expect(page.getByText(new RegExp(`${expected} application`))).toBeVisible()
     const id = await userIdByEmail(email)
     const { data: found } = await admin().auth.admin.getUserById(id)
@@ -156,4 +156,39 @@ test('the authenticator is optional for customers, vendors and riders: no setup 
     expect(p.url(), `${role ?? 'customer'} on ${area}`).not.toMatch(/\/mfa\//)
     await context.close()
   }
+})
+
+test('after sign-up there is always a way forward: resend the link, sign in, or start again', async ({
+  browser,
+}, info) => {
+  const context = await browser.newContext({
+    viewport: info.project.use.viewport ?? undefined,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  const page = await context.newPage()
+  const email = uniqueEmail('signup-next')
+  await page.goto('/signup')
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+  await page.getByLabel('Confirm password').fill(PASSWORD)
+  await page.getByLabel(/I confirm that I am 18/).check()
+  await page.getByRole('button', { name: 'Create account' }).click()
+  const done = page.getByTestId('signup-done')
+  await expect(done.getByRole('heading', { name: 'Check your email' })).toBeVisible()
+  await expect(done.getByText(email, { exact: false }).first()).toBeVisible()
+  await expect(done.getByText(/Spam/)).toBeVisible()
+  // ask for the link again: the answer is a plain confirmation, not an error
+  await done.getByRole('button', { name: 'Send the confirmation e-mail again' }).click()
+  await expect(done.getByText(/fresh link/)).toBeVisible()
+  // asking again straight away is politely refused, never a crash
+  await done.getByRole('button', { name: 'Send the confirmation e-mail again' }).click()
+  await expect(done.getByText(/wait a few minutes/)).toBeVisible()
+  await expect(done.getByRole('link', { name: 'I have confirmed: sign in' })).toHaveAttribute(
+    'href',
+    '/login',
+  )
+  await done.getByRole('link', { name: 'Start again' }).click()
+  await expect(page).toHaveURL(/\/signup$/)
+  await expect(page.getByRole('button', { name: 'Create account' })).toBeVisible()
+  await context.close()
 })

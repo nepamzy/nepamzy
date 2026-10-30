@@ -138,6 +138,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   // Same message whether or not the address already exists (prevents account enumeration).
   return {
     ok: true,
+    email,
     message:
       intent === 'customer'
         ? 'Check your email. We sent a link to confirm your address.'
@@ -193,9 +194,9 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
 }
 
 /** A fresh confirmation link for an address that signed up but never confirmed. At most one every 5 minutes per address. */
-async function resendConfirmation(email: string): Promise<void> {
+async function resendConfirmation(email: string): Promise<'done' | 'wait'> {
   try {
-    if (!(await rateLimit(`confirm-resend:${sha256Hex(email)}`, 300, 1))) return
+    if (!(await rateLimit(`confirm-resend:${sha256Hex(email)}`, 300, 1))) return 'wait'
     const mail = mailConfig()
     if (mail) {
       const gen = await createSupabaseServiceClient().auth.admin.generateLink({
@@ -208,7 +209,7 @@ async function resendConfirmation(email: string): Promise<void> {
         const out = await sendMailDetailed(email, confirmEmail(link, serverEnv().SITE_URL), {
           config: mail,
         })
-        if (out.result === 'sent') return
+        if (out.result === 'sent') return 'done'
         logger.warn('confirmation e-mail not sent', { status: out.status, reason: out.reason })
       }
     }
@@ -220,6 +221,30 @@ async function resendConfirmation(email: string): Promise<void> {
     })
   } catch {
     /* best effort */
+  }
+  return 'done'
+}
+
+/** "Send me the confirmation e-mail again" on the page shown after sign-up. The answer never says whether the address has an account. */
+export async function resendConfirmationAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const parsed = emailSchema.safeParse(formData.get('email'))
+  if (!parsed.success) return { error: 'Enter a valid email address.' }
+  const email = parsed.data
+  const ip = await clientIp()
+  if (!(await rateLimit(`resend:ip:${ip}`, 3600, 10))) return { error: TOO_MANY, email }
+  const r = await resendConfirmation(email)
+  if (r === 'wait')
+    return {
+      error: 'We sent one a moment ago. Please wait a few minutes before asking for another.',
+      email,
+    }
+  return {
+    ok: true,
+    email,
+    message: `If ${email} is waiting for confirmation, we have sent a fresh link. It can take a minute. Check Spam too.`,
   }
 }
 

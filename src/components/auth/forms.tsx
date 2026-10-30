@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox, Input } from '@/components/ui/fields'
 import {
   requestPasswordResetAction,
+  resendConfirmationAction,
   resetPasswordAction,
   signInAction,
   signUpAction,
@@ -79,9 +80,63 @@ export function SignInForm({ next, staff = false }: { next: string; staff?: bool
   )
 }
 
+/** What to do after creating an account: where the link is, how to ask for it again, and how to carry on. */
+function SignUpDone({ email, message }: { email: string; message?: string }) {
+  const [state, action, pending] = useActionState(resendConfirmationAction, initial)
+  return (
+    <div className="space-y-4" data-testid="signup-done">
+      <p className="text-center text-5xl" aria-hidden="true">
+        ✉️
+      </p>
+      <h2 className="text-center text-xl font-bold">Check your email</h2>
+      <Notice state={{ message: message ?? `We sent a confirmation link to ${email}.` }} />
+      <ol className="list-decimal space-y-1 pl-6">
+        <li>
+          Open the message from <strong>AFIT Market</strong> sent to <strong>{email}</strong>.
+        </li>
+        <li>
+          Tap <strong>Confirm my e-mail</strong>.
+        </li>
+        <li>Then sign in to continue.</li>
+      </ol>
+      <p className="text-sm text-muted">
+        Nothing there after a minute? Look in Spam or Promotions, then ask for a new link below.
+      </p>
+      <form action={action} className="space-y-2">
+        <input type="hidden" name="email" value={email} />
+        {state.error && (
+          <p role="alert" className="font-medium text-danger-700">
+            {state.error}
+          </p>
+        )}
+        {state.ok && state.message && (
+          <p role="status" className="font-medium text-success-700">
+            {state.message}
+          </p>
+        )}
+        <Button type="submit" variant="secondary" disabled={pending} className="w-full">
+          {pending ? 'Sending…' : 'Send the confirmation e-mail again'}
+        </Button>
+      </form>
+      <Link
+        href="/login"
+        className="touch-target flex w-full items-center justify-center rounded-[var(--radius-control)] bg-gold-400 px-4 font-bold text-ink hover:bg-gold-500"
+      >
+        I have confirmed: sign in
+      </Link>
+      <p className="text-center text-sm text-muted">
+        Wrong address?{' '}
+        <a className="font-semibold text-brand-700 underline" href="/signup">
+          Start again
+        </a>
+      </p>
+    </div>
+  )
+}
+
 export function SignUpForm() {
   const [state, action, pending] = useActionState(signUpAction, initial)
-  if (state.ok) return <Notice state={state} />
+  if (state.ok) return <SignUpDone email={state.email ?? ''} message={state.message} />
   return (
     <form action={action} className="space-y-4" noValidate>
       <Notice state={state} />
