@@ -14,7 +14,7 @@ import {
 
 /** Copies the account number only; the number is already on screen for the signed-in customer. */
 export function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState<'yes' | 'no' | null>(null)
   return (
     <>
       <Button
@@ -23,16 +23,21 @@ export function CopyButton({ value, label }: { value: string; label: string }) {
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(value)
-            setCopied(true)
+            setCopied('yes')
           } catch {
-            setCopied(false)
+            setCopied('no')
           }
+          setTimeout(() => setCopied(null), 4000)
         }}
       >
         {label}
       </Button>
       <span role="status" className="text-sm text-muted">
-        {copied ? 'Copied.' : ''}
+        {copied === 'yes'
+          ? 'Copied.'
+          : copied === 'no'
+            ? 'Could not copy here. Select the number and copy it.'
+            : ''}
       </span>
     </>
   )

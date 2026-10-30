@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import { signOutAction } from '@/server/modules/identity-and-access/actions'
 import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
-import { isPrivilegedRole } from '@/server/modules/identity-and-access/policy'
+import {
+  experienceOf,
+  homeFor,
+  isPrivilegedRole,
+} from '@/server/modules/identity-and-access/policy'
 import { cartItemCount } from '@/server/modules/cart-and-checkout/queries'
 import { ButtonLink } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icons'
@@ -13,7 +17,9 @@ import { ModePill, ModeSwitch } from './mode-switch'
 export async function PublicHeader() {
   const who = await loadPrincipal()
   const staff = who.roles.some(isPrivilegedRole)
-  const cart = who.authenticated ? await cartItemCount() : 0
+  const experience = experienceOf(who)
+  const shopping = experience === 'customer' || experience === 'admin'
+  const cart = who.authenticated && shopping ? await cartItemCount() : 0
   return (
     <header className="sticky top-0 z-30 border-b border-line border-t-4 border-t-gold-400 bg-card/95 backdrop-blur">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
@@ -40,21 +46,23 @@ export async function PublicHeader() {
           <ModePill who={who} />
           {who.authenticated ? (
             <>
-              <Link
-                href="/cart"
-                aria-label={cart > 0 ? `Cart, ${cart} items` : 'Cart'}
-                className="touch-target relative grid place-items-center rounded-full text-navy-900 hover:bg-brand-50"
-              >
-                <Icon name="cart" size={22} />
-                {cart > 0 && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute -right-1 -top-1 grid min-w-5 place-items-center rounded-full bg-danger-700 px-1 text-[0.7rem] font-bold leading-5 text-white"
-                  >
-                    {cart > 99 ? '99+' : cart}
-                  </span>
-                )}
-              </Link>
+              {shopping && (
+                <Link
+                  href="/cart"
+                  aria-label={cart > 0 ? `Cart, ${cart} items` : 'Cart'}
+                  className="touch-target relative grid place-items-center rounded-full text-navy-900 hover:bg-brand-50"
+                >
+                  <Icon name="cart" size={22} />
+                  {cart > 0 && (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -right-1 -top-1 grid min-w-5 place-items-center rounded-full bg-danger-700 px-1 text-[0.7rem] font-bold leading-5 text-white"
+                    >
+                      {cart > 99 ? '99+' : cart}
+                    </span>
+                  )}
+                </Link>
+              )}
               <Menu
                 label="Account menu"
                 summary={
@@ -71,12 +79,28 @@ export async function PublicHeader() {
                 }
               >
                 <ul>
-                  {[
-                    ['/account', 'My account', 'user'],
-                    ['/orders', 'My orders', 'package'],
-                    ['/notifications', 'Notifications', 'bell'],
-                    ['/account/security', 'Security', 'shield'],
-                  ].map(([href, label, icon]) => (
+                  {(shopping
+                    ? [
+                        ['/account', 'My account', 'user'],
+                        ['/orders', 'My orders', 'package'],
+                        ['/notifications', 'Notifications', 'bell'],
+                        ['/account/security', 'Security', 'shield'],
+                      ]
+                    : [
+                        [
+                          homeFor(experience),
+                          experience === 'vendor' ? 'My shop' : 'My deliveries',
+                          experience === 'vendor' ? 'store' : 'truck',
+                        ],
+                        [
+                          '/account',
+                          experience === 'vendor' ? 'Shop account' : 'Rider account',
+                          'user',
+                        ],
+                        ['/notifications', 'Notifications', 'bell'],
+                        ['/account/security', 'Security', 'shield'],
+                      ]
+                  ).map(([href, label, icon]) => (
                     <li key={href}>
                       <Link
                         href={href!}

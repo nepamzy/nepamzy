@@ -149,7 +149,7 @@ export default async function PayDeliveryFee({ params }: { params: Promise<{ id:
             v.state === 'not_applicable'
               ? 'Nothing to pay the rider'
               : v.state === 'not_ready'
-                ? 'Not ready yet'
+                ? 'Nothing to pay yet'
                 : v.state === 'rider_details_missing'
                   ? 'Payment details are not ready'
                   : 'We need to check this order'
@@ -158,7 +158,7 @@ export default async function PayDeliveryFee({ params }: { params: Promise<{ id:
           {v.state === 'not_applicable'
             ? 'The delivery fee for this order is not paid directly to a rider.'
             : v.state === 'not_ready'
-              ? 'This opens after the order is paid and delivered.'
+              ? 'Nothing is due yet. You pay your rider after the order is delivered, and the button to do it appears on your order page then.'
               : v.state === 'rider_details_missing'
                 ? 'The rider has not added bank details yet. Please check again later. You have not been charged.'
                 : 'Our records for this order do not clearly show whether the delivery fee was already paid, so you are not being asked to pay it. Support will review it.'}

@@ -1,3 +1,4 @@
+import { AutoRefresh } from '@/components/domain/auto-refresh'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
@@ -50,6 +51,7 @@ export default async function Jobs() {
   ])
   return (
     <>
+      <AutoRefresh />
       <PageHeader
         breadcrumbs={[{ label: 'Rider', href: '/rider' }, { label: 'Jobs' }]}
         title="Jobs"

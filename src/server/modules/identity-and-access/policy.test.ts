@@ -4,6 +4,8 @@ import {
   ANONYMOUS,
   ROUTE_POLICIES,
   decideAccess,
+  experienceOf,
+  homeFor,
   isPrivilegedRole,
   policyFor,
   safeNextPath,
@@ -88,7 +90,9 @@ describe('route policy matrix (generated)', () => {
         const needs2 = p.requirement.aal === 'aal2' || (!p.requirement.mfaSetup && staff)
         const aalOk =
           !needs2 || principal.aal === 'aal2' || (!principal.hasVerifiedFactor && !staff)
-        const expected = principal.authenticated && roleOk && aalOk
+        const exp = experienceOf(principal)
+        const homeOk = !p.requirement.customerOnly || exp === 'customer' || exp === 'admin'
+        const expected = principal.authenticated && roleOk && aalOk && homeOk
         expect(d.allow, `${label} on ${p.prefix}`).toBe(expected)
       }
     })
@@ -243,5 +247,50 @@ describe('Administrator / Customer mode', () => {
         mode: 'admin',
       }),
     ).toEqual({ allow: false, action: 'mfa-challenge' })
+  })
+})
+
+describe('one experience per person', () => {
+  const customerOnly = (path: string) => policyFor(path)!.requirement
+  it('picks exactly one interface', () => {
+    expect(experienceOf({ roles: ['customer'] })).toBe('customer')
+    expect(experienceOf({ roles: ['customer', 'vendor_owner'] })).toBe('vendor')
+    expect(experienceOf({ roles: ['customer', 'vendor_staff'] })).toBe('vendor')
+    expect(experienceOf({ roles: ['customer', 'rider'] })).toBe('rider')
+    expect(experienceOf({ roles: ['customer', 'platform_admin'] })).toBe('admin')
+    expect(experienceOf({ roles: ['customer', 'platform_admin'], mode: 'customer' })).toBe(
+      'customer',
+    )
+  })
+  it('sends a shop or a rider home from every shopping screen, never to the customer screens', () => {
+    const paths = [
+      '/cart',
+      '/orders',
+      '/orders/abc',
+      '/checkout',
+      '/apply',
+      '/rider-apply',
+      '/account/wishlist',
+      '/account/addresses',
+      '/account/receipts',
+    ]
+    for (const path of paths) {
+      for (const role of ['vendor_owner', 'vendor_staff', 'rider'] as const) {
+        expect(
+          decideAccess(customerOnly(path), who(['customer', role], 'aal2')),
+          `${role} on ${path}`,
+        ).toEqual({ allow: false, action: 'go-home' })
+      }
+      expect(decideAccess(customerOnly(path), who(['customer'], 'aal2')).allow, path).toBe(true)
+    }
+  })
+  it('keeps the shared account pages open to everyone signed in', () => {
+    for (const path of ['/account', '/account/security', '/notifications', '/cases'])
+      expect(decideAccess(customerOnly(path), who(['customer', 'rider'], 'aal2')).allow).toBe(true)
+  })
+  it('each experience has its own home', () => {
+    expect(homeFor('vendor')).toBe('/vendor')
+    expect(homeFor('rider')).toBe('/rider')
+    expect(homeFor('admin')).toBe('/admin')
   })
 })

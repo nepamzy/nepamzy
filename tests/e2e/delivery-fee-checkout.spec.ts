@@ -114,7 +114,7 @@ test('an administrator switches the mode with a reason; the next delivery order 
   // (the local test-pay button records no ledger entry; the DB suite proves the Paystack-collected amount equals this total)
   // not yet delivered: no payment to the rider is requested
   await c.goto(`/orders/${second}/delivery-fee`)
-  await expect(c.getByText('Not ready yet')).toBeVisible()
+  await expect(c.getByText('Nothing to pay yet')).toBeVisible()
 })
 
 test('the public receipt check is rate limited per address and answers safely', async ({

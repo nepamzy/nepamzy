@@ -13,6 +13,7 @@ import { Menu } from './menu'
 import { ModeBar, ModePill, ModeSwitch } from './mode-switch'
 import type { NavItem } from './nav-config'
 import { BottomNav, SidebarNav } from './nav-links'
+import { SHELL_THEMES, type ShellTheme } from './theme'
 
 const initials = (email?: string) => (email?.trim()[0] ?? '?').toUpperCase()
 
@@ -49,7 +50,7 @@ export async function AppShell({
   moreHref?: string
   children: ReactNode
   signedInAs?: string
-  theme?: 'light' | 'navy'
+  theme?: ShellTheme
   /** Where the header search sends people (customer areas). Omitted where no real search exists. */
   search?: { action: string; placeholder: string }
   showCart?: boolean
@@ -57,35 +58,46 @@ export async function AppShell({
   const who = await loadPrincipal()
   const staff = who.roles.some(isPrivilegedRole)
   const [unread, cart] = await Promise.all([unreadCount(), showCart ? cartItemCount() : 0])
-  const navy = theme === 'navy'
+  const t = SHELL_THEMES[theme]
+  const navy = t.dark
   const email = signedInAs
+  const areaName = area.replace(/^(Vendor|Rider)\s*·?\s*/, '')
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[16rem_1fr]">
       <aside
-        className={`hidden md:flex md:flex-col ${navy ? 'bg-navy-900 text-white' : 'border-r border-line bg-card'} sticky top-0 h-dvh overflow-y-auto p-4`}
+        className={`hidden md:flex md:flex-col ${t.aside} sticky top-0 h-dvh overflow-y-auto p-4`}
       >
         <Logo tone={navy ? 'light' : 'dark'} className="mb-5" />
-        <p
-          className={`mb-3 px-3 text-xs font-bold uppercase tracking-wider ${navy ? 'text-navy-text/80' : 'text-muted'}`}
-        >
-          {area}
-        </p>
+        <p className={`mb-3 px-3 text-xs font-bold uppercase tracking-wider ${t.label}`}>{area}</p>
         <div className="flex-1">
           <SidebarNav items={items} theme={theme} />
         </div>
         {staff && (
-          <div className={`mt-4 border-t pt-4 ${navy ? 'border-white/10' : 'border-line'}`}>
+          <div className={`mt-4 border-t pt-4 ${t.divider}`}>
             <ModeSwitch who={who} dark={navy} />
           </div>
         )}
       </aside>
       <div className="min-w-0">
-        <header className="sticky top-0 z-30 flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-3 border-b border-line border-t-4 border-t-gold-400 bg-card/95 px-4 py-2.5 backdrop-blur">
+        <header
+          className={`sticky top-0 z-30 flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-3 border-b border-line border-t-4 ${t.topBar} bg-card/95 px-4 py-2.5 backdrop-blur`}
+        >
           <MobileDrawer items={items} theme={theme} area={area}>
             {staff && <ModeSwitch who={who} dark={navy} />}
           </MobileDrawer>
           <Logo className="md:hidden" compact />
-          <span className="hidden text-sm font-semibold text-muted md:inline">{area}</span>
+          {t.chip ? (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold ${t.chip}`}
+              data-testid="area-chip"
+            >
+              <Icon name={theme === 'vendor' ? 'store' : 'bike'} size={16} />
+              {t.chipLabel}
+              {areaName && <span className="hidden sm:inline"> · {areaName}</span>}
+            </span>
+          ) : (
+            <span className="hidden text-sm font-semibold text-muted md:inline">{area}</span>
+          )}
           {search && (
             <SearchField
               action={search.action}

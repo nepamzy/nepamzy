@@ -18,7 +18,14 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { confirmEmail, resetCodeEmail } from '@/server/modules/engagement/email-templates'
 import { mailConfig, sendMail, sendMailDetailed } from '@/server/modules/engagement/mail'
 import { checkAccess, loadPrincipal } from './guard'
-import { MODE_COOKIE, isPrivilegedRole, safeNextPath, signUpOutcome } from './policy'
+import {
+  MODE_COOKIE,
+  experienceOf,
+  homeFor,
+  isPrivilegedRole,
+  safeNextPath,
+  signUpOutcome,
+} from './policy'
 import { clientIp, rateLimit, recordSecurityEvent, sha256Hex } from './security'
 
 export type FormState = { ok?: boolean; error?: string; message?: string; email?: string }
@@ -232,6 +239,11 @@ async function finishSignIn(
   // Someone who signed up to sell or deliver is taken to that application until they hold the role.
   const holds = intent === 'vendor' ? 'vendor_owner' : intent === 'rider' ? 'rider' : null
   if (next === '/' && holds && !who.roles.includes(holds)) next = applicationPathFor(intent) ?? next
+  // A shop or a rider starts in its own area, never on the customer screens.
+  if (next === '/') {
+    const home = experienceOf(who)
+    if (home === 'vendor' || home === 'rider') next = homeFor(home)
+  }
   // The "sign in as" choice only picks the interface for accounts that already hold a staff role; for anyone else it is ignored.
   if (staff && chosen) {
     await setModeCookie(chosen)

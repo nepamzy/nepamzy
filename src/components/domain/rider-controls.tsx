@@ -266,6 +266,12 @@ export function LocationSharing({
       }
     }
     const start = () => {
+      // Ask for one reading straight away: some phones and browsers send nothing from a watch until the rider moves.
+      navigator.geolocation.getCurrentPosition(onPosition, () => undefined, {
+        enableHighAccuracy: true,
+        maximumAge: 10_000,
+        timeout: 15_000,
+      })
       watchId = navigator.geolocation.watchPosition(
         onPosition,
         (err) => {

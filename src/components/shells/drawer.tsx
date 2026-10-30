@@ -4,6 +4,7 @@ import { Icon } from '@/components/ui/icons'
 import { SidebarNav } from './nav-links'
 import type { NavItem } from './nav-config'
 import { Logo } from '@/components/ui/logo'
+import { SHELL_THEMES, type ShellTheme } from './theme'
 
 /** Phone navigation drawer: a native <dialog> (focus trap, Escape, inert page) opened from the header menu button. */
 export function MobileDrawer({
@@ -13,7 +14,7 @@ export function MobileDrawer({
   children,
 }: {
   items: NavItem[]
-  theme: 'light' | 'navy'
+  theme: ShellTheme
   area: string
   children?: ReactNode
 }) {
@@ -25,7 +26,8 @@ export function MobileDrawer({
     if (open && !el.open) el.showModal()
     if (!open && el.open) el.close()
   }, [open])
-  const navy = theme === 'navy'
+  const t = SHELL_THEMES[theme]
+  const navy = t.dark
   return (
     <>
       <button
@@ -42,7 +44,7 @@ export function MobileDrawer({
         onClose={() => setOpen(false)}
         onClick={(e) => e.target === ref.current && setOpen(false)}
         aria-label={`${area} navigation`}
-        className={`m-0 h-dvh max-h-none w-[min(20rem,86vw)] max-w-none overflow-y-auto p-4 backdrop:bg-black/50 ${navy ? 'bg-navy-900 text-white' : 'bg-card text-ink'}`}
+        className={`m-0 h-dvh max-h-none w-[min(20rem,86vw)] max-w-none overflow-y-auto p-4 backdrop:bg-black/50 ${navy ? t.aside : 'bg-card text-ink'}`}
       >
         <div className="mb-4 flex items-center justify-between">
           <Logo tone={navy ? 'light' : 'dark'} />
@@ -55,11 +57,7 @@ export function MobileDrawer({
             <Icon name="close" size={22} />
           </button>
         </div>
-        <p
-          className={`mb-3 px-3 text-xs font-bold uppercase tracking-wider ${navy ? 'text-navy-text/80' : 'text-muted'}`}
-        >
-          {area}
-        </p>
+        <p className={`mb-3 px-3 text-xs font-bold uppercase tracking-wider ${t.label}`}>{area}</p>
         <SidebarNav items={items} theme={theme} onNavigate={() => setOpen(false)} />
         {children && <div className="mt-5 border-t border-white/10 pt-4">{children}</div>}
       </dialog>

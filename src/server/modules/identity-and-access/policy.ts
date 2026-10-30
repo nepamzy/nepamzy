@@ -30,6 +30,24 @@ export const ALL_ROLES: AppRole[] = [
 export const isPrivilegedRole = (r: AppRole) =>
   r === 'platform_admin' || r === 'finance_admin' || r === 'support_agent'
 
+/** Roles that belong to a shop or a rider. An account holding one of these lives in that area, not in the customer area. */
+export const isBusinessRole = (r: AppRole) =>
+  r === 'vendor_owner' || r === 'vendor_staff' || r === 'rider'
+
+/** Which interface a person works in. Exactly one, so a shop or a rider never lands on the customer screens. */
+export type Experience = 'admin' | 'vendor' | 'rider' | 'customer'
+
+export const experienceOf = (who: Pick<Principal, 'roles' | 'mode'>): Experience => {
+  if (who.roles.some(isPrivilegedRole) && who.mode !== 'customer') return 'admin'
+  if (who.roles.some((r) => r === 'vendor_owner' || r === 'vendor_staff')) return 'vendor'
+  if (who.roles.includes('rider')) return 'rider'
+  return 'customer'
+}
+
+/** Where each experience starts, and where a wrong-area visit is sent back to. */
+export const homeFor = (e: Experience): string =>
+  ({ admin: '/admin', vendor: '/vendor', rider: '/rider', customer: '/products' })[e]
+
 export type Principal = {
   authenticated: boolean
   userId: string | null
@@ -57,11 +75,16 @@ export type AccessRequirement = {
   aal: Aal
   /** MFA enrollment/challenge pages themselves must be reachable at aal1. */
   mfaSetup?: boolean
+  /** Shopping screens: shops and riders are sent to their own area instead of seeing them. */
+  customerOnly?: boolean
 }
 
 export type Decision =
   | { allow: true }
-  | { allow: false; action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' | 'switch-mode' }
+  | {
+      allow: false
+      action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' | 'switch-mode' | 'go-home'
+    }
 
 export function decideAccess(req: AccessRequirement, who: Principal): Decision {
   if (!who.authenticated) return { allow: false, action: 'login' }
@@ -69,6 +92,9 @@ export function decideAccess(req: AccessRequirement, who: Principal): Decision {
     return { allow: false, action: 'forbidden' }
   }
   const staff = who.roles.some((r) => isPrivilegedRole(r))
+  // Shopping screens belong to customers: a shop or a rider account goes back to its own area.
+  if (req.customerOnly && experienceOf(who) !== 'customer' && experienceOf(who) !== 'admin')
+    return { allow: false, action: 'go-home' }
   // A staff-only area is closed while the person is browsing in Customer mode: they switch back on purpose.
   if (req.roles && req.roles.every((r) => isPrivilegedRole(r)) && who.mode === 'customer')
     return { allow: false, action: 'switch-mode' }
@@ -154,14 +180,19 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   },
   { prefix: '/vendor', requirement: { roles: ['vendor_owner', 'vendor_staff'], aal: 'aal2' } },
   { prefix: '/rider', requirement: { roles: ['rider'], aal: 'aal2' } },
-  { prefix: '/orders', requirement: { roles: ['customer'], aal: 'aal2' } },
+  { prefix: '/orders', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   // The cart is usable at aal1 by plain customers (privileged accounts are lifted to aal2 by decideAccess);
   // checkout, vendor applications and everything that creates orders need aal2.
-  { prefix: '/cart', requirement: { roles: ['customer'], aal: 'aal1' } },
-  { prefix: '/checkout', requirement: { roles: ['customer'], aal: 'aal2' } },
-  { prefix: '/apply', requirement: { roles: ['customer'], aal: 'aal2' } },
-  { prefix: '/rider-apply', requirement: { roles: ['customer'], aal: 'aal2' } },
+  { prefix: '/cart', requirement: { roles: ['customer'], aal: 'aal1', customerOnly: true } },
+  { prefix: '/checkout', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
+  { prefix: '/apply', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
+  { prefix: '/rider-apply', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   { prefix: '/account', requirement: { aal: 'aal2' } },
+  // Customer-only parts of the account: a shop or a rider has its own profile and settings instead.
+  ...['wishlist', 'addresses', 'receipts'].map((p) => ({
+    prefix: `/account/${p}`,
+    requirement: { aal: 'aal2' as const, customerOnly: true },
+  })),
   { prefix: '/notifications', requirement: { aal: 'aal2' } },
   // Reports (support cases): customers, shops and riders who are a party see their own; the database decides which.
   { prefix: '/cases', requirement: { aal: 'aal2' } },
