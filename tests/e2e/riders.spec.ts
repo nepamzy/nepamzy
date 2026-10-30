@@ -160,15 +160,10 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect(r.getByText('Location sharing is')).toBeVisible()
 
   // ---- tracking starts the moment the rider accepts: the customer already sees the rider on the map ----
-  await expect
-    .poll(
-      async () => {
-        await c.goto(`/orders/${orderId}`)
-        return c.getByRole('region', { name: /Live map showing your rider/ }).isVisible()
-      },
-      { timeout: 60000, intervals: [3000] },
-    )
-    .toBe(true)
+  await c.goto(`/orders/${orderId}`)
+  await expect(c.getByRole('region', { name: /Live map showing your rider/ })).toBeVisible({
+    timeout: 60000,
+  })
 
   // ---- vendor-to-rider handover token: wrong code refused, real one works once ----
   await r.getByRole('button', { name: 'Show handover code to vendor' }).click()
