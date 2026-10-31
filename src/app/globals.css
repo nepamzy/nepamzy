@@ -129,3 +129,10 @@ body {
 .afit-pin-stale {
   opacity: 0.55;
 }
+
+/* Accuracy circle around a rough position (live-map.tsx). */
+.afit-accuracy {
+  stroke: var(--color-brand-700);
+  fill: var(--color-brand-700);
+  fill-opacity: 0.12;
+}

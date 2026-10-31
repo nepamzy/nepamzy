@@ -73,6 +73,28 @@ describe('live map in both directions', () => {
     })
   })
 
+  it('a rough position (a few km) is accepted and the rider is told how rough it is', async () => {
+    await isoTx(async (c) => {
+      const o = await deliveryOrder(c)
+      const r = await mkRider(c)
+      const a = await accept(c, r.id, o.order)
+      expect(
+        (
+          await callJson(
+            c,
+            AAL2(o.cust),
+            `select public.customer_post_location($1, 0.01, 0.01, 2500) r`,
+            [o.order],
+          )
+        ).accepted,
+      ).toBe(true)
+      const map = await callJson(c, rider(r.id), `select public.rider_job_map($1) r`, [
+        a.assignment_id,
+      ])
+      expect(map.customer.accuracy_m).toBe(2500)
+    })
+  })
+
   it('inaccurate or impossible positions are refused, and the table has no direct access', async () => {
     await isoTx(async (c) => {
       const o = await deliveryOrder(c)
@@ -80,9 +102,12 @@ describe('live map in both directions', () => {
       await accept(c, r.id, o.order)
       expect(
         (
-          await callJson(c, AAL2(o.cust), `select public.customer_post_location($1, 0, 0, 900) r`, [
-            o.order,
-          ])
+          await callJson(
+            c,
+            AAL2(o.cust),
+            `select public.customer_post_location($1, 0, 0, 9000) r`,
+            [o.order],
+          )
         ).reason,
       ).toBe('inaccurate')
       expect(

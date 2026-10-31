@@ -75,7 +75,14 @@ export function OrderTracking({ orderId, mapKey }: { orderId: string; mapKey?: s
       lng: dest.lng,
       label: dest.label ?? 'Delivery point',
     })
-  if (share.me) pins.push({ id: 'me', lat: share.me.lat, lng: share.me.lng, label: 'You' })
+  if (share.me)
+    pins.push({
+      id: 'me',
+      lat: share.me.lat,
+      lng: share.me.lng,
+      label: 'You',
+      radiusM: share.me.accuracy,
+    })
 
   const body = !t ? (
     <p role="status">{err ? 'Tracking is unavailable right now.' : 'Loading tracking…'}</p>
@@ -146,7 +153,7 @@ export function OrderTracking({ orderId, mapKey }: { orderId: string; mapKey?: s
 /** The customer's own position, sent only while they have switched sharing on. */
 function useShareLocation(orderId: string) {
   const [on, setOn] = useState(false)
-  const [me, setMe] = useState<{ lat: number; lng: number } | null>(null)
+  const [me, setMe] = useState<{ lat: number; lng: number; accuracy: number } | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const watch = useRef<number | null>(null)
   const lastSent = useRef(0)
@@ -180,7 +187,11 @@ function useShareLocation(orderId: string) {
     setOn(true)
     watch.current = navigator.geolocation.watchPosition(
       async (pos) => {
-        setMe({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        setMe({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+        })
         const now = Date.now()
         if (now - lastSent.current < 8000) return
         lastSent.current = now

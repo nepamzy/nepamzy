@@ -8,7 +8,13 @@ type JobMap =
       active: true
       destination: { label: string | null; lat: number | null; lng: number | null }
       rider: { lat: number; lng: number; age_seconds: number } | null
-      customer: { lat: number; lng: number; age_seconds: number; stale: boolean } | null
+      customer: {
+        lat: number
+        lng: number
+        accuracy_m?: number
+        age_seconds: number
+        stale: boolean
+      } | null
     }
 
 /** The rider's map for one delivery: themselves, the delivery point, and the customer if they chose to share. */
@@ -55,6 +61,7 @@ export function RiderJobMap({
       lng: m.customer.lng,
       label: 'Customer',
       stale: m.customer.stale,
+      radiusM: m.customer.accuracy_m,
     })
   if (pins.length === 0) return null
   return (
@@ -64,7 +71,9 @@ export function RiderJobMap({
         {m.customer
           ? m.customer.stale
             ? `The customer shared their location ${m.customer.age_seconds}s ago (out of date).`
-            : 'The customer is sharing where they are (blue pin).'
+            : (m.customer.accuracy_m ?? 0) >= 300
+              ? `The customer is sharing roughly where they are (blue circle, about ${Math.round((m.customer.accuracy_m ?? 0) / 100) / 10} km wide). Ask them to move closer or call if you cannot find them.`
+              : 'The customer is sharing where they are (blue pin).'
           : 'The customer has not shared their location. Head for the red flag.'}
       </p>
     </div>

@@ -164,6 +164,9 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect(c.getByRole('region', { name: /Live map showing your rider/ })).toBeVisible({
     timeout: 60000,
   })
+  // the pins themselves must be drawn, not just the map box
+  await expect(c.locator('.afit-pin-rider')).toBeVisible({ timeout: 60000 })
+  await expect(c.locator('.afit-pin-destination')).toBeVisible()
 
   // ---- vendor-to-rider handover token: wrong code refused, real one works once ----
   await r.getByRole('button', { name: 'Show handover code to vendor' }).click()
@@ -224,6 +227,9 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect(r.getByText(/The customer is sharing where they are/)).toBeVisible({
     timeout: 30000,
   })
+  await expect(r.locator('.afit-pin-customer')).toBeVisible()
+  await expect(r.locator('.afit-pin-rider')).toBeVisible()
+  await expect(r.locator('.afit-pin-destination')).toBeVisible()
   await c.getByRole('button', { name: 'Stop sharing my location' }).click()
   await expect(c.getByText('Sharing stopped.')).toBeVisible()
   await r.reload()

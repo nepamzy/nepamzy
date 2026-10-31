@@ -9,8 +9,12 @@ export type MapPin = {
   label: string
   /** Last update is old: the pin is drawn faded. */
   stale?: boolean
+  /** How roughly the position is known, in metres: drawn as a circle when it is wide enough to matter. */
+  radiusM?: number
 }
 
+// People are drawn above the delivery-point flag, so a rider standing at the flag is still visible.
+const Z: Record<MapPin['id'], number> = { rider: 1000, customer: 900, me: 900, destination: 0 }
 const CLASS: Record<MapPin['id'], string> = {
   rider: 'afit-pin afit-pin-rider',
   customer: 'afit-pin afit-pin-customer',
@@ -43,6 +47,7 @@ export function LiveMap({
     map: import('leaflet').Map
     L: typeof import('leaflet')
     markers: Map<string, import('leaflet').Marker>
+    circles: Map<string, import('leaflet').Circle>
     fitted: string
   } | null>(null)
   const latest = useRef(pins)
@@ -50,13 +55,36 @@ export function LiveMap({
   const sync = () => {
     const s = state.current
     if (!s) return
-    const { L, map, markers } = s
+    const { L, map, markers, circles } = s
     const now = latest.current
     for (const [id, m] of markers)
       if (!now.some((p) => p.id === id)) {
         m.remove()
         markers.delete(id)
       }
+    for (const [id, c] of circles)
+      if (!now.some((p) => p.id === id && (p.radiusM ?? 0) >= 60)) {
+        c.remove()
+        circles.delete(id)
+      }
+    // A rough position is drawn as a circle, so nobody mistakes "somewhere around here" for an exact spot.
+    for (const p of now) {
+      if ((p.radiusM ?? 0) < 60) continue
+      const c = circles.get(p.id)
+      if (c) {
+        c.setLatLng([p.lat, p.lng])
+        c.setRadius(p.radiusM!)
+      } else
+        circles.set(
+          p.id,
+          L.circle([p.lat, p.lng], {
+            radius: p.radiusM!,
+            className: 'afit-accuracy',
+            weight: 2,
+            interactive: false,
+          }).addTo(map),
+        )
+    }
     for (const p of now) {
       const icon = L.divIcon({
         className: '',
@@ -69,9 +97,12 @@ export function LiveMap({
         m.setLatLng([p.lat, p.lng])
         m.setIcon(icon)
       } else {
-        const created = L.marker([p.lat, p.lng], { icon, title: p.label, keyboard: false }).addTo(
-          map,
-        )
+        const created = L.marker([p.lat, p.lng], {
+          icon,
+          title: p.label,
+          keyboard: false,
+          zIndexOffset: Z[p.id],
+        }).addTo(map)
         markers.set(p.id, created)
       }
     }
@@ -112,7 +143,7 @@ export function LiveMap({
       L.tileLayer(`${host}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}${q}`, {
         maxZoom: 19,
       }).addTo(map)
-      state.current = { map, L, markers: new Map(), fitted: '' }
+      state.current = { map, L, markers: new Map(), circles: new Map(), fitted: '' }
       sync()
     })()
     return () => {
