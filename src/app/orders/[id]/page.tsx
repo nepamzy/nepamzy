@@ -166,7 +166,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         ) && (
           <Card className="mb-5 space-y-2">
             <h2 className="text-lg font-extrabold text-navy-900">Delivery tracking</h2>
-            <OrderTracking orderId={order.id} />
+            <OrderTracking orderId={order.id} mapKey={process.env.ARCGIS_API_KEY ?? null} />
           </Card>
         )}
 

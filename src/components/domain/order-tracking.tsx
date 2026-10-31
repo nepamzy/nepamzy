@@ -32,7 +32,7 @@ const WHY: Record<string, string> = {
 }
 
 /** Polls a protected server route (no direct database access, no Realtime) every 15 seconds. */
-export function OrderTracking({ orderId }: { orderId: string }) {
+export function OrderTracking({ orderId, mapKey }: { orderId: string; mapKey?: string | null }) {
   const [t, setT] = useState<Tracking | null>(null)
   const [err, setErr] = useState(false)
   const share = useShareLocation(orderId)
@@ -111,7 +111,11 @@ export function OrderTracking({ orderId }: { orderId: string }) {
   return (
     <div className="space-y-3" aria-live="polite">
       {pins.length > 0 && (
-        <LiveMap pins={pins} label="Live map showing your rider and your delivery point" />
+        <LiveMap
+          pins={pins}
+          mapKey={mapKey}
+          label="Live map showing your rider and your delivery point"
+        />
       )}
       {body}
       <div className="rounded-[var(--radius-control)] border border-line p-3">
@@ -151,7 +155,15 @@ function useShareLocation(orderId: string) {
     if (watch.current !== null) navigator.geolocation.clearWatch(watch.current)
     watch.current = null
   }
+  const remember = (v: 'on' | 'off') => {
+    try {
+      localStorage.setItem('afit-share-location', v)
+    } catch {
+      /* private window: the choice just is not remembered */
+    }
+  }
   const stop = () => {
+    remember('off')
     halt()
     setOn(false)
     setMe(null)
@@ -159,6 +171,7 @@ function useShareLocation(orderId: string) {
     void stopCustomerLocationAction(orderId)
   }
   const start = () => {
+    remember('on')
     if (!('geolocation' in navigator)) {
       setNote('This browser cannot share location.')
       return
@@ -193,6 +206,24 @@ function useShareLocation(orderId: string) {
       { enableHighAccuracy: true, maximumAge: 10_000, timeout: 30_000 },
     )
   }
-  useEffect(() => halt, [])
+  // Already allowed on this device and not switched off: start by itself, so the rider can find the customer from the
+  // moment the order is accepted without the customer having to tap anything.
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        if (localStorage.getItem('afit-share-location') === 'off') return
+        const perm = await navigator.permissions?.query({ name: 'geolocation' })
+        if (!cancelled && perm?.state === 'granted') start()
+      } catch {
+        /* no permissions API: the customer taps the button instead */
+      }
+    })()
+    return () => {
+      cancelled = true
+      halt()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return { on, me, note, start, stop }
 }

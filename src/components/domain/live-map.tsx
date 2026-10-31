@@ -23,14 +23,20 @@ const TEXT: Record<MapPin['id'], string> = { rider: 'R', customer: 'C', me: 'Me'
  * Satellite map (Esri World Imagery tiles + place labels) with a pin for each person or place. Pins move as the props
  * change; the view re-fits only when a pin appears or disappears, so a person who zooms in is not pulled back.
  */
+const FREE_HOST = 'https://server.arcgisonline.com/ArcGIS/rest/services'
+const KEYED_HOST = 'https://ibasemaps-api.arcgis.com/arcgis/rest/services'
+
 export function LiveMap({
   pins,
   label,
   height = 280,
+  mapKey,
 }: {
   pins: MapPin[]
   label: string
   height?: number
+  /** ArcGIS Location Platform API key. It is public by design: restrict it to the site's address in the ArcGIS dashboard. */
+  mapKey?: string | null
 }) {
   const box = useRef<HTMLDivElement>(null)
   const state = useRef<{
@@ -95,14 +101,17 @@ export function LiveMap({
         zoom: first ? 16 : 2,
         attributionControl: false,
       })
-      L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        { maxZoom: 19, attribution: 'Esri' },
-      ).addTo(map)
-      L.tileLayer(
-        'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-        { maxZoom: 19 },
-      ).addTo(map)
+      // With an ArcGIS Location Platform key the maps are metered to the owner's own account; without one the free
+      // public tiles are used.
+      const host = mapKey ? KEYED_HOST : FREE_HOST
+      const q = mapKey ? `?token=${encodeURIComponent(mapKey)}` : ''
+      L.tileLayer(`${host}/World_Imagery/MapServer/tile/{z}/{y}/{x}${q}`, {
+        maxZoom: 19,
+        attribution: 'Esri',
+      }).addTo(map)
+      L.tileLayer(`${host}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}${q}`, {
+        maxZoom: 19,
+      }).addTo(map)
       state.current = { map, L, markers: new Map(), fitted: '' }
       sync()
     })()
@@ -111,7 +120,7 @@ export function LiveMap({
       state.current?.map.remove()
       state.current = null
     }
-  }, [])
+  }, [mapKey])
 
   useEffect(() => {
     latest.current = pins

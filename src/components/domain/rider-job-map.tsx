@@ -12,7 +12,13 @@ type JobMap =
     }
 
 /** The rider's map for one delivery: themselves, the delivery point, and the customer if they chose to share. */
-export function RiderJobMap({ assignmentId }: { assignmentId: string }) {
+export function RiderJobMap({
+  assignmentId,
+  mapKey,
+}: {
+  assignmentId: string
+  mapKey?: string | null
+}) {
   const [m, setM] = useState<JobMap | null>(null)
   useEffect(() => {
     let stop = false
@@ -53,7 +59,7 @@ export function RiderJobMap({ assignmentId }: { assignmentId: string }) {
   if (pins.length === 0) return null
   return (
     <div className="space-y-1">
-      <LiveMap pins={pins} label="Map of your delivery" height={240} />
+      <LiveMap pins={pins} mapKey={mapKey} label="Map of your delivery" height={240} />
       <p className="text-sm">
         {m.customer
           ? m.customer.stale

@@ -230,6 +230,13 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect(r.getByText(/The customer has not shared their location/)).toBeVisible({
     timeout: 30000,
   })
+  // the choice is remembered: after stopping, a reload does not start sharing again...
+  await c.reload()
+  await expect(c.getByRole('button', { name: 'Share my location with my rider' })).toBeVisible()
+  // ...but a customer who has allowed location and has not switched it off is shared automatically
+  await c.evaluate(() => localStorage.removeItem('afit-share-location'))
+  await c.reload()
+  await expect(c.getByText('Your rider can see where you are.')).toBeVisible({ timeout: 30000 })
 
   // privacy: other accounts cannot read this order's tracking
   const stranger = await openSession(browser, info, 'rs')

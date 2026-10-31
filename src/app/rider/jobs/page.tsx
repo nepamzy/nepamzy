@@ -108,7 +108,10 @@ export default async function Jobs() {
                         : 0
                 }
               />
-              <RiderJobMap assignmentId={a.assignment_id} />
+              <RiderJobMap
+                assignmentId={a.assignment_id}
+                mapKey={process.env.ARCGIS_API_KEY ?? null}
+              />
               <p>
                 <strong>Collect from:</strong> {a.vendor_name}
                 {a.pickup ? ` · ${a.pickup}` : ''}
