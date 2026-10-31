@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -120,7 +121,7 @@ export async function completePickupAction(_p: ActionState, fd: FormData): Promi
   }
   revalidatePath('/vendor/handover')
   revalidatePath('/vendor/orders')
-  return done('Handover complete. Receipt is available to the customer.')
+  redirect('/vendor/handover?done=pickup')
 }
 
 // ---------------------------------------------------------------------------------------------

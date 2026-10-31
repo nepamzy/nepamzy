@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { RefundRequestForm, ResolveFlagForm } from '@/components/domain/finance-forms'
 import { Badge } from '@/components/ui/badge'
@@ -49,9 +50,7 @@ export default async function PaymentsAdmin() {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="warning">{f.reason.replaceAll('_', ' ')}</Badge>
                 {f.order_number && <span className="font-semibold">{f.order_number}</span>}
-                <span className="text-sm text-muted">
-                  {new Date(f.created_at).toLocaleString('en-NG')}
-                </span>
+                <span className="text-sm text-muted">{lagosDateTime(f.created_at)}</span>
               </div>
               <p>{WHY[f.reason] ?? f.reason}</p>
               <ResolveFlagForm flagId={f.id} />

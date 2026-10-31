@@ -1,4 +1,5 @@
 'use client'
+import { lagosTime } from '@/lib/time'
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { ActionForm } from '@/components/forms/action-form'
 import { Button } from '@/components/ui/button'
@@ -258,7 +259,7 @@ export function LocationSharing({
       if (r.accepted) {
         setLive('sharing')
         setNote(null)
-        setLast(new Date().toLocaleTimeString('en-NG'))
+        setLast(lagosTime(new Date(), true))
       } else if (r.reason === 'tracking_not_active') {
         setLive('paused')
       } else {

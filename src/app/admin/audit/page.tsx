@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { PageHeader } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -56,7 +57,7 @@ export default async function AuditPage({
             </EmptyState>
           }
           columns={[
-            { header: 'When', cell: (e) => new Date(e.occurred_at).toLocaleString('en-NG') },
+            { header: 'When', cell: (e) => lagosDateTime(e.occurred_at) },
             {
               header: 'Who',
               cell: (e) => (

@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest'
-import { AAL2, as, createUser, pool, PRIV_DENIED } from './helpers'
+import { AAL2, as, createUser, giveRole, mkDeliveryPoint, pool, PRIV_DENIED } from './helpers'
 import { accept, callFails, callJson, deliveryOrder, isoTx, mkRider, rider } from './rider-helpers'
 
 afterAll(async () => {
@@ -126,6 +126,42 @@ describe('live map in both directions', () => {
         }
       })
       expect(direct).toBe('denied')
+    })
+  })
+})
+
+describe('delivery points on the real map', () => {
+  it('only an administrator can set coordinates; bad numbers are refused; "real place" switches off the placeholder flag', async () => {
+    await isoTx(async (c) => {
+      const pt = await mkDeliveryPoint(c, { lat: 0.01, lng: 0.01, radius: 60 })
+      const admin = await createUser(c, 'admin')
+      await giveRole(c, admin, 'platform_admin')
+      const customer = await createUser(c, 'plain')
+      const set = `select public.delivery_point_set_geo($1, $2, $3, $4, $5)`
+      expect((await callFails(c, AAL2(customer), set, [pt, 10.5105, 7.4165, 60, true])).code).toBe(
+        PRIV_DENIED,
+      )
+      expect((await callFails(c, AAL2(admin), set, [pt, 95, 7.4, 60, true])).message).toMatch(
+        /invalid_coordinates/,
+      )
+      expect((await callFails(c, AAL2(admin), set, [pt, 10.5, 7.4, 5, true])).message).toMatch(
+        /invalid_radius/,
+      )
+      await as(c, AAL2(admin), async () => {
+        await c.query(set, [pt, 10.5105, 7.4165, 80, true])
+      })
+      const row = (
+        await c.query(
+          `select lat, lng, geofence_radius_m, is_synthetic from public.approved_delivery_points where id = $1`,
+          [pt],
+        )
+      ).rows[0]
+      expect(row).toMatchObject({
+        lat: 10.5105,
+        lng: 7.4165,
+        geofence_radius_m: 80,
+        is_synthetic: false,
+      })
     })
   })
 })

@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -128,7 +129,7 @@ export default async function AdminOrder({ params }: { params: Promise<{ id: str
               {order.fulfilment === 'delivery'
                 ? row('Delivery point', order.delivery_point_label)
                 : row('Pickup location', order.pickup_location_snapshot ?? order.vendor_name)}
-              {row('Placed', new Date(order.created_at).toLocaleString('en-NG'))}
+              {row('Placed', lagosDateTime(order.created_at))}
               {row(
                 'Customer reference',
                 <code className="text-sm">{order.customer_id.slice(0, 8)}</code>,
@@ -140,9 +141,7 @@ export default async function AdminOrder({ params }: { params: Promise<{ id: str
             <Timeline
               steps={history.map((h, i) => ({
                 label: label(h.to_status),
-                detail:
-                  new Date(h.created_at).toLocaleString('en-NG') +
-                  (h.reason ? ` · ${h.reason}` : ''),
+                detail: lagosDateTime(h.created_at) + (h.reason ? ` · ${h.reason}` : ''),
                 state: i === history.length - 1 ? 'current' : 'done',
               }))}
             />

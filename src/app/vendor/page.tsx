@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OrderStatusPill } from '@/components/domain/order-status'
@@ -222,7 +223,7 @@ export default async function VendorHome() {
               cell: (o) => <Money kobo={o.items_total_kobo} />,
             },
             { header: 'Status', cell: (o) => <OrderStatusPill code={o.status} /> },
-            { header: 'Placed', cell: (o) => new Date(o.created_at).toLocaleString('en-NG') },
+            { header: 'Placed', cell: (o) => lagosDateTime(o.created_at) },
           ]}
         />
       </Section>

@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -76,8 +77,7 @@ export default async function Applications({
                 <div>
                   <p className="text-lg font-extrabold text-navy-900">{a.business_name}</p>
                   <p className="text-sm text-muted">
-                    {a.category} · {a.contact_phone} ·{' '}
-                    {new Date(a.created_at).toLocaleDateString('en-NG')}
+                    {a.category} · {a.contact_phone} · {lagosDate(a.created_at)}
                   </p>
                 </div>
                 <p>{a.description}</p>

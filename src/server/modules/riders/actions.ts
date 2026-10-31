@@ -3,6 +3,7 @@
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
 import { notifyApplicationReceived } from '@/server/modules/engagement/dispatch'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import type { AccessRequirement } from '@/server/modules/identity-and-access/policy'
@@ -236,5 +237,6 @@ export async function confirmRiderPickupAction(
   }
   revalidatePath('/vendor/handover')
   revalidatePath('/vendor/orders')
-  return done('Parcel handed to the rider.')
+  // The card leaves the list once handed over, so the confirmation is shown on the page instead.
+  redirect('/vendor/handover?done=rider')
 }

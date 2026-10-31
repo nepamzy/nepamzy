@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -46,11 +47,8 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
             )}
             {row('Email confirmed', u.email_confirmed ? 'Yes' : 'No')}
             {row('Two-step sign-in', u.has_authenticator ? 'On' : 'Off')}
-            {row('Joined', new Date(u.created_at).toLocaleString('en-NG'))}
-            {row(
-              'Last sign-in',
-              u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleString('en-NG') : 'Never',
-            )}
+            {row('Joined', lagosDateTime(u.created_at))}
+            {row('Last sign-in', u.last_sign_in_at ? lagosDateTime(u.last_sign_in_at) : 'Never')}
           </dl>
         </Card>
         <Card>

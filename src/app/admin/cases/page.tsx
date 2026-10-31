@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -49,9 +50,7 @@ export default async function AdminCases({
               <span>{c.case_type.replaceAll('_', ' ')}</span>
               <Badge tone="info">{c.status.replaceAll('_', ' ')}</Badge>
               {c.decision && <Badge tone="brand">{c.decision.replaceAll('_', ' ')}</Badge>}
-              <span className="text-sm text-muted">
-                {new Date(c.created_at).toLocaleString('en-NG')}
-              </span>
+              <span className="text-sm text-muted">{lagosDateTime(c.created_at)}</span>
             </Card>
           ))}
         </div>

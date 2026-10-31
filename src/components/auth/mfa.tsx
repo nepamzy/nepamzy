@@ -1,4 +1,5 @@
 'use client'
+import { lagosDate } from '@/lib/time'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
@@ -203,9 +204,7 @@ export function FactorList({
             <Card className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-3">
               <div>
                 <p className="font-semibold">{f.name}</p>
-                <p className="text-sm text-muted">
-                  Added {new Date(f.createdAt).toLocaleDateString('en-NG')}
-                </p>
+                <p className="text-sm text-muted">Added {lagosDate(f.createdAt)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Badge tone={f.status === 'verified' ? 'success' : 'warning'}>

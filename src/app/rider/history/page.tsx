@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { StatusBadge } from '@/components/domain/delivery-fee-view'
 import { RiderFreeNotice } from '@/components/domain/rider-free-notice'
@@ -77,7 +78,7 @@ export default async function RiderHistory({
           { header: 'Delivered to', cell: (r) => r.deliver_to ?? 'Not recorded' },
           {
             header: 'Finished',
-            cell: (r) => new Date(r.finished_at).toLocaleString('en-NG'),
+            cell: (r) => lagosDateTime(r.finished_at),
           },
           {
             header: 'Delivery fee',

@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import { DataRequestForm } from '@/components/domain/engagement-forms'
 import { Badge } from '@/components/ui/badge'
@@ -43,9 +44,7 @@ export default async function DataRequests() {
                   >
                     {r.status.replaceAll('_', ' ')}
                   </Badge>
-                  <span className="text-sm text-muted">
-                    {new Date(r.created_at).toLocaleDateString('en-NG')}
-                  </span>
+                  <span className="text-sm text-muted">{lagosDate(r.created_at)}</span>
                 </p>
                 {r.response_note && <p className="text-sm">Reply: {r.response_note}</p>}
               </Card>

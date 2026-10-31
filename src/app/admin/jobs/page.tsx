@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
@@ -7,7 +8,7 @@ import { deadNotifications, jobHealth } from '@/server/modules/engagement/querie
 
 export const metadata: Metadata = { title: 'Background jobs' }
 
-const when = (v: string | null) => (v ? new Date(v).toLocaleString('en-NG') : 'never')
+const when = (v: string | null) => (v ? lagosDateTime(v) : 'never')
 
 export default async function Jobs() {
   const h = await jobHealth()

@@ -167,6 +167,23 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   // the pins themselves must be drawn, not just the map box
   await expect(c.locator('.afit-pin-rider')).toBeVisible({ timeout: 60000 })
   await expect(c.locator('.afit-pin-destination')).toBeVisible()
+  // the rider pin MOVES when the rider moves: its position relative to the (fixed) delivery flag changes
+  const offset = async () => {
+    const rb = await c.locator('.afit-pin-rider').boundingBox()
+    const fb = await c.locator('.afit-pin-destination').boundingBox()
+    return { dx: rb!.x - fb!.x, dy: rb!.y - fb!.y }
+  }
+  const before = await offset()
+  await moveTo(riderUser.context, { latitude: 0.0112, longitude: 0.0112, accuracy: 10 })
+  await expect
+    .poll(
+      async () => {
+        const o = await offset()
+        return Math.abs(o.dx - before.dx) + Math.abs(o.dy - before.dy)
+      },
+      { timeout: 90000, intervals: [3000] },
+    )
+    .toBeGreaterThan(5)
 
   // ---- vendor-to-rider handover token: wrong code refused, real one works once ----
   await r.getByRole('button', { name: 'Show handover code to vendor' }).click()
@@ -215,7 +232,7 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   await expect(c.getByRole('heading', { name: 'Delivery tracking' })).toBeVisible()
   await expect(c.getByRole('region', { name: /Live map showing your rider/ })).toBeVisible()
   await expect(c.getByText(/about \d+ min/)).toBeVisible()
-  await expect(c.getByText(/SAMPLE route service|approximation/)).toBeVisible()
+  await expect(c.getByText(/SAMPLE estimate|Approximate time and distance/)).toBeVisible()
   await a11yClean(c, '/orders/[id] (tracking)')
 
   // ---- two-way map: the customer chooses to share where they are, and the rider sees it; stopping hides it ----

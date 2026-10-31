@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import { Alert } from '@/components/ui/alert'
 import { BarChart } from '@/components/ui/bar-chart'
@@ -14,7 +15,7 @@ import { getMyVendor } from '@/server/modules/vendors-and-catalogue/vendor-queri
 export const metadata: Metadata = { title: 'Earnings' }
 
 const pct = (bps: number) => `${(bps / 100).toFixed(bps % 100 === 0 ? 0 : 1)}%`
-const day = (v: string) => new Date(v).toLocaleDateString('en-NG')
+const day = (v: string) => lagosDate(v)
 
 export default async function Earnings() {
   const vendor = await getMyVendor()

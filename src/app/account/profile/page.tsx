@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import { ProfileForm } from '@/components/domain/customer-forms'
 import { Card, PageHeader } from '@/components/ui/card'
@@ -19,7 +20,7 @@ export default async function ProfilePage() {
         </p>
         <p className="text-sm text-muted">
           Your email is your sign-in. It cannot be changed here yet.
-          {p.createdAt ? ` Member since ${new Date(p.createdAt).toLocaleDateString('en-NG')}.` : ''}
+          {p.createdAt ? ` Member since ${lagosDate(p.createdAt)}.` : ''}
         </p>
         <ProfileForm displayName={p.displayName ?? ''} />
       </Card>
