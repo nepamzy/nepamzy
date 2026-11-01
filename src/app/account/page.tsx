@@ -4,10 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/card'
 import { Icon, type IconName } from '@/components/ui/icons'
 import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
-import {
-  experienceOf,
-  homeFor,
-} from '@/server/modules/identity-and-access/policy'
+import { experienceOf, homeFor } from '@/server/modules/identity-and-access/policy'
 import { myProfile } from '@/server/modules/customer/queries'
 
 export const metadata: Metadata = { title: 'My account' }
