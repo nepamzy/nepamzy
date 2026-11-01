@@ -5,8 +5,11 @@ test('the AFIT Market logo is used for the browser tab, the installed app and li
   request,
 }) => {
   await page.goto('/')
-  // header logo
-  await expect(page.locator('header img[alt="AFIT Market"]').first()).toBeVisible()
+  // header: the mark and the name written out as text
+  const logo = page.locator('header').getByRole('link', { name: 'AFIT Market home' }).first()
+  await expect(logo.locator('img[src="/brand/mark.png"]')).toBeVisible()
+  await expect(logo).toContainText('AFIT')
+  await expect(logo).toContainText('MARKET')
   const head = await page.evaluate(() => ({
     icons: [...document.querySelectorAll('link[rel~="icon"], link[rel="apple-touch-icon"]')].map(
       (l) => (l as HTMLLinkElement).href,
@@ -36,6 +39,6 @@ test('the AFIT Market logo is used for the browser tab, the installed app and li
     expect(r.headers()['content-type']).toContain(i.type)
   }
   // e-mails and receipts load the same logo files
-  expect((await request.get('/brand/logo-header.png')).status()).toBe(200)
+  expect((await request.get('/brand/mark.png')).status()).toBe(200)
   expect((await request.get('/brand/logo-full.png')).status()).toBe(200)
 })

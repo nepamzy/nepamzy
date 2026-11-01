@@ -22,6 +22,7 @@
 
   /* Gold: decorative fills and rules only (never text on white); text uses accent-600/700. */
   --color-gold-400: #ffc928;
+  --color-gold-700: #946a00;
   --color-accent-50: #fff4cf;
   --color-accent-600: #8f6400;
   --color-accent-700: #7a5400;
