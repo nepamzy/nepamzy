@@ -174,10 +174,11 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
     return { dx: rb!.x - fb!.x, dy: rb!.y - fb!.y }
   }
   const before = await offset()
-  await moveTo(riderUser.context, { latitude: 0.0112, longitude: 0.0112, accuracy: 10 })
   await expect
     .poll(
       async () => {
+        // emulated positions can be missed on a slow runner: nudge the rider again on every try
+        await moveTo(riderUser.context, { latitude: 0.0112, longitude: 0.0112, accuracy: 10 })
         const o = await offset()
         return Math.abs(o.dx - before.dx) + Math.abs(o.dy - before.dy)
       },
