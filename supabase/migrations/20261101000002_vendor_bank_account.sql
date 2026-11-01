@@ -43,7 +43,9 @@ language plpgsql stable security definer set search_path = ''
 as $$
 declare v_actor uuid := (select auth.uid()); b public.vendor_bank_accounts%rowtype;
 begin
-  if v_actor is null or not exists (select 1 from public.vendor_staff where vendor_id = p_vendor and user_id = v_actor) then
+  if v_actor is null then raise exception 'authentication required' using errcode = '28000'; end if;
+  if not app_private.is_aal2() then raise exception 'MFA (aal2) required' using errcode = '42501'; end if;
+  if not exists (select 1 from public.vendor_staff where vendor_id = p_vendor and user_id = v_actor) then
     raise exception 'forbidden' using errcode = '42501';
   end if;
   select * into b from public.vendor_bank_accounts where vendor_id = p_vendor;
