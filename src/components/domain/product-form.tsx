@@ -4,6 +4,7 @@ import { ActionForm } from '@/components/forms/action-form'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox, Input, Textarea } from '@/components/ui/fields'
+import { ProductPhotoField } from './product-photo-field'
 import { saveProductAction } from '@/server/modules/vendors-and-catalogue/actions'
 import type { EditableProduct } from '@/server/modules/vendors-and-catalogue/vendor-queries'
 
@@ -18,10 +19,12 @@ export function ProductForm({
   vendorId,
   product,
   disabled,
+  hasPhoto,
 }: {
   vendorId: string
   product?: EditableProduct
   disabled?: boolean
+  hasPhoto?: boolean
 }) {
   const [groups, setGroups] = useState<G[]>(
     product?.groups.map(({ name, min, max, options }) => ({ name, min, max, options })) ?? [],
@@ -56,6 +59,7 @@ export function ProductForm({
           maxLength={300}
           defaultValue={product?.description ?? ''}
         />
+        <ProductPhotoField productId={product?.id} hasPhoto={hasPhoto} />
         <h2 className="border-t border-line pt-4 text-lg font-extrabold text-navy-900">
           2. Price and stock
         </h2>

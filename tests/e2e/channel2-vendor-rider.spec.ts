@@ -60,7 +60,7 @@ test('vendor area: every page renders for the shop owner with real figures, no s
   }
   // honest about what does not exist
   await p.goto('/vendor/catalogue')
-  await expect(p.getByText(/file storage has not been set up/i).first()).toBeVisible()
+  await expect(p.getByText(/Add a photo to each item/i).first()).toBeVisible()
   await p.goto('/vendor/earnings')
   await expect(p.getByText('Nothing has been paid out')).toBeVisible()
   await owner.context.close()

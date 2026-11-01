@@ -18,7 +18,7 @@ export default async function NewProduct() {
           { label: 'Add an item' },
         ]}
         title="Add an item"
-        subtitle="Name, price and options. Photos are not available yet because file storage has not been set up."
+        subtitle="Name, photo, price and options."
       />
       <Card className="max-w-2xl">
         <ProductForm vendorId={vendor.id} />

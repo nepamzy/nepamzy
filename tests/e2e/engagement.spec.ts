@@ -398,7 +398,7 @@ test('job monitoring: the health endpoint needs the secret, reports problems unt
   expect(remote.stderr).toMatch(/refusing/)
 })
 
-test('effective protection: every API route refuses an anonymous caller with a non-2xx answer (only /api/health is public)', async () => {
+test('effective protection: every API route refuses an anonymous caller with a non-2xx answer (only /api/health and the product photo tile are public)', async () => {
   const { readdirSync, statSync } = await import('node:fs')
   const { join } = await import('node:path')
   const walk = (d: string): string[] =>
@@ -423,6 +423,12 @@ test('effective protection: every API route refuses an anonymous caller with a n
         redirect: 'manual',
         body: method === 'POST' ? '{}' : undefined,
       })
+      // the product photo route is public like the catalogue: an unknown or hidden product gets only the placeholder tile
+      if (method === 'GET' && /^\/api\/products\/[0-9a-f-]{36}\/image$/.test(path)) {
+        expect(res.status, `${method} ${path}`).toBe(200)
+        expect(res.headers.get('content-type')).toBe('image/svg+xml')
+        continue
+      }
       const publicByDesign = path === '/api/health' && method === 'GET'
       if (publicByDesign) {
         expect([200, 503], `${method} ${path}`).toContain(res.status)

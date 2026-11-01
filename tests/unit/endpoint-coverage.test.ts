@@ -14,7 +14,11 @@ describe('every API route authenticates its caller', () => {
   const routes = walk(join(root, 'src/app/api')).filter((f) => f.endsWith('route.ts'))
   it('there are routes to check', () => expect(routes.length).toBeGreaterThanOrEqual(6))
   // Public by design, and why: a monitor must reach it without credentials, so it reveals only ok / not ok and is rate limited.
-  const PUBLIC_BY_DESIGN = ['src/app/api/health/route.ts']
+  // the product photo route is public like the catalogue it belongs to: it serves only photos of active products of approved shops
+  const PUBLIC_BY_DESIGN = [
+    'src/app/api/health/route.ts',
+    'src/app/api/products/[id]/image/route.ts',
+  ]
   for (const file of routes) {
     it(file.replace(root + '/', ''), () => {
       const src = readFileSync(file, 'utf8')

@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { Badge } from './badge'
-import { cn } from './cn'
-import { Icon, type IconName } from './icons'
+import type { IconName } from './icons'
 import { Money } from './money'
+import { NoImageTile } from './no-image-tile'
+import { ProductPhoto } from './product-photo'
 
-/** Icon for a vendor category. Product images are not stored yet (no file storage), so tiles are an honest branded placeholder. */
+export { NoImageTile }
+
+/** Icon for a vendor category. A product without a photo shows this branded tile. */
 export function categoryIcon(slug?: string | null): IconName {
   if (!slug) return 'bag'
   if (/food|meal|kitchen|snack/.test(slug)) return 'utensils'
@@ -12,29 +15,6 @@ export function categoryIcon(slug?: string | null): IconName {
   if (/print|stationery|copy/.test(slug)) return 'printer'
   if (/souvenir|gift/.test(slug)) return 'gift'
   return 'bag'
-}
-
-export function NoImageTile({
-  icon = 'bag',
-  className,
-  label,
-}: {
-  icon?: IconName
-  className?: string
-  label?: string
-}) {
-  return (
-    <div
-      role="img"
-      aria-label={label ?? 'No photo yet'}
-      className={cn(
-        'grid aspect-[4/3] w-full place-items-center overflow-hidden rounded-t-[var(--radius-card)] bg-gradient-to-br from-navy-900 to-navy-700 text-gold-400',
-        className,
-      )}
-    >
-      <Icon name={icon} size={44} />
-    </div>
-  )
 }
 
 export function ProductCard({
@@ -54,10 +34,16 @@ export function ProductCard({
   openNow?: boolean
   icon?: IconName
 }) {
+  // the photo belongs to the product the card links to (/products/<id>)
+  const productId = /\/products\/([0-9a-f-]{36})$/.exec(href)?.[1]
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line bg-card shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-pop)]">
       <Link href={href} tabIndex={-1} aria-hidden="true">
-        <NoImageTile icon={icon} />
+        {productId ? (
+          <ProductPhoto productId={productId} icon={icon} />
+        ) : (
+          <NoImageTile icon={icon} />
+        )}
       </Link>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="font-bold leading-snug text-navy-900">

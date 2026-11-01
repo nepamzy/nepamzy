@@ -6,7 +6,7 @@ import { Alert } from '@/components/ui/alert'
 import { PageHeader } from '@/components/ui/card'
 import { Card } from '@/components/ui/card'
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
-import { NoImageTile } from '@/components/ui/product-card'
+import { ProductPhoto } from '@/components/ui/product-photo'
 import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
 import {
@@ -48,8 +48,8 @@ export default async function Catalogue() {
         />
       </MetricGrid>
       <Alert tone="info" plain title="Photos">
-        Item photos are not available yet because file storage has not been set up. Customers see a
-        simple placeholder tile for each item.
+        Add a photo to each item: items with a clear photo sell better. Customers see a simple
+        placeholder tile for items without one.
       </Alert>
       <div className="mt-4">
         {products.length === 0 ? (
@@ -64,7 +64,11 @@ export default async function Catalogue() {
             {products.map((p) => (
               <li key={p.id}>
                 <Card className="flex flex-wrap items-center justify-between gap-3">
-                  <NoImageTile icon="bag" className="aspect-square! w-12! shrink-0 rounded-lg" />
+                  <ProductPhoto
+                    productId={p.id}
+                    icon="bag"
+                    className="aspect-square! w-12! shrink-0 rounded-lg"
+                  />
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/vendor/catalogue/${p.id}`}
