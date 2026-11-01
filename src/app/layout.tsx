@@ -6,14 +6,25 @@ import { RegisterServiceWorker } from '@/components/register-sw'
 import { ToastProvider } from '@/components/ui/toast'
 import './globals.css'
 
+const SITE = process.env.SITE_URL ?? 'https://afit-market.vercel.app'
+
 export const metadata: Metadata = {
-  title: { default: 'AFIT Market', template: '%s | AFIT Market' },
+  metadataBase: new URL(SITE),
+  title: { default: 'AFIT Market: Shop. Order. Receive.', template: '%s | AFIT Market' },
   description: 'Order from vendors for pickup or delivery.',
+  openGraph: {
+    type: 'website',
+    siteName: 'AFIT Market',
+    title: 'AFIT Market: Shop. Order. Receive.',
+    description: 'Order from campus vendors for pickup or delivery.',
+    locale: 'en_NG',
+  },
+  twitter: { card: 'summary_large_image', title: 'AFIT Market' },
   manifest: '/manifest.webmanifest',
   applicationName: 'AFIT Market',
   robots: { index: false, follow: false }, // pre-launch: not for search engines
 }
-export const viewport: Viewport = { themeColor: '#174a9c', width: 'device-width', initialScale: 1 }
+export const viewport: Viewport = { themeColor: '#0b2a5c', width: 'device-width', initialScale: 1 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   await connection() // CSP nonces require per-request (dynamic) rendering

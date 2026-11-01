@@ -87,8 +87,8 @@ export function renderEmail(l: Layout): RenderedEmail {
 <span style="display:none;max-height:0;overflow:hidden;opacity:0">${escapeHtml(l.preheader)}</span>
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:${BRAND.page}"><tr><td align="center" style="padding:28px 12px">
 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:580px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 14px rgba(16,52,111,.10)">
-<tr><td style="background:${BRAND.blueDark};padding:22px 30px"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td style="font-size:24px;font-weight:800;color:#ffffff">&#128717;&#65039; AFIT <span style="color:${BRAND.gold}">Market</span></td><td align="right" style="font-size:12px;color:#c9d6f0">Your campus marketplace</td></tr></table></td></tr>
-<tr><td style="height:5px;background:${BRAND.gold};font-size:0;line-height:0">&nbsp;</td></tr>
+<tr><td style="background:#ffffff;padding:18px 30px 14px"><a href="${escapeHtml(site)}" style="text-decoration:none"><img src="${escapeHtml(site)}/brand/logo-header.png" width="200" alt="AFIT Market" style="display:block;border:0;outline:none;height:auto;max-width:200px"></a></td></tr>
+<tr><td style="height:5px;background:${BRAND.blueDark};font-size:0;line-height:0">&nbsp;</td></tr><tr><td style="height:3px;background:${BRAND.gold};font-size:0;line-height:0">&nbsp;</td></tr>
 <tr><td style="padding:30px 30px 26px">
 ${emoji}<h1 style="margin:0 0 18px;text-align:center;font-size:24px;line-height:1.3;color:${BRAND.blueDark}">${escapeHtml(l.heading)}</h1>
 ${p}${highlight}${details}${button}${note}

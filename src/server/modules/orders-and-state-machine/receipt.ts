@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib'
 import { lagosDateTime } from '@/lib/time'
 import type { HistoryRow, OrderItemRow, OrderRow } from './queries'
+import { LOGO_ASPECT, LOGO_PNG_BASE64 } from './brand-logo'
 
 const ngn = (kobo: number) =>
   'NGN ' +
@@ -170,18 +171,12 @@ export async function buildReceiptPdf(a: {
   // ---- header band ----
   rect(0, H - 104, W, 104, NAVY)
   rect(0, H - 108, W, 4, GOLD)
-  // brand mark: white tile with a navy "A" and a gold underline
-  rect(M, H - 76, 40, 40, WHITE)
-  page.drawSvgPath('M20 3 L3 37 L11 37 L14 30 L26 30 L29 37 L37 37 Z', {
-    x: M,
-    y: H - 36,
-    scale: 1,
-    color: NAVY,
-    borderWidth: 0,
-  })
-  rect(M + 4, H - 74, 32, 3, GOLD)
-  text('AFIT Market', M + 54, H - 54, { f: bold, size: 22, color: WHITE })
-  text('Campus marketplace, Kaduna', M + 54, H - 72, { size: 9.5, color: rgb(0.86, 0.91, 0.97) })
+  // the AFIT Market logo on a white tile (the picture has a white background)
+  const logo = await doc.embedPng(Buffer.from(LOGO_PNG_BASE64, 'base64'))
+  const logoH = 52
+  const logoW = logoH * LOGO_ASPECT
+  rect(M - 6, H - 98, logoW + 12, 92, WHITE)
+  page.drawImage(logo, { x: M, y: H - 98 + (92 - logoH) / 2, width: logoW, height: logoH })
   right('RECEIPT', R, H - 50, { f: bold, size: 11, color: GOLD })
   right(a.order.order_number, R, H - 72, { f: bold, size: 20, color: WHITE })
   y = H - 108 - 22
