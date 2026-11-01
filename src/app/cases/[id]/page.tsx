@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -55,7 +56,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                     {s.party === 'support' ? 'Support' : s.party}
                   </p>
                   <p>{s.body}</p>
-                  <p className="text-xs text-muted">{new Date(s.at).toLocaleString('en-NG')}</p>
+                  <p className="text-xs text-muted">{lagosDateTime(s.at)}</p>
                 </li>
               ))}
             </ul>
@@ -68,7 +69,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
             steps={[
               ...c.timeline.map((t) => ({
                 label: t.action.replaceAll('_', ' '),
-                detail: new Date(t.at).toLocaleString('en-NG'),
+                detail: lagosDateTime(t.at),
               })),
             ].map((s, i, a) => ({
               ...s,

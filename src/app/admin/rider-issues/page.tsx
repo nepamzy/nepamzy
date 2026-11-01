@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { ReleaseForm, ResolveIssueForm } from '@/components/domain/rider-admin-forms'
 import { OpsExceptionForm } from '@/components/domain/support-forms'
@@ -34,9 +35,7 @@ export default async function RiderIssues() {
               <p className="flex flex-wrap items-center gap-2">
                 <Badge tone="warning">{LABEL[i.reason] ?? i.reason}</Badge>
                 <span className="font-bold">{i.order_number}</span>
-                <span className="text-sm text-muted">
-                  {new Date(i.created_at).toLocaleString('en-NG')}
-                </span>
+                <span className="text-sm text-muted">{lagosDateTime(i.created_at)}</span>
               </p>
               {i.note && <p>{i.note}</p>}
               <ResolveIssueForm id={i.id} />

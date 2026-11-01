@@ -194,6 +194,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
     requirement: { aal: 'aal2' as const, customerOnly: true },
   })),
   { prefix: '/notifications', requirement: { aal: 'aal2' } },
+  { prefix: '/signature-setup', requirement: { aal: 'aal2' } },
   // Reports (support cases): customers, shops and riders who are a party see their own; the database decides which.
   { prefix: '/cases', requirement: { aal: 'aal2' } },
   { prefix: '/mfa', requirement: { aal: 'aal1', mfaSetup: true } },

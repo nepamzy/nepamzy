@@ -15,6 +15,7 @@ import {
   tag,
   uiSignInAttempt,
   PASSWORD,
+  uiSignUpSteps,
 } from './helpers'
 import { aal2ClientWithSecret, anonClient, sql } from './channel1-helpers'
 
@@ -277,8 +278,8 @@ test('registration: API sign-up rules, email confirmation required to sign in, a
   const anon = await openAnonymous(browser, info)
   const p = anon.page
   await p.goto('/signup')
+  await uiSignUpSteps(p)
   await expect(p.getByText(/only for people aged 18 and over/i)).toBeVisible()
-  await expect(p.getByText(/we do not check your age or identity/i)).toBeVisible()
   await a11yClean(p, '/signup')
   // API: declaration must be the JSON boolean true
   const email = `c1-reg-${tag()}@example.test`
@@ -306,7 +307,6 @@ test('registration: API sign-up rules, email confirmation required to sign in, a
   const after = await ac.auth.signInWithPassword({ email, password: PASSWORD })
   expect(after.error).toBeNull()
   // the UI form refuses without the checkbox
-  await p.goto('/signup')
   await p.getByLabel('Email').fill(`c1-ui-${tag()}@example.test`)
   await p.getByLabel('Password', { exact: true }).fill(PASSWORD)
   await p.getByLabel('Confirm password').fill(PASSWORD)

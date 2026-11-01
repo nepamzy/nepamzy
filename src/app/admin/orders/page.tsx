@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OrderStatusPill, ORDER_STATES } from '@/components/domain/order-status'
@@ -117,7 +118,7 @@ export default async function AdminOrders({
           { header: 'Type', cell: (o) => (o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup') },
           { header: 'Total', align: 'right', cell: (o) => <Money kobo={o.total_kobo} /> },
           { header: 'Status', cell: (o) => <OrderStatusPill code={o.status} /> },
-          { header: 'Placed', cell: (o) => new Date(o.created_at).toLocaleString('en-NG') },
+          { header: 'Placed', cell: (o) => lagosDateTime(o.created_at) },
         ]}
       />
       <Pager

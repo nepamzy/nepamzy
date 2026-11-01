@@ -4,11 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { PageHeader } from '@/components/ui/card'
 import { Icon, type IconName } from '@/components/ui/icons'
 import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
-import {
-  experienceOf,
-  homeFor,
-  isPrivilegedRole,
-} from '@/server/modules/identity-and-access/policy'
+import { experienceOf, homeFor } from '@/server/modules/identity-and-access/policy'
 import { myProfile } from '@/server/modules/customer/queries'
 
 export const metadata: Metadata = { title: 'My account' }
@@ -27,7 +23,6 @@ type Tile = { href: string; icon: IconName; title: string; text: string }
 
 export default async function AccountPage() {
   const [who, profile] = await Promise.all([loadPrincipal(), myProfile()])
-  const staff = who.roles.some(isPrivilegedRole)
   const experience = experienceOf(who)
   const shared: Tile[] = [
     { href: '/account/profile', icon: 'user', title: 'Profile', text: 'Your name and email.' },
@@ -139,16 +134,6 @@ export default async function AccountPage() {
       title: 'Your data',
       text: 'Copy of your data or close your account.',
     },
-    ...(staff
-      ? [
-          {
-            href: '/account/mode',
-            icon: 'switch' as IconName,
-            title: 'Administrator / Customer mode',
-            text: 'Switch the view you are using.',
-          },
-        ]
-      : []),
   ]
   const tiles: Tile[] =
     experience !== 'customer' && experience !== 'admin' ? [...own, ...shared] : customerTiles

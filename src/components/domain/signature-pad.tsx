@@ -15,11 +15,25 @@ function inkPixels(c: HTMLCanvasElement): number {
 }
 
 /** Draw-to-sign box. Writes a PNG data URL into a hidden `signature` field; touch, pen and mouse supported. */
-export function SignaturePad({ label = 'Recipient signature' }: { label?: string }) {
+export function SignaturePad({
+  label = 'Recipient signature',
+  hint = 'Ask the recipient to sign with a finger or stylus.',
+  onSignedChange,
+}: {
+  label?: string
+  /** The sentence above the signed / not signed status. */
+  hint?: string
+  onSignedChange?: (signed: boolean) => void
+}) {
   const canvas = useRef<HTMLCanvasElement>(null)
   const signedRef = useRef(false)
   const drawing = useRef(false)
   const [signed, setSigned] = useState(false)
+  // the parent's callback may be a new function on every render; keep the latest without re-running effects
+  const changed = useRef(onSignedChange)
+  useEffect(() => {
+    changed.current = onSignedChange
+  })
 
   const ctx = () => canvas.current?.getContext('2d') ?? null
   const reset = useCallback(() => {
@@ -33,6 +47,7 @@ export function SignaturePad({ label = 'Recipient signature' }: { label?: string
     g.strokeStyle = '#111111'
     signedRef.current = false
     setSigned(false)
+    changed.current?.(false)
   }, [])
   useEffect(() => reset(), [reset])
   // Add the image at submit time. (React resets the form after every action, which would wipe a hidden input
@@ -79,6 +94,7 @@ export function SignaturePad({ label = 'Recipient signature' }: { label?: string
     drawing.current = false
     signedRef.current = true
     setSigned(true)
+    changed.current?.(true)
   }
 
   return (
@@ -100,8 +116,7 @@ export function SignaturePad({ label = 'Recipient signature' }: { label?: string
         onPointerCancel={up}
       />
       <p id="sig-hint" aria-live="polite" className="text-sm text-muted">
-        Ask the recipient to sign with a finger or stylus.{' '}
-        {signed ? 'Signature captured.' : 'Nothing signed yet.'}
+        {hint} {signed ? 'Signature captured.' : 'Nothing signed yet.'}
       </p>
       <Button type="button" variant="secondary" onClick={reset}>
         Clear signature

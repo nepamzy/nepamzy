@@ -70,7 +70,7 @@ describe('routing adapter', () => {
       approximate: true,
       source: 'straight-line-fallback',
     })
-    expect(describeEstimate(e).note).toMatch(/approximation/i)
+    expect(describeEstimate(e).note).toMatch(/approximate/i)
   })
   it('a failing provider falls back to the labelled straight line', async () => {
     const broken = {

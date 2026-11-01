@@ -136,6 +136,41 @@ export async function saveDeliveryPointAction(_p: ActionState, fd: FormData): Pr
   return done('Delivery point saved.')
 }
 
+export async function setDeliveryPointGeoAction(
+  _p: ActionState,
+  fd: FormData,
+): Promise<ActionState> {
+  const g = await gate(asReq(ADMIN))
+  if ('state' in g) return g.state
+  const id = text(fd, 'id', 40)
+  if (!uuid.safeParse(id).success) return failed('That delivery point was not found.')
+  const lat = Number(text(fd, 'lat', 20).replace(',', '.'))
+  const lng = Number(text(fd, 'lng', 20).replace(',', '.'))
+  const radius = int(fd, 'radius') ?? 60
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    lat < -90 ||
+    lat > 90 ||
+    lng < -180 ||
+    lng > 180
+  )
+    return failed('Enter latitude and longitude as plain numbers, for example 10.5105 and 7.4165.')
+  if (radius < 10 || radius > 500)
+    return failed('The arrival radius must be between 10 and 500 metres.')
+  const sb = await createSupabaseServerClient()
+  const { error } = await sb.rpc('delivery_point_set_geo', {
+    p_id: id,
+    p_lat: lat,
+    p_lng: lng,
+    p_radius: radius,
+    p_real: fd.get('real') === 'on',
+  })
+  if (error) return dbFailed(error, 'Could not save the location.')
+  revalidatePath('/admin/delivery-points')
+  return done('Location saved. New deliveries to this point use it.')
+}
+
 // ---------------------------------------------------------------- vendor self-service
 async function vendorId(fd: FormData): Promise<string | null> {
   const id = String(fd.get('vendorId') ?? '')

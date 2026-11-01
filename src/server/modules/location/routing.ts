@@ -92,7 +92,7 @@ export function describeEstimate(e: RouteEstimate): {
     eta: `about ${mins} min`,
     note:
       e.basis === 'route'
-        ? 'Estimate from a SAMPLE route service (synthetic data), not a real campus route.'
-        : 'Straight-line approximation, not the actual route.',
+        ? 'SAMPLE estimate from a test routing service: the real road may differ.'
+        : 'Approximate time and distance in a straight line; the real road may differ.',
   }
 }

@@ -109,21 +109,8 @@ test('roles stay separate: customers, riders and vendors cannot open each otherâ
   await owner.context.close()
 })
 
-test('an administrator in Customer mode gets no vendor or rider access from the switch', async ({
-  browser,
-}, info) => {
+test('an administrator gets no vendor or rider access', async ({ browser }, info) => {
   const adm = await openSession(browser, info, 'c2-adm', ['platform_admin'])
-  await adm.page.goto('/account/mode')
-  await Promise.all([
-    adm.page.waitForResponse((r) => r.request().method() === 'POST'),
-    adm.page.locator('#main').getByRole('button', { name: 'Customer', exact: true }).click(),
-  ])
-  await expect(adm.page.locator('#main').getByText('Mode: Customer')).toBeVisible()
-  // staff area: closed behind the mode page (no administrator content is served)
-  await adm.page.goto('/admin/users')
-  await expect(adm.page).toHaveURL(/\/account\/mode\?next=/)
-  await expect(adm.page.getByRole('heading', { name: 'Users' })).toHaveCount(0)
-  // vendor and rider areas: the account holds neither role, so the switch grants nothing
   for (const path of ['/vendor', '/vendor/earnings', '/rider', '/rider/payments'])
     expect((await adm.page.goto(path))?.status(), path).toBe(403)
   await adm.context.close()

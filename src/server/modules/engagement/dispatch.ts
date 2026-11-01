@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import 'server-only'
 import { after } from 'next/server'
 import { logger } from '@/lib/logger'
@@ -275,11 +276,7 @@ export function notifySignIn(email: string, userAgent: string | null | undefined
     try {
       if (!mailConfig()) return
       if (!(await rateLimit(`signin-alert:${sha256Hex(email)}`, 1800, 1))) return
-      const when = `${new Date().toLocaleString('en-NG', {
-        timeZone: 'Africa/Lagos',
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })} (Nigeria time)`
+      const when = `${lagosDateTime(new Date())} (Nigeria time)`
       await sendMail(
         email,
         signInAlertEmail(

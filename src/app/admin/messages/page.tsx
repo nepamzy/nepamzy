@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { ContactStatusButtons } from '@/components/domain/admin-controls'
 import { PageHeader } from '@/components/ui/card'
@@ -61,7 +62,7 @@ export default async function MessagesPage({
                     <a className="text-brand-700 underline" href={`mailto:${m.email}`}>
                       {m.email}
                     </a>{' '}
-                    · {new Date(m.created_at).toLocaleString('en-NG')}
+                    · {lagosDateTime(m.created_at)}
                   </p>
                 </div>
                 <StatusBadge

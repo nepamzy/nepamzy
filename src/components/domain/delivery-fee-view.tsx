@@ -1,6 +1,6 @@
+import { lagosDateTime } from '@/lib/time'
 import QRCode from 'qrcode'
 import { Badge, type Tone } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { serverEnv } from '@/lib/env'
 import type { DfpPayment } from '@/server/modules/delivery-fee/queries'
@@ -73,8 +73,7 @@ export function History({ items }: { items: NonNullable<DfpPayment['history']> }
       <ul className="mt-2 space-y-1">
         {items.map((h, i) => (
           <li key={i}>
-            {new Date(h.at).toLocaleString('en-NG')} · {h.actor_role} ·{' '}
-            {h.action.replaceAll('_', ' ')}
+            {lagosDateTime(h.at)} · {h.actor_role} · {h.action.replaceAll('_', ' ')}
             {h.note ? ` · “${h.note}”` : ''}
           </li>
         ))}
@@ -93,60 +92,85 @@ export async function ReceiptCard({ p }: { p: DfpPayment }) {
   if (!r) return null
   const url = r.token ? new URL(`/receipts/${r.token}`, serverEnv().SITE_URL).toString() : null
   const svg = url ? await qrSvg(url) : null
+  const issued = r.status !== 'void'
+  const row = (label: string, value: React.ReactNode) => (
+    <div className="flex items-baseline justify-between gap-4 border-b border-line py-2 last:border-b-0">
+      <dt className="text-sm font-semibold text-muted">{label}</dt>
+      <dd className="text-right font-medium">{value}</dd>
+    </div>
+  )
   return (
-    <Card className="space-y-2 border-brand-700" aria-labelledby={`receipt-${r.id}`}>
-      <h3 id={`receipt-${r.id}`} className="text-lg font-bold">
-        Delivery fee receipt {r.number} {r.status === 'void' && <Badge tone="danger">Void</Badge>}
-      </h3>
-      <dl className="grid gap-x-4 gap-y-1 text-sm sm:grid-cols-2">
-        <dt className="font-semibold">Order</dt>
-        <dd>{p.order_number}</dd>
-        <dt className="font-semibold">Customer</dt>
-        <dd>{p.customer_name}</dd>
-        <dt className="font-semibold">Rider</dt>
-        <dd>{p.rider_name}</dd>
-        <dt className="font-semibold">Delivery fee</dt>
-        <dd>
-          <Money kobo={p.amount_kobo} /> ({p.currency})
-        </dd>
-        <dt className="font-semibold">Method</dt>
-        <dd>Direct Bank Transfer</dd>
-        <dt className="font-semibold">Customer reported</dt>
-        <dd>
-          {p.customer_reported_at ? new Date(p.customer_reported_at).toLocaleString('en-NG') : '—'}
-        </dd>
-        <dt className="font-semibold">
-          {r.basis === 'administrator_resolution' ? 'Administrator decision' : 'Rider confirmed'}
-        </dt>
-        <dd>
-          {new Date(
-            r.basis === 'administrator_resolution'
-              ? (p.resolved_at ?? r.issued_at)
-              : (p.rider_responded_at ?? r.issued_at),
-          ).toLocaleString('en-NG')}
-        </dd>
-        <dt className="font-semibold">Issued</dt>
-        <dd>{new Date(r.issued_at).toLocaleString('en-NG')}</dd>
-        <dt className="font-semibold">Status</dt>
-        <dd>{r.status === 'void' ? 'Void (kept for the record)' : DFP_STATUS[p.status].label}</dd>
-      </dl>
-      <p className="text-sm text-muted">{BANK_NOTE}</p>
-      {svg && url && (
-        <div className="flex flex-wrap items-center gap-3">
-          <div
-            role="img"
-            aria-label="QR code that opens the public receipt check page"
-            className="h-40 w-40 bg-white"
-            dangerouslySetInnerHTML={{ __html: svg }}
-          />
-          <p className="text-sm">
-            Anyone with this link can check that the receipt exists:{' '}
-            <a className="break-all font-semibold text-brand-700 underline" href={url}>
-              {url}
-            </a>
-          </p>
+    <section
+      aria-labelledby={`receipt-${r.id}`}
+      className="overflow-hidden rounded-[var(--radius-card)] border border-brand-700 bg-card shadow-[var(--shadow-card)]"
+    >
+      <div className="border-b-4 border-gold-400 bg-navy-900 px-5 py-4 text-white">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-gold-400">
+              AFIT Market · Delivery fee receipt
+            </p>
+            <h3 id={`receipt-${r.id}`} className="mt-1 text-xl font-extrabold">
+              Delivery fee receipt {r.number}
+            </h3>
+          </div>
+          {r.status === 'void' ? (
+            <Badge tone="danger">Void</Badge>
+          ) : (
+            <span className="rounded-full bg-success-50 px-3 py-1 text-sm font-bold text-success-700">
+              {DFP_STATUS[p.status].label}
+            </span>
+          )}
         </div>
-      )}
-    </Card>
+        <p className="mt-3 text-3xl font-extrabold tracking-tight">
+          <Money kobo={p.amount_kobo} />{' '}
+          <span className="text-sm font-semibold text-navy-text">({p.currency})</span>
+        </p>
+        <p className="text-sm text-navy-text">
+          Paid directly to the rider by bank transfer for order {p.order_number}
+        </p>
+      </div>
+      <div className="space-y-4 p-5">
+        <dl>
+          {row('Order', p.order_number)}
+          {row('Customer', p.customer_name)}
+          {row('Rider', p.rider_name)}
+          {row('Method', 'Direct Bank Transfer')}
+          {row(
+            'Customer reported',
+            p.customer_reported_at ? lagosDateTime(p.customer_reported_at) : '—',
+          )}
+          {row(
+            r.basis === 'administrator_resolution' ? 'Administrator decision' : 'Rider confirmed',
+            lagosDateTime(
+              r.basis === 'administrator_resolution'
+                ? (p.resolved_at ?? r.issued_at)
+                : (p.rider_responded_at ?? r.issued_at),
+            ),
+          )}
+          {row('Issued', lagosDateTime(r.issued_at))}
+          {row('Status', issued ? DFP_STATUS[p.status].label : 'Void (kept for the record)')}
+        </dl>
+        <p className="rounded-[var(--radius-control)] bg-surface p-3 text-sm text-muted">
+          {BANK_NOTE}
+        </p>
+        {svg && url && (
+          <div className="flex flex-wrap items-center gap-4 border-t border-line pt-4">
+            <div
+              role="img"
+              aria-label="QR code that opens the public receipt check page"
+              className="h-40 w-40 rounded-[var(--radius-control)] border border-line bg-white p-1"
+              dangerouslySetInnerHTML={{ __html: svg }}
+            />
+            <p className="min-w-0 flex-1 text-sm">
+              Anyone with this link can check that the receipt exists:{' '}
+              <a className="break-all font-semibold text-brand-700 underline" href={url}>
+                {url}
+              </a>
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
   )
 }

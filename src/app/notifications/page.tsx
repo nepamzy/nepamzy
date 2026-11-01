@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MarkReadButton, PreferenceForm } from '@/components/domain/engagement-forms'
@@ -59,9 +60,7 @@ export default async function Notifications({
                 </p>
                 <p>{n.body}</p>
                 <p className="flex flex-wrap items-center gap-3 text-sm text-muted">
-                  <time dateTime={n.created_at}>
-                    {new Date(n.created_at).toLocaleString('en-NG')}
-                  </time>
+                  <time dateTime={n.created_at}>{lagosDateTime(n.created_at)}</time>
                   {n.link && (
                     <Link className="font-semibold text-brand-700 underline" href={n.link}>
                       Open

@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
@@ -130,9 +131,7 @@ export default async function VendorPage({
                   <Card className="space-y-1 p-3 sm:p-3">
                     <p aria-label={`${r.rating} out of 5`}>{'★'.repeat(r.rating)}</p>
                     {r.comment && <p>{r.comment}</p>}
-                    <p className="text-xs text-muted">
-                      {new Date(r.created_at).toLocaleDateString('en-NG')}
-                    </p>
+                    <p className="text-xs text-muted">{lagosDate(r.created_at)}</p>
                     {signedIn && <ReportReviewForm reviewId={r.id} />}
                   </Card>
                 </li>

@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -88,9 +89,12 @@ export default async function UsersPage({
             columns={[
               {
                 header: 'Name',
-                cell: (u) => (
-                  <span className="font-bold text-navy-900">{u.display_name ?? '(no name)'}</span>
-                ),
+                cell: (u) =>
+                  u.display_name ? (
+                    <span className="font-bold text-navy-900">{u.display_name}</span>
+                  ) : (
+                    <span className="text-muted">Name not set</span>
+                  ),
               },
               { header: 'Email', cell: (u) => u.email },
               {
@@ -114,7 +118,7 @@ export default async function UsersPage({
                     <Badge tone="success">Active</Badge>
                   ),
               },
-              { header: 'Joined', cell: (u) => new Date(u.created_at).toLocaleDateString('en-NG') },
+              { header: 'Joined', cell: (u) => lagosDate(u.created_at) },
               {
                 header: 'Actions',
                 cell: (u) => (

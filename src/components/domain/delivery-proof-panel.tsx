@@ -1,4 +1,5 @@
 'use client'
+import { lagosTime } from '@/lib/time'
 import { useState, useTransition } from 'react'
 import { ActionForm } from '@/components/forms/action-form'
 import { SignaturePad } from '@/components/domain/signature-pad'
@@ -107,12 +108,8 @@ export function DeliveryProofPanel({
             required
           />
           <p className="text-sm text-muted">
-            This confirmation expires at{' '}
-            {new Date(session.expiresAt).toLocaleTimeString('en-NG', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-            . If it expires, choose Confirm receipt again.
+            This confirmation expires at {lagosTime(session.expiresAt)}. If it expires, choose
+            Confirm receipt again.
           </p>
         </ActionForm>
       )}

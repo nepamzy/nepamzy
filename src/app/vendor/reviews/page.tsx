@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import { PageHeader } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -67,7 +68,7 @@ export default async function VendorReviews({
                 header: 'Comment',
                 cell: (x) => x.comment ?? <span className="text-muted">No comment</span>,
               },
-              { header: 'Date', cell: (x) => new Date(x.created_at).toLocaleDateString('en-NG') },
+              { header: 'Date', cell: (x) => lagosDate(x.created_at) },
             ]}
           />
           <Pager basePath="/vendor/reviews" page={page} hasMore={page * 10 < r.count} />

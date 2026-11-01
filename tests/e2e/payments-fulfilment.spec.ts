@@ -10,6 +10,7 @@ import {
   openAnonymous,
   openSession,
   tag,
+  drawSignature,
 } from './helpers'
 
 test.describe.configure({ mode: 'serial' })
@@ -150,16 +151,7 @@ test('Paystack test payment -> vendor accepts, prepares, readies -> pickup code 
   expect((await orderRow(orderId)).status).toBe('PICKUP_AWAITING_HANDOVER')
   await v.getByLabel('Pickup code from the customer').fill('WRONG123')
   await v.getByLabel('Recipient name').fill('Ada Student')
-  const pad = v.locator('canvas')
-  const sign = async () => {
-    await pad.scrollIntoViewIfNeeded()
-    const box = (await pad.boundingBox())! // measured now: an error message above the pad moves it
-    await v.mouse.move(box.x + 20, box.y + 40)
-    await v.mouse.down()
-    await v.mouse.move(box.x + 120, box.y + 90, { steps: 8 })
-    await v.mouse.move(box.x + 60, box.y + 120, { steps: 8 })
-    await v.mouse.up()
-  }
+  const sign = () => drawSignature(v)
   await clickAndWait(v, () => v.getByRole('button', { name: 'Complete handover' }).click())
   await expect(alertIn(v)).toContainText(/must sign/i)
   await sign()

@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OrderStatusPill } from '@/components/domain/order-status'
@@ -88,7 +89,7 @@ export default async function OrdersPage({
           },
           { header: 'Shop', cell: (o) => o.vendor_name },
           { header: 'Type', cell: (o) => (o.fulfilment === 'delivery' ? 'Delivery' : 'Pickup') },
-          { header: 'Date', cell: (o) => new Date(o.created_at).toLocaleDateString('en-NG') },
+          { header: 'Date', cell: (o) => lagosDate(o.created_at) },
           {
             header: 'Total',
             align: 'right',

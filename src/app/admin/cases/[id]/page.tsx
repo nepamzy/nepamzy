@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -130,7 +131,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
                 <li key={a.no}>
                   Attempt {a.no}: {a.rider ?? 'rider'} · {a.status}
                   {a.arrival_detected_at
-                    ? ` · arrival detected ${new Date(a.arrival_detected_at).toLocaleString('en-NG')}`
+                    ? ` · arrival detected ${lagosDateTime(a.arrival_detected_at)}`
                     : ''}
                   {a.release_reason ? ` · released: ${a.release_reason}` : ''}
                 </li>
@@ -140,9 +141,8 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
           {b.delivery_proof ? (
             <p className="text-sm">
               Proof on file: {b.delivery_proof.kind}, {b.delivery_proof.method} signature by{' '}
-              {b.delivery_proof.recipient} at{' '}
-              {new Date(b.delivery_proof.completed_at).toLocaleString('en-NG')}. The signature image
-              is only available through the audited proof tool.
+              {b.delivery_proof.recipient} at {lagosDateTime(b.delivery_proof.completed_at)}. The
+              signature image is only available through the audited proof tool.
             </p>
           ) : (
             <p className="text-sm">No handover proof on file.</p>
@@ -172,7 +172,7 @@ export default async function AdminCase({ params }: { params: Promise<{ id: stri
           <ul className="text-sm">
             {b.order_timeline.map((t, i) => (
               <li key={i}>
-                {new Date(t.at).toLocaleString('en-NG')} · {t.to}
+                {lagosDateTime(t.at)} · {t.to}
                 {t.reason ? ` (${t.reason})` : ''}
               </li>
             ))}

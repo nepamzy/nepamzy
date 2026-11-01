@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { RefundStaffControls } from '@/components/domain/support-forms'
 import { Badge, type Tone } from '@/components/ui/badge'
@@ -78,7 +79,7 @@ export default async function Refunds({
                   <ul className="mt-1 space-y-1 text-sm">
                     {r.events.map((e, i) => (
                       <li key={i}>
-                        {new Date(e.at).toLocaleString('en-NG')} · {e.action.replaceAll('_', ' ')}
+                        {lagosDateTime(e.at)} · {e.action.replaceAll('_', ' ')}
                         {e.note ? `: ${e.note}` : ''}
                       </li>
                     ))}

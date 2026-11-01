@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
@@ -43,7 +44,7 @@ export default async function VerifyReceipt({ params }: { params: Promise<{ toke
             <dt className="font-semibold">Method</dt>
             <dd>{r.payment_method}</dd>
             <dt className="font-semibold">Issued</dt>
-            <dd>{new Date(r.issued_at).toLocaleString('en-NG')}</dd>
+            <dd>{lagosDateTime(r.issued_at)}</dd>
             <dt className="font-semibold">Basis</dt>
             <dd>
               {r.basis === 'administrator_resolution'

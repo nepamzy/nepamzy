@@ -14,6 +14,7 @@ export async function ModeSwitch({
   /** On the navy sidebar. */
   dark?: boolean
 }) {
+  return null
   const next = safeNextPath((await headers()).get('x-pathname'))
   const admin = who.mode !== 'customer'
   const btn = (to: 'customer' | 'admin', label: string, on: boolean) => (
@@ -60,6 +61,7 @@ export async function ModeSwitch({
 }
 
 export function ModePill({ who }: { who: Principal }) {
+  return null
   if (
     !who.roles.some((r) => r === 'platform_admin' || r === 'finance_admin' || r === 'support_agent')
   )
@@ -81,6 +83,7 @@ export function ModePill({ who }: { who: Principal }) {
 
 /** Phone-width strip under the header so the active mode is always visible where the pill does not fit. */
 export function ModeBar({ who }: { who: Principal }) {
+  return null
   if (
     !who.roles.some((r) => r === 'platform_admin' || r === 'finance_admin' || r === 'support_agent')
   )

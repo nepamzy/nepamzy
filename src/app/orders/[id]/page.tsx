@@ -1,3 +1,4 @@
+import { lagosDateTime, lagosTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -66,14 +67,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <p>
             Total to pay: <Money kobo={order.total_kobo} className="font-bold" />
             {order.expires_at && (
-              <span className="text-sm text-muted">
-                {' '}
-                · hold ends{' '}
-                {new Date(order.expires_at).toLocaleTimeString('en-NG', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
+              <span className="text-sm text-muted"> · hold ends {lagosTime(order.expires_at)}</span>
             )}
           </p>
           <div className="flex flex-wrap gap-3">
@@ -310,7 +304,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
           <Timeline
             steps={history.map((h, i) => ({
               label: label(h.to_status),
-              detail: new Date(h.created_at).toLocaleString('en-NG'),
+              detail: lagosDateTime(h.created_at),
               state: i === history.length - 1 ? 'current' : 'done',
             }))}
           />

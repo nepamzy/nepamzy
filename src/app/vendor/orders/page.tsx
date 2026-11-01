@@ -1,3 +1,4 @@
+import { lagosDateTime } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { VendorOrderActions } from '@/components/domain/vendor-order-actions'
@@ -46,7 +47,7 @@ function OrdersTable({
             </ul>
             <Money kobo={o.items_total_kobo} className="font-semibold" />
           </Td>
-          <Td>{new Date(o.created_at).toLocaleString('en-NG')}</Td>
+          <Td>{lagosDateTime(o.created_at)}</Td>
           <Td>
             <OrderStatusPill code={o.status} />
           </Td>

@@ -1,3 +1,4 @@
+import { PNG } from 'pngjs'
 import { existsSync, readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
@@ -34,7 +35,54 @@ export async function freshCode(secret: string) {
 
 export const uniqueEmail = (label: string) => `${label}-${randomUUID().slice(0, 8)}@example.test`
 
-export async function createUser(label: string, roles: string[] = []) {
+/**
+ * The signature most test accounts "saved at sign-up": the same zigzag these tests draw whenever a signature is asked for
+ * (so the real signature check passes). Pass `{ signature: false }` for an account made before signatures existed.
+ */
+function zigzagPng(): Buffer {
+  const W = 600
+  const H = 220
+  const png = new PNG({ width: W, height: H })
+  png.data.fill(255)
+  // the same fractions of the canvas that drawSignature() draws
+  const pts: [number, number][] = [
+    [0.15, 0.6],
+    [0.25, 0.2],
+    [0.35, 0.7],
+    [0.5, 0.3],
+    [0.62, 0.75],
+    [0.75, 0.25],
+    [0.88, 0.6],
+  ].map(([fx, fy]) => [fx! * W, fy! * H])
+  for (let k = 0; k < pts.length - 1; k++) {
+    const [x0, y0] = pts[k]!
+    const [x1, y1] = pts[k + 1]!
+    const n = Math.ceil(Math.hypot(x1 - x0, y1 - y0))
+    for (let t = 0; t <= n; t++) {
+      const x = x0 + ((x1 - x0) * t) / n
+      const y = y0 + ((y1 - y0) * t) / n
+      for (let dy = -1; dy <= 1; dy++)
+        for (let dx = -1; dx <= 1; dx++) {
+          const i = (Math.round(y + dy) * W + Math.round(x + dx)) * 4
+          png.data[i] = png.data[i + 1] = png.data[i + 2] = 17
+          png.data[i + 3] = 255
+        }
+    }
+  }
+  return PNG.sync.write(png)
+}
+export async function saveDefaultSignature(userId: string) {
+  const { error } = await admin()
+    .from('user_signatures')
+    .upsert({ user_id: userId, png: '\\x' + zigzagPng().toString('hex') })
+  if (error) throw error
+}
+
+export async function createUser(
+  label: string,
+  roles: string[] = [],
+  opts: { signature?: boolean } = {},
+) {
   const email = uniqueEmail(label)
   const a = admin()
   const { data, error } = await a.auth.admin.createUser({
@@ -47,6 +95,7 @@ export async function createUser(label: string, roles: string[] = []) {
     const { error: e } = await a.from('role_assignments').insert({ user_id: data.user.id, role })
     if (e) throw e
   }
+  if (opts.signature !== false) await saveDefaultSignature(data.user.id)
   return { id: data.user.id, email }
 }
 
@@ -527,4 +576,42 @@ export async function seedPaidCompletedOrder(shop: { vendorId: string }, custome
     jollofId: items!.find((i) => i.product_name.startsWith('Jollof'))!.id as string,
     zoboId: items!.find((i) => i.product_name.startsWith('Zobo'))!.id as string,
   }
+}
+
+/** Draws a signature with the mouse on the (visible) signature box. */
+export async function drawSignature(page: Page) {
+  const canvas = page.locator('canvas:visible').first()
+  await canvas.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+  const box = (await canvas.boundingBox())!
+  const at = (fx: number, fy: number) => ({ x: box.x + box.width * fx, y: box.y + box.height * fy })
+  await page.mouse.move(at(0.15, 0.6).x, at(0.15, 0.6).y)
+  await page.mouse.down()
+  for (const [fx, fy] of [
+    [0.25, 0.2],
+    [0.35, 0.7],
+    [0.5, 0.3],
+    [0.62, 0.75],
+    [0.75, 0.25],
+    [0.88, 0.6],
+  ] as const)
+    await page.mouse.move(at(fx, fy).x, at(fx, fy).y, { steps: 8 })
+  await page.mouse.up()
+}
+
+/**
+ * Steps 1 and 2 of the sign-up form: choose who you are (customers also pick "Other", which needs no ID card), then sign.
+ * Leaves the page on step 3, the account details.
+ */
+export async function uiSignUpSteps(
+  page: Page,
+  role: 'Customer' | 'Vendor' | 'Rider' = 'Customer',
+) {
+  await page
+    .getByRole('group', { name: 'I want to use AFIT Market as a' })
+    .getByRole('radio', { name: new RegExp(role) })
+    .check()
+  if (role === 'Customer') await page.getByRole('radio', { name: 'Other', exact: true }).check()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await drawSignature(page)
+  await page.getByRole('button', { name: 'Next' }).click()
 }

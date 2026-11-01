@@ -1,6 +1,6 @@
 import 'server-only'
 import { cache } from 'react'
-import { cookies, headers } from 'next/headers'
+import { headers } from 'next/headers'
 import { forbidden, redirect } from 'next/navigation'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import {
@@ -10,7 +10,6 @@ import {
   ROUTE_POLICIES,
   decideAccess,
   isPrivilegedRole,
-  MODE_COOKIE,
   safeNextPath,
   type AccessRequirement,
   type AppRole,
@@ -28,14 +27,13 @@ export const loadPrincipal = cache(async (): Promise<Principal> => {
     supabase.rpc('my_roles'),
   ])
   const roleList = (roles ?? []) as AppRole[]
-  // The mode cookie can only choose the lighter interface. A non-staff account is always `customer`.
+  // Staff always work in the administrator interface (the customer-view switch was removed). A non-staff account is always `customer`.
   const staff = roleList.some(isPrivilegedRole)
-  const chosen = (await cookies()).get(MODE_COOKIE)?.value
   return {
     authenticated: true,
     userId: data.user.id,
     roles: roleList,
-    mode: staff && chosen !== 'customer' ? 'admin' : 'customer',
+    mode: staff ? 'admin' : 'customer',
     aal: aal?.currentLevel === 'aal2' ? 'aal2' : 'aal1',
     hasVerifiedFactor: aal?.nextLevel === 'aal2' || aal?.currentLevel === 'aal2',
   }

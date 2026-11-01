@@ -9,6 +9,8 @@ import {
   uiSignIn,
   uniqueEmail,
   userIdByEmail,
+  drawSignature,
+  uiSignUpSteps,
 } from './helpers'
 
 /**
@@ -48,10 +50,10 @@ test('signing up as a vendor or rider records the choice; a customer sign-up rec
     const page = await context.newPage()
     const email = uniqueEmail(`signup-${choice.toLowerCase()}`)
     await page.goto('/signup')
+    await uiSignUpSteps(page, choice)
     await page.getByLabel('Email').fill(email)
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
     await page.getByLabel('Confirm password').fill(PASSWORD)
-    await page.getByRole('radio', { name: new RegExp(choice) }).check()
     await page.getByLabel(/I confirm that I am 18/).check()
     await page.getByRole('button', { name: 'Create account' }).click()
     await expect(page.getByTestId('signup-done')).toBeVisible()
@@ -136,6 +138,7 @@ test('the authenticator is optional for customers, vendors and riders: no setup 
   page,
 }, info) => {
   await page.goto('/signup')
+  await uiSignUpSteps(page)
   await expect(page.getByText(/authenticator app for extra security is optional/i)).toBeVisible()
   await expect(page.getByText(/before you can place orders/i)).toHaveCount(0)
   for (const [role, area] of [
@@ -168,6 +171,7 @@ test('after sign-up there is always a way forward: resend the link, sign in, or 
   const page = await context.newPage()
   const email = uniqueEmail('signup-next')
   await page.goto('/signup')
+  await uiSignUpSteps(page)
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
   await page.getByLabel('Confirm password').fill(PASSWORD)
@@ -189,6 +193,148 @@ test('after sign-up there is always a way forward: resend the link, sign in, or 
   )
   await done.getByRole('link', { name: 'Start again' }).click()
   await expect(page).toHaveURL(/\/signup$/)
-  await expect(page.getByRole('button', { name: 'Create account' })).toBeVisible()
+  await expect(page.getByTestId('signup-step')).toContainText('Step 1 of 3')
   await context.close()
+})
+
+/** A real, readable JPEG made in the browser (the form shrinks the photo, so it has to decode as an image). */
+const idCardJpeg = async (page: import('@playwright/test').Page) => {
+  const b64 = await page.evaluate(() => {
+    const c = document.createElement('canvas')
+    c.width = 900
+    c.height = 560
+    const g = c.getContext('2d')!
+    g.fillStyle = '#f5f0e0'
+    g.fillRect(0, 0, 900, 560)
+    for (let i = 0; i < 400; i++) {
+      g.fillStyle = `rgb(${(i * 37) % 255},${(i * 91) % 255},${(i * 53) % 255})`
+      g.fillRect((i * 83) % 880, (i * 47) % 540, 40, 14)
+    }
+    return c.toDataURL('image/jpeg', 0.9).split(',')[1]!
+  })
+  return Buffer.from(b64, 'base64')
+}
+
+test('a student gives an ID number and card photo, sees that it will be reviewed, can edit it, and the account keeps both', async ({
+  browser,
+}, info) => {
+  const context = await browser.newContext({
+    viewport: info.project.use.viewport ?? undefined,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  const page = await context.newPage()
+  const email = uniqueEmail('signup-student')
+  await page.goto('/signup')
+  await page.getByRole('radio', { name: 'Student', exact: true }).check()
+  // Next stays off until the ID card is saved; nothing says the card cannot be checked
+  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
+  await expect(page.getByText(/cannot be checked|not verified|unverified/i)).toHaveCount(0)
+  await page.getByLabel('Student ID card number').fill('AFIT/2026/0417')
+  await page.locator('#idcard-file').setInputFiles({
+    name: 'id.jpg',
+    mimeType: 'image/jpeg',
+    buffer: await idCardJpeg(page),
+  })
+  await page.getByRole('button', { name: 'Save ID card' }).click()
+  await expect(page.getByText('Your ID card will be reviewed.')).toBeVisible()
+  // editing is possible, and saving again brings the same message back
+  await page.getByRole('button', { name: 'Edit ID card' }).click()
+  await expect(page.getByLabel('Student ID card number')).toHaveValue('AFIT/2026/0417')
+  await page.getByRole('button', { name: 'Save ID card' }).click()
+  await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Next' }).click()
+  // the signature step carries the statement
+  await expect(page.getByText(/receive deliveries/)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
+  await drawSignature(page)
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+  await page.getByLabel('Confirm password').fill(PASSWORD)
+  await page.getByLabel(/I confirm that I am 18/).check()
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await expect(page.getByTestId('signup-done')).toBeVisible()
+  const id = await userIdByEmail(email)
+  const ident = (
+    await admin()
+      .from('account_identity')
+      .select('person_type, student_id_cipher, id_card_jpeg')
+      .eq('user_id', id)
+      .single()
+  ).data!
+  expect(ident.person_type).toBe('student')
+  expect(ident.id_card_jpeg).toBeTruthy()
+  // the number is stored encrypted, never as typed
+  expect(ident.student_id_cipher).not.toContain('2026')
+  const sig = await admin().from('user_signatures').select('user_id').eq('user_id', id)
+  expect(sig.data).toHaveLength(1)
+  await context.close()
+})
+
+test('military, lecturer and other customers need no ID card, vendors and riders are not asked who they are, and everyone signs', async ({
+  browser,
+}, info) => {
+  for (const [kind, type] of [
+    ['Military', 'military'],
+    ['Lecturer', 'lecturer'],
+    ['Other', 'other'],
+  ] as const) {
+    const context = await browser.newContext({
+      viewport: info.project.use.viewport ?? undefined,
+      extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+    })
+    const page = await context.newPage()
+    const email = uniqueEmail(`signup-${type}`)
+    await page.goto('/signup')
+    await page.getByRole('radio', { name: kind, exact: true }).check()
+    await expect(page.getByLabel('Student ID card number')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Next' }).click()
+    await drawSignature(page)
+    await page.getByRole('button', { name: 'Next' }).click()
+    await page.getByLabel('Email').fill(email)
+    await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+    await page.getByLabel('Confirm password').fill(PASSWORD)
+    await page.getByLabel(/I confirm that I am 18/).check()
+    await page.getByRole('button', { name: 'Create account' }).click()
+    await expect(page.getByTestId('signup-done')).toBeVisible()
+    const id = await userIdByEmail(email)
+    const ident = (
+      await admin()
+        .from('account_identity')
+        .select('person_type, id_card_jpeg')
+        .eq('user_id', id)
+        .single()
+    ).data!
+    expect(ident).toMatchObject({ person_type: type, id_card_jpeg: null })
+    await context.close()
+  }
+  // a vendor is not asked "who are you": straight to the signature
+  const context = await browser.newContext({
+    viewport: info.project.use.viewport ?? undefined,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  const page = await context.newPage()
+  await page.goto('/signup')
+  await page.getByRole('radio', { name: /Vendor/ }).check()
+  await expect(page.getByRole('radio', { name: 'Student', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
+  await context.close()
+})
+
+test('an account with no saved signature is asked for one right after signing in, once, and then goes where it was going', async ({
+  page,
+}) => {
+  const u = await createUser('nosig', [], { signature: false })
+  await uiSignIn(page, u.email)
+  await expect(page).toHaveURL(/\/signature-setup/)
+  await expect(page.getByText(/receive deliveries/)).toBeVisible()
+  await drawSignature(page)
+  await page.getByRole('button', { name: 'Save my signature' }).click()
+  await expect(page).not.toHaveURL(/signature-setup/)
+  const saved = await admin().from('user_signatures').select('user_id').eq('user_id', u.id)
+  expect(saved.data).toHaveLength(1)
+  // signing in again does not ask again
+  await page.context().clearCookies()
+  await uiSignIn(page, u.email)
+  await expect(page).not.toHaveURL(/signature-setup/)
 })

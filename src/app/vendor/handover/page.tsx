@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { RiderPickupForm } from '@/components/domain/rider-pickup-form'
 import { FindByCode } from '@/components/domain/find-by-code'
 import { HandoverForm } from '@/components/domain/handover-form'
+import { Alert } from '@/components/ui/alert'
 import { Card, PageHeader } from '@/components/ui/card'
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { EmptyState } from '@/components/ui/states'
@@ -12,7 +13,12 @@ import { getMyVendor } from '@/server/modules/vendors-and-catalogue/vendor-queri
 
 export const metadata: Metadata = { title: 'Confirm handover' }
 
-export default async function Handover() {
+export default async function Handover({
+  searchParams,
+}: {
+  searchParams: Promise<{ done?: string }>
+}) {
+  const { done } = await searchParams
   const vendor = await getMyVendor()
   const waiting = vendor
     ? await listOrders({
@@ -31,6 +37,13 @@ export default async function Handover() {
         title="Confirm handover"
         subtitle="The customer shows a pickup code, then signs for the order."
       />
+      {(done === 'rider' || done === 'pickup') && (
+        <Alert tone="success" title="Handed over">
+          {done === 'rider'
+            ? 'The parcel is with the rider and the order is now on its way to the customer.'
+            : 'Handover complete. The customer can open their receipt now.'}
+        </Alert>
+      )}
       <MetricGrid>
         <MetricCard
           label="Customer pickups waiting"

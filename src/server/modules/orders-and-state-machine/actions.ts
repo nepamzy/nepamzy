@@ -1,12 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { rateLimit } from '@/server/modules/identity-and-access/security'
 import { registerPickupCodeForOrder } from './queries'
+import { signatureProblem } from '@/server/modules/identity-and-access/identity'
 import { parseSignature } from './signature'
 import {
   dbFailed,
@@ -81,6 +83,14 @@ export async function completePickupAction(_p: ActionState, fd: FormData): Promi
           : 'The recipient must sign in the box before completing.',
       )
     signature = sig.hex
+    // The customer signs on the shop's device: it must look like the signature that customer saved at sign-up.
+    const { data: ord } = await createSupabaseServiceClient()
+      .from('orders')
+      .select('customer_id')
+      .eq('id', orderId)
+      .maybeSingle()
+    const mismatch = ord?.customer_id ? await signatureProblem(ord.customer_id, sig.png) : null
+    if (mismatch) return failed(mismatch)
   } else {
     typed = text(fd, 'typed', 120)
     if (typed.length < 2) return failed('Type the recipient’s full name to acknowledge receipt.')
@@ -120,7 +130,7 @@ export async function completePickupAction(_p: ActionState, fd: FormData): Promi
   }
   revalidatePath('/vendor/handover')
   revalidatePath('/vendor/orders')
-  return done('Handover complete. Receipt is available to the customer.')
+  redirect('/vendor/handover?done=pickup')
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -171,6 +181,8 @@ export async function completeDeliveryAction(_p: ActionState, fd: FormData): Pro
     )
   if (!(await rateLimit(`delivery-proof:${gated.who.userId}`, 600, 40)))
     return failed('Too many attempts. Please wait a few minutes.')
+  const mismatch = gated.who.userId ? await signatureProblem(gated.who.userId, sig.png) : null
+  if (mismatch) return failed(mismatch)
   const sb = await createSupabaseServerClient()
   const { data, error } = await sb.rpc('complete_delivery', {
     p_order: orderId,

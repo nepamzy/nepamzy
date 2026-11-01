@@ -1,3 +1,4 @@
+import { lagosDate } from '@/lib/time'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Alert } from '@/components/ui/alert'
@@ -105,7 +106,7 @@ export default async function VendorsAdmin({
                     />
                   </p>
                   <p className="font-mono text-xs text-muted">
-                    {v.slug} · joined {new Date(v.created_at).toLocaleDateString('en-NG')}
+                    {v.slug} · joined {lagosDate(v.created_at)}
                   </p>
                 </div>
               </div>
