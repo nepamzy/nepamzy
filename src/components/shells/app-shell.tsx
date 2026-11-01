@@ -10,7 +10,6 @@ import { Logo } from '@/components/ui/logo'
 import { SearchField } from '@/components/ui/search-field'
 import { MobileDrawer } from './drawer'
 import { Menu } from './menu'
-import { ModeBar, ModePill, ModeSwitch } from './mode-switch'
 import type { NavItem } from './nav-config'
 import { BottomNav, SidebarNav } from './nav-links'
 import { SHELL_THEMES, type ShellTheme } from './theme'
@@ -72,19 +71,12 @@ export async function AppShell({
         <div className="flex-1">
           <SidebarNav items={items} theme={theme} />
         </div>
-        {staff && (
-          <div className={`mt-4 border-t pt-4 ${t.divider}`}>
-            <ModeSwitch who={who} dark={navy} />
-          </div>
-        )}
       </aside>
       <div className="min-w-0">
         <header
           className={`sticky top-0 z-30 flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-x-3 border-b border-line border-t-4 ${t.topBar} bg-card/95 px-4 py-2.5 backdrop-blur`}
         >
-          <MobileDrawer items={items} theme={theme} area={area}>
-            {staff && <ModeSwitch who={who} dark={navy} />}
-          </MobileDrawer>
+          <MobileDrawer items={items} theme={theme} area={area} />
           <Logo className="md:hidden" compact />
           {t.chip ? (
             <span
@@ -107,7 +99,6 @@ export async function AppShell({
             />
           )}
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            <ModePill who={who} />
             {showCart && (
               <Link
                 href="/cart"
@@ -146,6 +137,16 @@ export async function AppShell({
                 </p>
               )}
               <ul>
+                {staff && (
+                  <li>
+                    <Link
+                      href="/admin"
+                      className="touch-target flex items-center gap-2 rounded-lg px-3 py-2 font-semibold hover:bg-brand-50"
+                    >
+                      <Icon name="home" size={18} /> Overview
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <Link
                     href="/account"
@@ -163,11 +164,6 @@ export async function AppShell({
                   </Link>
                 </li>
               </ul>
-              {staff && (
-                <div className="my-2 border-t border-line px-1 pt-3">
-                  <ModeSwitch who={who} />
-                </div>
-              )}
               <form action={signOutAction} className="mt-1 border-t border-line pt-1">
                 <button
                   type="submit"
@@ -179,7 +175,6 @@ export async function AppShell({
             </Menu>
           </div>
         </header>
-        <ModeBar who={who} />
         <main id="main" className="mx-auto max-w-6xl px-4 py-6 pb-24 md:pb-10">
           {children}
         </main>
