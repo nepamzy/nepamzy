@@ -7,7 +7,7 @@ Operator: [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; n
 
 ## 1. Your hand-off signature
 
-When you create an account you draw a signature. We keep it and use it for one purpose: when a delivery or pick-up is handed over, the signature drawn on the day is compared with the one you registered. If the two look clearly different, the hand-off is refused so that a parcel is not given to the wrong person. Small differences are expected and are allowed. The comparison is automatic and approximate. It does **not** prove who you are and it is not a legal electronic signature [COUNSEL: confirm wording against the Evidence Act 2011 as amended in 2023].
+When you create an account you draw a signature. We keep it and use it for one purpose: when an order is handed over, the signature drawn on the day is compared with the one you registered. For a delivery you sign on the rider's phone and the rider signs too; as an alternative you can confirm by scanning a QR code on the rider's phone with your own signed-in phone. For a shop-counter pick-up you sign at the counter. If the two look clearly different, the hand-off is refused so that a parcel is not given to the wrong person. Small differences are expected and are allowed. The comparison is automatic and approximate. It does **not** prove who you are and it is not a legal electronic signature [COUNSEL: confirm wording against the Evidence Act 2011 as amended in 2023].
 
 - **What we store:** the image of your signature, and the date it was registered. Staff cannot view it in normal use. [COUNSEL: decide whether administrators may view it in a dispute, and how that is logged.]
 - **Accounts created before this feature:** you are asked to register a signature the next time you sign in.

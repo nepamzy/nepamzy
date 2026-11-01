@@ -902,8 +902,28 @@ describe('no rider path completes an order, and table privacy', () => {
                  'list_delivery_offers','release_assignment','ops_release_assignment','get_order_tracking','staff_get_order_tracking','set_rider_status'))`,
       )
       expect(defs.rowCount).toBeGreaterThan(10)
-      for (const r of defs.rows)
+      // The two rider-led confirmation functions are the deliberate exceptions (owner decision, 2026-11-01): the customer
+      // confirms at the door on the rider's phone (signatures) or by scanning the rider's QR code.
+      const LED = ['rider_delivery_complete', 'rider_qr_open']
+      for (const r of defs.rows.filter((x) => !LED.includes(x.proname)))
         expect(r.prosrc, r.proname).not.toMatch(/'(DELIVERED|COMPLETED|AWAITING_RECIPIENT_PROOF)'/)
+      const priv = await c.query(
+        `select has_function_privilege('authenticated', 'public.rider_delivery_complete(uuid,uuid,text,bytea,bytea)', 'execute') a,
+                has_function_privilege('anon', 'public.rider_delivery_complete(uuid,uuid,text,bytea,bytea)', 'execute') n,
+                has_function_privilege('service_role', 'public.rider_delivery_complete(uuid,uuid,text,bytea,bytea)', 'execute') s`,
+      )
+      // a rider cannot call the signature route directly: only the server, after it compared the signature, can
+      expect(priv.rows[0]).toEqual({ a: false, n: false, s: true })
+      const led = Object.fromEntries(
+        defs.rows
+          .filter((x) => LED.includes(x.proname))
+          .map((x) => [x.proname, x.prosrc as string]),
+      )
+      // it only ever completes an ARRIVED delivery that belongs to the calling rider, never one the customer owns
+      expect(led['rider_delivery_complete']).toMatch(/arrival_detected_at is null/)
+      expect(led['rider_delivery_complete']).toMatch(/v_a\.rider_id <> p_actor/)
+      // opening a QR code completes nothing
+      expect(led['rider_qr_open']).not.toMatch(/'(DELIVERED|COMPLETED)'/)
       const u = await createUser(c, 'u')
       const e = await as(c, AAL2(u), () =>
         failure(c, `select app_private.step_order(gen_random_uuid(),'PAID','COMPLETED',null,'x')`),

@@ -175,6 +175,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   // The cart is usable at aal1 by plain customers (privileged accounts are lifted to aal2 by decideAccess);
   // checkout, vendor applications and everything that creates orders need aal2.
   { prefix: '/cart', requirement: { roles: ['customer'], aal: 'aal1', customerOnly: true } },
+  { prefix: '/confirm', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   { prefix: '/checkout', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   { prefix: '/apply', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   { prefix: '/rider-apply', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },

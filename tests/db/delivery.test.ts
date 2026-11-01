@@ -590,7 +590,7 @@ describe('Phase 9: who may and may not complete a delivery', () => {
     })
   })
 
-  it('only the reviewed functions can reach the proof or completed states, and none is rider-named', async () => {
+  it('only the reviewed functions can reach the proof or completed states', async () => {
     const defs = await pool.query(
       `select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
         where n.nspname = 'public' and p.prosrc ~ '''(DELIVERED|COMPLETED|AWAITING_RECIPIENT_PROOF)'''
@@ -608,12 +608,15 @@ describe('Phase 9: who may and may not complete a delivery', () => {
       'complete_delivery',
       'complete_pickup',
       'create_review',
+      'customer_qr_confirm', // the customer scans the rider's QR code (signed in, aal2, must be the customer)
       'customer_request_refund',
       'customer_request_return',
       'delivery_proof_begin',
       'my_order_review',
       'open_support_case',
       'ops_handle_delivery_exception',
+      'rider_delivery_complete', // service role only: the app compares the customer's signature first (see riders.test.ts)
+      'rider_qr_open', // opens a ten-minute code for an ARRIVED delivery; completes nothing
       'staff_decide_return',
     ])
   })

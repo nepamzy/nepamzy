@@ -579,8 +579,8 @@ export async function seedPaidCompletedOrder(shop: { vendorId: string }, custome
 }
 
 /** Draws a signature with the mouse on the (visible) signature box. */
-export async function drawSignature(page: Page) {
-  const canvas = page.locator('canvas:visible').first()
+export async function drawSignature(page: Page, which = 0) {
+  const canvas = page.locator('canvas:visible').nth(which)
   await canvas.evaluate((el) => el.scrollIntoView({ block: 'center' }))
   const box = (await canvas.boundingBox())!
   const at = (fx: number, fy: number) => ({ x: box.x + box.width * fx, y: box.y + box.height * fy })

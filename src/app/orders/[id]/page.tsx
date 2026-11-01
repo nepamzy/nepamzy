@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { AutoRefresh } from '@/components/domain/auto-refresh'
-import { DeliveryProofPanel } from '@/components/domain/delivery-proof-panel'
 import { OrderStatusPill, ORDER_STATES } from '@/components/domain/order-status'
 import { OrderTracking } from '@/components/domain/order-tracking'
 import { Alert } from '@/components/ui/alert'
@@ -167,20 +166,22 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       {order.fulfilment === 'delivery' &&
         ['ARRIVAL_DETECTED', 'AWAITING_RECIPIENT_PROOF'].includes(order.status) && (
           <Card className="mb-5 border-brand-700">
-            <DeliveryProofPanel
-              orderId={order.id}
-              orderNumber={order.order_number}
-              vendorName={order.vendor_name}
-              deliverTo={order.delivery_point_label ?? ''}
-              totalKobo={order.total_kobo}
-              items={items.map((i) => ({
-                id: i.id,
-                name: i.product_name,
-                quantity: i.quantity,
-                lineKobo: i.line_total_kobo,
-              }))}
-              helpHref={`/orders/${order.id}/help`}
-            />
+            <h2 className="text-lg font-extrabold text-navy-900">Your rider has arrived</h2>
+            <p className="mt-1">
+              Check that you have everything. Your rider will hand you their phone to sign on, or
+              show you a QR code to scan with this phone. You do not need to confirm anything on
+              your own.
+            </p>
+            <p className="mt-2 text-sm">
+              Something missing or wrong? Do not confirm.{' '}
+              <a
+                className="font-semibold text-brand-700 underline"
+                href={`/orders/${order.id}/help`}
+              >
+                Get help from support
+              </a>
+              .
+            </p>
           </Card>
         )}
 
