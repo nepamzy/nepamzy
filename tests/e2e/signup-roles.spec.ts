@@ -244,7 +244,7 @@ test('a student gives an ID number and card photo, sees that it will be reviewed
   await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
   await page.getByRole('button', { name: 'Next' }).click()
   // the signature step carries the statement
-  await expect(page.getByText(/receive deliveries/)).toBeVisible()
+  await expect(page.getByText('receive deliveries', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
   await drawSignature(page)
   await page.getByRole('button', { name: 'Next' }).click()
@@ -327,7 +327,7 @@ test('an account with no saved signature is asked for one right after signing in
   const u = await createUser('nosig', [], { signature: false })
   await uiSignIn(page, u.email)
   await expect(page).toHaveURL(/\/signature-setup/)
-  await expect(page.getByText(/receive deliveries/)).toBeVisible()
+  await expect(page.getByText('receive deliveries', { exact: true })).toBeVisible()
   await drawSignature(page)
   await page.getByRole('button', { name: 'Save my signature' }).click()
   await expect(page).not.toHaveURL(/signature-setup/)

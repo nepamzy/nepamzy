@@ -39,7 +39,7 @@ test('a shop owner verifies a payout account: the bank gives the name in capital
   await adm.page.goto('/admin/vendors')
   const row = adm.page.getByTestId('vendor-row').filter({ hasText: shop.slug })
   await row.locator('summary').click()
-  await row.getByLabel('Reason (required)').last().fill('Owner changed bank')
+  await row.getByLabel('Reason for unlocking (required)').fill('Owner changed bank')
   await row.getByRole('button', { name: 'Unlock payout account' }).click()
   await expect(row.getByText(/Unlocked/)).toBeVisible()
   await p.goto('/vendor/earnings')
