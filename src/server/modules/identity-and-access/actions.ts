@@ -17,7 +17,17 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { confirmEmail, resetCodeEmail } from '@/server/modules/engagement/email-templates'
 import { mailConfig, sendMail, sendMailDetailed } from '@/server/modules/engagement/mail'
+import { parseSignature } from '@/server/modules/orders-and-state-machine/signature'
 import { checkAccess, loadPrincipal } from './guard'
+import {
+  PERSON_TYPES,
+  hasSignature,
+  parseIdCard,
+  saveIdentity,
+  saveSignature,
+  validStudentId,
+  type PersonType,
+} from './identity'
 import {
   MODE_COOKIE,
   experienceOf,
@@ -69,6 +79,25 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   })
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Check your details.' }
   const { email, password, intent } = parsed.data
+  // The signature chosen at sign-up, and (customers only) the kind of customer and, for students, the ID details.
+  const sig = parseSignature(String(formData.get('signature') ?? ''))
+  if (!sig.ok) return { error: 'Please sign in the signature box before creating your account.' }
+  let personType: PersonType | null = null
+  let studentId: string | undefined
+  let idCard: Buffer | undefined
+  if (intent === 'customer') {
+    const t = String(formData.get('personType') ?? '')
+    if (!PERSON_TYPES.includes(t as PersonType))
+      return { error: 'Choose whether you are a student, military, a lecturer or other.' }
+    personType = t as PersonType
+    if (personType === 'student') {
+      studentId = String(formData.get('studentId') ?? '').trim()
+      if (!validStudentId(studentId)) return { error: 'Enter your student ID card number.' }
+      const card = parseIdCard(String(formData.get('idCard') ?? ''))
+      if (!card.ok) return { error: 'Add a clear photo of your student ID card.' }
+      idCard = card.jpeg
+    }
+  }
   const ip = await clientIp()
   if (
     !(await rateLimit(`signup:ip:${ip}`, 3600, 10)) ||
@@ -83,7 +112,8 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   const mail = mailConfig()
   const supabase = await createSupabaseServerClient()
   let error: { code?: string; status?: number } | null = null
-  let data: { session?: unknown } | null = null
+  let data: { session?: unknown; user?: { id: string } | null } | null = null
+  let newUserId: string | null = null
   let sentByUs = false
   if (mail) {
     // Our own e-mail: the confirmation link is made here and sent through Brevo, so it does not depend on the auth
@@ -98,6 +128,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     if (gen.error) {
       error = { code: gen.error.code, status: gen.error.status }
     } else {
+      newUserId = gen.data.user?.id ?? null
       const hashed = gen.data.properties?.hashed_token
       const link = `${serverEnv().SITE_URL}/auth/confirm?token_hash=${encodeURIComponent(hashed ?? '')}&type=signup`
       const out = await sendMailDetailed(email, confirmEmail(link, serverEnv().SITE_URL), {
@@ -122,6 +153,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     })
     error = r.error
     data = r.data
+    newUserId = r.data?.user?.id ?? null
   }
   const outcome = signUpOutcome({ error, hasSession: Boolean(data?.session) })
   if (outcome === 'weak_password') return { error: 'Choose a stronger password.' }
@@ -130,6 +162,15 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   if (outcome === 'exists')
     return { error: 'An account with this email already exists. Try signing in instead.', email }
   if (!error) notifyAdmin({ type: 'signup', email })
+  // Keep what they told us. A failure here never blocks the account: the signature is asked for again at sign-in.
+  if (!error && newUserId) {
+    try {
+      await saveSignature(newUserId, String(formData.get('signature') ?? ''))
+      if (personType) await saveIdentity(newUserId, { personType, studentId, idCard })
+    } catch (e) {
+      logger.warn('sign-up details not saved', { err: e instanceof Error ? e.name : 'error' })
+    }
+  }
   // E-mail confirmation is switched off in the provider settings: the person is already signed in.
   if (outcome === 'signed_in') {
     notifyWelcome(email)
@@ -274,6 +315,10 @@ async function finishSignIn(
     await setModeCookie(chosen)
     if (chosen === 'admin' && next === '/') next = '/admin'
   }
+  // Everyone who signs deliveries needs a saved signature to compare against. Accounts made before this existed are
+  // asked for one right after sign-in (staff accounts do not sign deliveries).
+  if (who.userId && !staff && !(await hasSignature(who.userId)))
+    next = `/signature-setup?next=${encodeURIComponent(next)}`
   if (who.hasVerifiedFactor) redirect(`/mfa/challenge?next=${encodeURIComponent(next)}`)
   if (staff) redirect(`/mfa/enroll?next=${encodeURIComponent(next)}`)
   redirect(next)

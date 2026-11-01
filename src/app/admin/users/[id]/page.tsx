@@ -6,7 +6,9 @@ import { SuspendUserButton } from '@/components/domain/admin-controls'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { z } from 'zod'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { userDetail } from '@/server/modules/admin/queries'
+import { identityForAdmin } from '@/server/modules/identity-and-access/identity'
 
 export const metadata: Metadata = { title: 'User' }
 
@@ -15,6 +17,10 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
   if (!z.uuid().safeParse(id).success) notFound()
   const u = await userDetail(id)
   if (!u) notFound()
+  const identity = await identityForAdmin(id)
+  // Looking at someone's ID details is recorded.
+  if (identity?.studentId)
+    await (await createSupabaseServerClient()).rpc('admin_log_identity_view', { p_user: id })
   const row = (k: string, v: React.ReactNode) => (
     <div className="flex flex-wrap justify-between gap-2 border-b border-line py-2 last:border-b-0">
       <dt className="font-semibold text-muted">{k}</dt>
@@ -33,6 +39,35 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
         ]}
         actions={<SuspendUserButton userId={u.id} suspended={u.suspended} />}
       />
+      {identity && (
+        <Card className="mb-4">
+          <h2 className="mb-2 text-lg font-extrabold text-navy-900">Details given at sign-up</h2>
+          <dl>
+            {row(
+              'Customer type',
+              identity.personType.charAt(0).toUpperCase() + identity.personType.slice(1),
+            )}
+            {identity.personType === 'student' &&
+              row('Student ID number', identity.studentId ?? 'Could not be read')}
+            {identity.hasIdCard &&
+              row(
+                'ID card photo',
+                <a
+                  className="font-semibold text-brand-700 underline"
+                  href={`/admin/users/${id}/id-card`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View the photo (opens in a new tab, the look is logged)
+                </a>,
+              )}
+          </dl>
+          <p className="mt-2 text-sm text-muted">
+            These details are what the person typed and uploaded. They are not checked
+            automatically.
+          </p>
+        </Card>
+      )}
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <h2 className="mb-2 text-lg font-extrabold text-navy-900">Account</h2>

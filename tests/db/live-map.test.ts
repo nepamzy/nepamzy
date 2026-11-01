@@ -165,3 +165,36 @@ describe('delivery points on the real map', () => {
     })
   })
 })
+
+describe('identity details are closed to every API role', () => {
+  it('a signed-in person cannot read signatures or ID details directly, and a student record needs its ID number and card', async () => {
+    await isoTx(async (c) => {
+      const u = await createUser(c, 'ident')
+      await c.query(
+        `insert into public.user_signatures (user_id, png) values ($1, decode(repeat('ab', 400), 'hex'))`,
+        [u],
+      )
+      await c.query(
+        `insert into public.account_identity (user_id, person_type, student_id_cipher, id_card_jpeg) values ($1, 'student', 'cipher', decode(repeat('cd', 3000), 'hex'))`,
+        [u],
+      )
+      for (const table of ['user_signatures', 'account_identity'])
+        for (const role of ['authenticated', 'anon'])
+          for (const priv of ['select', 'insert', 'update', 'delete']) {
+            const r = await c.query(`select has_table_privilege($1, $2, $3) as ok`, [
+              role,
+              `public.${table}`,
+              priv,
+            ])
+            expect(r.rows[0].ok, `${role} ${priv} ${table}`).toBe(false)
+          }
+      // a student record without the ID number and card is refused
+      await expect(
+        c.query(
+          `insert into public.account_identity (user_id, person_type) values ($1, 'student') on conflict (user_id) do update set person_type = 'student', student_id_cipher = null`,
+          [u],
+        ),
+      ).rejects.toThrow()
+    })
+  })
+})

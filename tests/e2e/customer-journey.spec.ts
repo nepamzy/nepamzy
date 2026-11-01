@@ -13,6 +13,7 @@ import {
   uiSignInAttempt,
   uiSignOut,
   uniqueEmail,
+  uiSignUpSteps,
 } from './helpers'
 
 test.use({
@@ -28,6 +29,7 @@ test('customer: sign up -> confirm email -> sign in -> orders without any second
 
   // 1. Sign up through the UI
   await page.goto('/signup')
+  await uiSignUpSteps(page)
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
   await page.getByLabel('Confirm password').fill(PASSWORD)
