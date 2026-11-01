@@ -5,11 +5,7 @@ import { logger } from '@/lib/logger'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { FieldCryptoError, encryptField } from '@/server/security/field-crypto'
 import { rateLimit } from '@/server/modules/identity-and-access/security'
-import {
-  PaymentsUnavailable,
-  listBanks,
-  resolveAccountName,
-} from '@/server/modules/payments/paystack'
+import { PaymentsUnavailable, resolveAccountName } from '@/server/modules/payments/paystack'
 import {
   dbFailed,
   done,
@@ -18,20 +14,12 @@ import {
   text,
   type ActionState,
 } from '@/server/modules/shared/action-helpers'
+import { vendorBankChoices } from './bank-choices'
 import { getMyVendor } from './vendor-queries'
 
 const OWNER = { roles: ['vendor_owner' as const], aal: 'aal2' as const }
 
 export type BankLookup = { ok: true; name: string } | { ok: false; message: string }
-
-/** The bank list for the picker. Empty when bank checks are not available. */
-export async function vendorBankChoices(): Promise<{ name: string; code: string }[]> {
-  try {
-    return await listBanks()
-  } catch {
-    return []
-  }
-}
 
 /** Asks the bank (through Paystack) whose account this is. The answer is only shown; saving asks again. */
 export async function lookupVendorBankAction(

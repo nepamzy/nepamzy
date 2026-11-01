@@ -13,7 +13,7 @@ import { vendorSettlement } from '@/server/modules/settlement/queries'
 import { getMyVendor } from '@/server/modules/vendors-and-catalogue/vendor-queries'
 import { VendorBankForm } from '@/components/domain/vendor-bank-form'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
-import { vendorBankChoices } from '@/server/modules/vendors-and-catalogue/bank-actions'
+import { vendorBankChoices } from '@/server/modules/vendors-and-catalogue/bank-choices'
 
 export const metadata: Metadata = { title: 'Earnings' }
 
