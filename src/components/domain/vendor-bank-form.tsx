@@ -93,7 +93,13 @@ export function UnlockVendorBankForm({ vendorId }: { vendorId: string }) {
       pendingLabel="Unlocking…"
     >
       <input type="hidden" name="vendorId" value={vendorId} />
-      <Input label="Reason (required)" name="reason" required minLength={5} maxLength={300} />
+      <Input
+        label="Reason for unlocking (required)"
+        name="reason"
+        required
+        minLength={5}
+        maxLength={300}
+      />
     </ActionForm>
   )
 }
