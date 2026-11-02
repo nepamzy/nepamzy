@@ -69,6 +69,7 @@ describe('every server action gates access', () => {
   const PRE_AUTH_OR_SELF_CHECKED = new Set([
     'signUpAction', // public sign-up (rate limited by IP and email hash)
     'signInAction', // public sign-in (rate limited)
+    'resendConfirmationAction', // public: a fresh confirmation code (rate limited by IP and once per address every five minutes; never says whether an account exists)
     'confirmEmailCodeAction', // public: the e-mailed confirmation code (rate limited by IP and by address, eight tries per 15 minutes)
     'requestPasswordResetAction', // public: e-mails a one-time code (rate limited by IP and email hash)
     'resetPasswordAction', // public: code + new password (rate limited, five tries per code)
