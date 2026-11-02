@@ -19,7 +19,9 @@ export default defineConfig({
   timeout: process.env.CI ? 150_000 : 90_000,
   retries: 0,
   reporter: [['list']],
-  use: { baseURL: 'http://127.0.0.1:3000', trace: 'retain-on-failure' },
+  // A click or fill waits for its element until the whole test times out, so one stuck step hides which step it was. 20 s per
+  // action makes a stuck step fail with its own name and what it was waiting for, in the CI log.
+  use: { baseURL: 'http://127.0.0.1:3000', trace: 'retain-on-failure', actionTimeout: 20_000 },
   projects: [
     {
       name: 'mobile-360',
