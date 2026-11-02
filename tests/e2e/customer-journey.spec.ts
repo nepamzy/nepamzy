@@ -60,7 +60,7 @@ test('customer: sign up -> confirm email -> sign in -> orders without any second
   const mails = await (await fetch(`${MAIL_SINK}/messages?to=${encodeURIComponent(email)}`)).json()
   const link = (mails[mails.length - 1].text as string)
     .match(/https?:\/\/\S+/)![0]
-    .replace(/[)\]>]+$/, '')
+    .replace(/[).\]>]+$/, '')
   expect(link).toContain('/auth/confirm?token_hash=')
   await page.goto(link)
   await expect(page).toHaveURL(/\/login\?confirmed=1/)
