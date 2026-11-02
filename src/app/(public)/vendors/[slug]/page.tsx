@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { Card } from '@/components/ui/card'
 import { Icon } from '@/components/ui/icons'
-import { NoImageTile, ProductCard, categoryIcon } from '@/components/ui/product-card'
+import { ProductCard } from '@/components/ui/product-card'
+import { ShopFront } from '@/components/ui/shop-front'
 import { Section } from '@/components/ui/section'
 import { EmptyState } from '@/components/ui/states'
 import { ReportReviewForm } from '@/components/domain/engagement-forms'
@@ -45,11 +46,7 @@ export default async function VendorPage({
         ]}
       />
       <div className="mb-6 overflow-hidden rounded-[var(--radius-card)] border border-line bg-card shadow-[var(--shadow-card)]">
-        <NoImageTile
-          icon={categoryIcon(null)}
-          className="aspect-[16/4] rounded-none"
-          label="No banner photo yet"
-        />
+        <ShopFront categorySlug={vendor.category} className="aspect-[16/5]" />
         <div className="flex flex-wrap items-start justify-between gap-3 p-5">
           <div className="min-w-0">
             <h1 className="text-3xl font-extrabold tracking-tight text-navy-900">{vendor.name}</h1>

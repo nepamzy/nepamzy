@@ -3,11 +3,10 @@ import { z } from 'zod'
 import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { clientIp, rateLimit } from '@/server/modules/identity-and-access/security'
 
-/** The branded tile shown for a product without a photo: navy with a gold shopping bag. Same look as the in-page tile. */
-const PLACEHOLDER = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="No photo yet"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgb(11,42,92)"/><stop offset="1" stop-color="rgb(23,74,156)"/></linearGradient></defs><rect width="400" height="300" fill="url(#g)"/><g fill="none" stroke="rgb(255,201,40)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M150 125h100l12 95h-124z"/><path d="M175 125v-18a25 25 0 0 1 50 0v18"/></g></svg>`
+import { artKind, productArtSvg, type ArtKind } from '@/lib/art/scenes'
 
-const placeholder = () =>
-  new NextResponse(PLACEHOLDER, {
+const placeholder = (kind: ArtKind = 'general') =>
+  new NextResponse(productArtSvg(kind), {
     headers: {
       'Content-Type': 'image/svg+xml',
       'Cache-Control': 'public, max-age=60',
@@ -34,7 +33,18 @@ export async function GET(_req: NextRequest, ctx: { params: Promise<{ id: string
     .eq('product_id', id)
     .maybeSingle()
   const p = data?.products as unknown as { status: string; vendors: { status: string } } | undefined
-  if (!data || !p || p.status !== 'active' || p.vendors.status !== 'approved') return placeholder()
+  if (!data || !p || p.status !== 'active' || p.vendors.status !== 'approved') {
+    // no photo: draw a picture that suits the product, chosen from its name and its shop's category
+    const { data: prod } = await sb
+      .from('products')
+      .select('name, status, vendors!inner(status, categories(slug))')
+      .eq('id', id)
+      .maybeSingle()
+    const v = prod?.vendors as unknown as
+      { status: string; categories?: { slug: string } | null } | undefined
+    if (!prod || prod.status !== 'active' || v?.status !== 'approved') return placeholder()
+    return placeholder(artKind(prod.name, v.categories?.slug))
+  }
   const hex = String(data.jpeg).replace(/^\\x/, '')
   const body = Buffer.from(hex, 'hex')
   const etag = `"${new Date(data.updated_at).getTime()}"`
