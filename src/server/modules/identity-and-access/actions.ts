@@ -24,6 +24,7 @@ import {
   hasSignature,
   parseIdCard,
   saveIdentity,
+  saveMatricNumber,
   saveSignature,
   validStudentId,
   type PersonType,
@@ -85,10 +86,13 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     personType = t as PersonType
     if (personType === 'student') {
       studentId = String(formData.get('studentId') ?? '').trim()
-      if (!validStudentId(studentId)) return { error: 'Enter your student ID card number.' }
-      const card = parseIdCard(String(formData.get('idCard') ?? ''))
-      if (!card.ok) return { error: 'Add a clear photo of your student ID card.' }
-      idCard = card.jpeg
+      if (!validStudentId(studentId)) return { error: 'Enter your matric number.' }
+      // the ID card photo is optional; a photo that cannot be used is simply not kept
+      const rawCard = String(formData.get('idCard') ?? '')
+      if (rawCard) {
+        const card = parseIdCard(rawCard)
+        if (card.ok) idCard = card.jpeg
+      }
     }
   }
   const ip = await clientIp()
@@ -557,4 +561,18 @@ export async function removeFactorAction(
   if (error) return { ok: false, error: 'We could not remove that authenticator.' }
   await recordSecurityEvent(who.userId, 'mfa.factor_removed')
   return { ok: true }
+}
+
+/** The Security page: a signed-in person adds or changes their matric number. */
+export async function saveMatricAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const who = await loadPrincipal()
+  if (!who.authenticated || !who.userId) return { error: 'Please sign in first.' }
+  if (!(await rateLimit(`matric:user:${who.userId}`, 3600, 10))) return { error: TOO_MANY }
+  const matric = String(formData.get('matric') ?? '').trim()
+  if (!validStudentId(matric))
+    return { error: 'Enter your matric number (letters, numbers, / . - _).' }
+  const ok = await saveMatricNumber(who.userId, matric)
+  return ok
+    ? { ok: true, message: 'Your matric number is saved.' }
+    : { error: 'Could not save it. Try again.' }
 }

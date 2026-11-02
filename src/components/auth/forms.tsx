@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button'
 import { SignaturePad } from '@/components/domain/signature-pad'
 import { Checkbox, Input } from '@/components/ui/fields'
 import { SignatureStatement } from './signature-statement'
+import { CustomerArt, RiderArt, VendorArt } from '@/components/landing/illustrations'
 import {
   requestPasswordResetAction,
   confirmEmailCodeAction,
   resendConfirmationAction,
   resetPasswordAction,
   signInAction,
+  saveMatricAction,
   signUpAction,
   type FormState,
 } from '@/server/modules/identity-and-access/actions'
@@ -187,6 +189,63 @@ const TYPE_LABEL: Record<PersonType, string> = {
   other: 'Other',
 }
 
+const ROLE_ART: Record<Intent, (p: { className?: string }) => React.JSX.Element> = {
+  customer: CustomerArt,
+  vendor: VendorArt,
+  rider: RiderArt,
+}
+
+/** Small flat badges for the "I am a" choices. Decorative: the words beside them carry the meaning. */
+function PersonIcon({ kind }: { kind: PersonType }) {
+  const common = {
+    viewBox: '0 0 48 48',
+    className: 'size-10',
+    'aria-hidden': true,
+    focusable: false,
+  } as const
+  if (kind === 'student')
+    return (
+      <svg {...common}>
+        <circle cx="24" cy="24" r="22" className="fill-gold-400/30" />
+        <path d="M24 12 6 21l18 9 18-9z" className="fill-navy-900" />
+        <path d="M13 26v8c0 3 5 6 11 6s11-3 11-6v-8l-11 5z" className="fill-brand-700" />
+        <path d="M40 22v12" stroke="rgb(255 201 40)" strokeWidth="2.5" strokeLinecap="round" />
+      </svg>
+    )
+  if (kind === 'military')
+    return (
+      <svg {...common}>
+        <circle cx="24" cy="24" r="22" className="fill-brand-50" />
+        <path d="M24 7 38 12v11c0 8-6 14-14 18C16 37 10 31 10 23V12z" className="fill-navy-900" />
+        <path
+          d="m24 15 2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"
+          className="fill-gold-400"
+        />
+      </svg>
+    )
+  if (kind === 'lecturer')
+    return (
+      <svg {...common}>
+        <circle cx="24" cy="24" r="22" className="fill-gold-400/30" />
+        <rect x="8" y="10" width="32" height="20" rx="3" className="fill-navy-900" />
+        <path
+          d="M14 17h14M14 22h20M14 26h9"
+          stroke="rgb(255 255 255)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <path d="M18 40 24 30l6 10" stroke="rgb(11 42 92)" strokeWidth="3" fill="none" />
+      </svg>
+    )
+  return (
+    <svg {...common}>
+      <circle cx="24" cy="24" r="22" className="fill-brand-50" />
+      <circle cx="24" cy="18" r="7" className="fill-navy-900" />
+      <path d="M10 40c1-9 7-13 14-13s13 4 14 13z" className="fill-brand-700" />
+    </svg>
+  )
+}
+
 export function SignUpForm() {
   const [state, action, pending] = useActionState(signUpAction, initial)
   const [step, setStep] = useState<1 | 2 | 3>(1)
@@ -194,7 +253,6 @@ export function SignUpForm() {
   const [personType, setPersonType] = useState<PersonType | null>(null)
   const [studentId, setStudentId] = useState('')
   const [idCard, setIdCard] = useState<string | null>(null)
-  const [idSaved, setIdSaved] = useState(false)
   const [signed, setSigned] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   if (state.ok) return <SignUpDone email={state.email ?? ''} message={state.message} />
@@ -202,25 +260,19 @@ export function SignUpForm() {
   const isStudent = intent === 'customer' && personType === 'student'
   const step1Ready =
     intent !== 'customer' ||
-    (personType !== null && (personType !== 'student' || (idSaved && !!idCard)))
+    (personType !== null && (personType !== 'student' || studentId.trim().length >= 3))
   const goNext = () => {
     setProblem(null)
     if (step === 1) {
       if (intent === 'customer' && !personType)
         return setProblem('Choose whether you are a student, military, a lecturer or other.')
-      if (isStudent && !idSaved) return setProblem('Save your ID card first.')
+      if (isStudent && studentId.trim().length < 3) return setProblem('Enter your matric number.')
       return setStep(2)
     }
     if (step === 2) {
       if (!signed) return setProblem('Please sign in the box first.')
       return setStep(3)
     }
-  }
-  const saveCard = () => {
-    setProblem(null)
-    if (studentId.trim().length < 3) return setProblem('Enter your student ID card number.')
-    if (!idCard) return setProblem('Add a clear photo of your student ID card.')
-    setIdSaved(true)
   }
   const stepTitle = ['Who are you?', 'Your signature', 'Your account'][step - 1]!
 
@@ -250,26 +302,39 @@ export function SignUpForm() {
           <legend className="px-1 text-sm font-bold text-navy-900">
             I want to use AFIT Market as a
           </legend>
-          <div className="space-y-1">
-            {(Object.keys(ROLE_HELP) as Intent[]).map((value) => (
-              <label key={value} className="touch-target flex items-start gap-2">
-                <input
-                  type="radio"
-                  name="intent-choice"
-                  value={value}
-                  checked={intent === value}
-                  onChange={() => {
-                    setIntent(value)
-                    setProblem(null)
-                  }}
-                  className="mt-1.5"
-                />
-                <span>
-                  <span className="font-semibold">{ROLE_HELP[value][0]}</span>
-                  <span className="block text-sm text-muted">{ROLE_HELP[value][1]}</span>
-                </span>
-              </label>
-            ))}
+          <div className="grid gap-2 sm:grid-cols-3">
+            {(Object.keys(ROLE_HELP) as Intent[]).map((value) => {
+              const Art = ROLE_ART[value]
+              return (
+                <label
+                  key={value}
+                  className="touch-target group relative flex cursor-pointer items-center gap-3 rounded-[var(--radius-card)] border-2 border-line bg-white p-3 transition hover:-translate-y-0.5 hover:border-brand-600 has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:checked]:shadow-[var(--shadow-card)] has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-gold-400/60 sm:flex-col sm:text-center"
+                >
+                  <input
+                    type="radio"
+                    name="intent-choice"
+                    value={value}
+                    checked={intent === value}
+                    onChange={() => {
+                      setIntent(value)
+                      setProblem(null)
+                    }}
+                    className="absolute inset-0 z-10 m-0 size-full cursor-pointer opacity-0"
+                  />
+                  <Art className="h-20 w-16 shrink-0 transition-transform duration-300 group-hover:scale-105 group-has-[:checked]:scale-110 sm:h-28 sm:w-24" />
+                  <span>
+                    <span className="block font-bold text-navy-900">{ROLE_HELP[value][0]}</span>
+                    <span className="block text-sm text-muted">{ROLE_HELP[value][1]}</span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-2 top-2 hidden size-6 place-items-center rounded-full bg-brand-700 text-xs font-extrabold text-white group-has-[:checked]:grid"
+                  >
+                    ✓
+                  </span>
+                </label>
+              )
+            })}
           </div>
           <p className="text-xs text-muted">
             Choosing Vendor or Rider takes you to the application after you sign in; nothing is
@@ -280,9 +345,12 @@ export function SignUpForm() {
         {intent === 'customer' && (
           <fieldset className="rounded-[var(--radius-control)] border border-line p-3">
             <legend className="px-1 text-sm font-bold text-navy-900">I am a</legend>
-            <div className="grid grid-cols-2 gap-1">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               {(Object.keys(TYPE_LABEL) as PersonType[]).map((t) => (
-                <label key={t} className="touch-target flex items-center gap-2">
+                <label
+                  key={t}
+                  className="touch-target relative flex cursor-pointer flex-col items-center gap-1 rounded-[var(--radius-control)] border-2 border-line bg-white px-2 py-3 text-center transition hover:border-brand-600 has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-gold-400/60"
+                >
                   <input
                     type="radio"
                     name="person-choice"
@@ -292,7 +360,9 @@ export function SignUpForm() {
                       setPersonType(t)
                       setProblem(null)
                     }}
+                    className="absolute inset-0 z-10 m-0 size-full cursor-pointer opacity-0"
                   />
+                  <PersonIcon kind={t} />
                   <span className="font-semibold">{TYPE_LABEL[t]}</span>
                 </label>
               ))}
@@ -302,52 +372,35 @@ export function SignUpForm() {
 
         {isStudent && (
           <div className="space-y-3 rounded-[var(--radius-control)] border border-line p-3">
-            <p className="font-semibold text-navy-900">Your student ID card</p>
-            {idSaved ? (
-              <div className="space-y-2">
-                <p role="status" className="font-medium text-success-700">
-                  Your ID card will be reviewed.
-                </p>
-                <p className="text-sm">ID number: {studentId.trim().toUpperCase()}</p>
-                <Button type="button" variant="secondary" onClick={() => setIdSaved(false)}>
-                  Edit ID card
-                </Button>
-              </div>
-            ) : (
-              <>
-                <Input
-                  label="Student ID card number"
-                  name="studentIdInput"
-                  autoComplete="off"
-                  value={studentId}
-                  onChange={(e) => setStudentId(e.target.value)}
-                />
-                <div className="space-y-1">
-                  <label htmlFor="idcard-file" className="text-sm font-semibold">
-                    Photo of your new student ID card (2026 edition)
-                  </label>
-                  <input
-                    id="idcard-file"
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    className="block w-full text-sm"
-                    onChange={async (e) => {
-                      const f = e.target.files?.[0]
-                      const url = f ? await shrinkToJpeg(f) : null
-                      setIdCard(url)
-                      if (f && !url) setProblem('That photo could not be used. Try another one.')
-                    }}
-                  />
-                  <p className="text-xs text-muted">
-                    Take it flat in good light, with all four corners and the text readable.
-                  </p>
-                </div>
-                <Button type="button" onClick={saveCard}>
-                  Save ID card
-                </Button>
-              </>
-            )}
+            <Input
+              label="Matric number"
+              name="studentIdInput"
+              autoComplete="off"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+            />
+            <div className="space-y-1">
+              <label htmlFor="idcard-file" className="text-sm font-semibold">
+                Photo of your student ID card (optional)
+              </label>
+              <input
+                id="idcard-file"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="block w-full text-sm"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0]
+                  const url = f ? await shrinkToJpeg(f) : null
+                  setIdCard(url)
+                  if (f && !url) setProblem('That photo could not be used. Try another one.')
+                }}
+              />
+              <p className="text-xs text-muted">
+                You can skip this now. You can add your matric number or card later under Security
+                in your account.
+              </p>
+            </div>
           </div>
         )}
         <Button type="button" onClick={goNext} disabled={!step1Ready} className="w-full">
@@ -495,6 +548,26 @@ export function ResetPasswordForm({ email }: { email: string }) {
           Send a new one
         </Link>
       </p>
+    </form>
+  )
+}
+
+/** Security page: add or change the matric number. */
+export function MatricForm({ current }: { current: string | null }) {
+  const [state, action, pending] = useActionState(saveMatricAction, initial)
+  return (
+    <form action={action} className="space-y-3" noValidate>
+      <Notice state={state} />
+      <Input
+        label="Matric number"
+        name="matric"
+        autoComplete="off"
+        defaultValue={current ?? ''}
+        hint="Students: your matriculation number. Only you and AFIT Market staff can see it."
+      />
+      <Button type="submit" disabled={pending}>
+        {pending ? 'Saving…' : 'Save matric number'}
+      </Button>
     </form>
   )
 }

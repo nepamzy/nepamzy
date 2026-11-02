@@ -48,7 +48,7 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
               identity.personType.charAt(0).toUpperCase() + identity.personType.slice(1),
             )}
             {identity.personType === 'student' &&
-              row('Student ID number', identity.studentId ?? 'Could not be read')}
+              row('Matric number', identity.studentId ?? 'Could not be read')}
             {identity.hasIdCard &&
               row(
                 'ID card photo',

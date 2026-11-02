@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
+import { MatricForm } from '@/components/auth/forms'
 import { EnrollFlow, FactorList, type FactorRow } from '@/components/auth/mfa'
 import { Card, PageHeader } from '@/components/ui/card'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
+import { matricForOwner } from '@/server/modules/identity-and-access/identity'
 import { isPrivilegedRole } from '@/server/modules/identity-and-access/policy'
 
 export const metadata: Metadata = { title: 'Security' }
@@ -19,10 +21,19 @@ export default async function SecurityPage() {
   }))
   const verified = factors.filter((f) => f.status === 'verified').length
   const privileged = who.roles.some(isPrivilegedRole)
+  const matric = who.userId ? await matricForOwner(who.userId) : null
   return (
     <>
       <PageHeader title="Security" subtitle="Two-step sign-in with an authenticator app" />
       <div className="space-y-5">
+        <Card>
+          <h2 className="text-lg font-bold">Matric number</h2>
+          <p className="mb-3 mt-1 text-muted">
+            If you are a student, keep your matriculation number on your account. You can add or
+            change it here at any time.
+          </p>
+          <MatricForm current={matric} />
+        </Card>
         {verified === 0 ? (
           <Card>
             <h2 className="text-lg font-bold">Turn on two-step sign-in (optional)</h2>

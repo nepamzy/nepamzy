@@ -6,7 +6,7 @@ import { signaturesMatch } from './signature-match'
 
 /**
  * What people tell us about themselves when they sign up: the signature they sign deliveries with, the kind of customer
- * they are and, for students, the student ID number and a photo of the ID card. None of it is checked automatically.
+ * they are and, for students, the matric number and, if they chose to add one, a photo of the student ID card. None of it is checked automatically.
  * These tables are closed to every API role, so everything here goes through the server's service client.
  */
 export type PersonType = 'student' | 'military' | 'lecturer' | 'other'
@@ -73,7 +73,7 @@ export async function saveIdentity(
   }
   if (a.personType === 'student') {
     row.student_id_cipher = encryptField(a.studentId!.trim().toUpperCase())
-    row.id_card_jpeg = toHex(a.idCard!)
+    row.id_card_jpeg = a.idCard ? toHex(a.idCard) : null
   }
   const { error } = await createSupabaseServiceClient()
     .from('account_identity')
@@ -128,4 +128,28 @@ export async function signatureProblem(userId: string, nowPng: Buffer): Promise<
   return r.reason === 'unreadable'
     ? 'The signature looks empty. Please sign again.'
     : SIGNATURE_MISMATCH
+}
+
+/**
+ * Adds or changes the matric number on an existing account (the account Security page). A person with no identity row yet
+ * becomes a student; the optional card photo is kept as it was.
+ */
+export async function saveMatricNumber(userId: string, matric: string): Promise<boolean> {
+  if (!validStudentId(matric)) return false
+  const { error } = await createSupabaseServiceClient()
+    .from('account_identity')
+    .upsert(
+      {
+        user_id: userId,
+        person_type: 'student',
+        student_id_cipher: encryptField(matric.trim().toUpperCase()),
+      },
+      { onConflict: 'user_id' },
+    )
+  return !error
+}
+
+export async function matricForOwner(userId: string): Promise<string | null> {
+  const id = await identityForAdmin(userId)
+  return id?.studentId ?? null
 }

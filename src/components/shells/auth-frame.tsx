@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Icon, type IconName } from '@/components/ui/icons'
 import { Logo } from '@/components/ui/logo'
+import { HeroScene } from '@/components/landing/illustrations'
 
 const POINTS: { icon: IconName; title: string; text: string }[] = [
   { icon: 'shield', title: 'Protected accounts', text: 'Your sign-in and payments are guarded.' },
@@ -21,6 +22,7 @@ export function AuthFrame({ children }: { children: ReactNode }) {
           <p className="mt-3 text-lg text-navy-text">
             One campus marketplace for customers, shops and riders.
           </p>
+          <HeroScene className="mt-6 w-full rounded-3xl shadow-[0_20px_50px_-20px_rgb(0_0_0/.6)]" />
           <ul className="mt-8 space-y-4">
             {POINTS.map((p) => (
               <li key={p.title} className="flex items-start gap-3">
