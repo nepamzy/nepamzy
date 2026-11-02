@@ -78,7 +78,7 @@ test.describe('platform basics', () => {
     const m = await request.get('/manifest.webmanifest')
     expect(m.status()).toBe(200)
     expect((await m.json()).name).toBe('AFIT Market')
-    expect((await request.get('/icons/icon.svg')).status()).toBe(200)
+    expect((await request.get('/icons/icon-192.png')).status()).toBe(200)
     expect((await request.get('/sw.js')).status()).toBe(200)
   })
   test('service worker serves the offline page when the network is down', async ({

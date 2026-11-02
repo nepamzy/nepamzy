@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import {
   admin,
-  clickAndWait,
   makeShopWithPoint,
   openAnonymous,
   openSession,
@@ -153,7 +152,7 @@ test('MFA challenge screen is keyboard operable and labelled', async ({ browser 
   await reflowAt320(page, 'MFA challenge')
 })
 
-test('signature capture: the known limitation is exactly as documented (no keyboard path), and the way out is reachable by keyboard', async ({
+test('signature capture on the rider’s phone: the known limitation is exactly as documented (no keyboard path), and everything else is reachable by keyboard', async ({
   browser,
 }, info) => {
   const customer = await openSession(browser, info, 'asig')
@@ -161,27 +160,25 @@ test('signature capture: the known limitation is exactly as documented (no keybo
   const shop = await makeShopWithPoint(ownerId, `Fixture dish ${tag()}`)
   const rider = await seedRider({ active: true })
   const o = await seedArrivedOrder(shop, customer.user.id, rider)
-  await openSessionFor(browser, info, rider)
-  const c = customer.page
-  await c.goto(`/orders/${o.id}`)
-  await clickAndWait(c, () => c.getByRole('button', { name: 'Confirm receipt' }).click())
-  await expect(c.locator('canvas')).toBeVisible()
+  const r = (await openSessionFor(browser, info, rider)).page
+  await r.goto('/rider/jobs')
+  await r.getByRole('button', { name: 'Confirm with signatures' }).click()
+  await expect(r.locator('canvas').first()).toBeVisible()
 
   // the drawing surface cannot take keyboard focus: this is K27, kept visible, NOT fixed by a typed fallback
-  expect(await c.locator('canvas').getAttribute('tabindex')).toBeNull()
-  const stops = await tabAudit(c)
+  expect(await r.locator('canvas').first().getAttribute('tabindex')).toBeNull()
+  const stops = await tabAudit(r)
   expect(stops.some((s) => s.tag === 'canvas')).toBe(false)
-  // everything else in the panel is reachable and named, including the escape route to a person
-  expect(stops.map((s) => s.name).join('|')).toMatch(/Get help from support/)
   expect(stops.map((s) => s.name).join('|')).toMatch(/Clear signature/)
+  expect(stops.map((s) => s.name).join('|')).toMatch(/Back/)
   expectGood(stops, 'signature panel')
   // the typed alternative stays disabled
-  await expect(c.getByLabel(/type your name as acknowledgement/i)).toHaveCount(0)
+  await expect(r.getByLabel(/type your name as acknowledgement/i)).toHaveCount(0)
   // the state of the pad is announced politely
-  expect(await c.locator('#sig-hint').getAttribute('aria-live')).toBe('polite')
+  expect(await r.locator('p[id$="-hint"]').first().getAttribute('aria-live')).toBe('polite')
   // nothing completed
   expect((await admin().from('orders').select('status').eq('id', o.id).single()).data!.status).toBe(
-    'AWAITING_RECIPIENT_PROOF',
+    'ARRIVAL_DETECTED',
   )
-  await reflowAt320(c, 'signature panel')
+  await reflowAt320(r, 'signature panel')
 })

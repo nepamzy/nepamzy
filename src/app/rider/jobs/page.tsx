@@ -1,3 +1,4 @@
+import { RiderHandoff } from '@/components/domain/rider-handoff'
 import { AutoRefresh } from '@/components/domain/auto-refresh'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -129,13 +130,7 @@ export default async function Jobs() {
                 </p>
               )}
               {a.arrival_detected_at && (
-                <p className="font-semibold">
-                  Arrival detected. Now the recipient confirms receipt in their own app and signs.
-                  {a.order_status === 'AWAITING_RECIPIENT_PROOF' &&
-                    ' They have started: wait for them to finish.'}{' '}
-                  This app cannot mark the order delivered for you; if the recipient is not there,
-                  report it below.
-                </p>
+                <RiderHandoff orderId={a.order_id} orderNumber={a.order_number} />
               )}
               <ReportIssueForm assignmentId={a.assignment_id} />
             </Card>

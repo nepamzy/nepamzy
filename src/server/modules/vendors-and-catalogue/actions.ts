@@ -280,9 +280,33 @@ export async function saveProductAction(_p: ActionState, fd: FormData): Promise<
     p_options: groups.groups,
   })
   if (error) return dbFailed(error, 'Check the name (2-80 characters) and price.')
+  const productId = uuid.safeParse(rawId).success ? rawId : String(data)
+  // the photo (already shrunk in the browser) is kept with the product; a failure here never loses the product itself
+  let photo: 'none' | 'saved' | 'removed' | 'failed' = 'none'
+  const imageUrl = String(fd.get('image') ?? '')
+  if (imageUrl) {
+    const m = /^data:image\/jpeg;base64,([A-Za-z0-9+/]+={0,2})$/.exec(imageUrl)
+    const buf = m ? Buffer.from(m[1]!, 'base64') : null
+    if (!buf || buf.length < 500 || buf.length > 350_000 || buf[0] !== 0xff || buf[1] !== 0xd8) {
+      photo = 'failed'
+    } else {
+      const r = await sb.rpc('vendor_set_product_image', {
+        p_product: productId,
+        p_jpeg: '\\x' + buf.toString('hex'),
+      })
+      photo = r.error ? 'failed' : 'saved'
+    }
+  } else if (String(fd.get('removeImage') ?? '') === '1') {
+    const r = await sb.rpc('vendor_remove_product_image', { p_product: productId })
+    photo = r.error ? 'failed' : 'removed'
+  }
   revalidatePath('/vendor/catalogue')
-  if (!rawId) redirect(`/vendor/catalogue/${String(data)}?created=1`)
-  return done('Product saved.')
+  revalidatePath('/products')
+  if (!rawId)
+    redirect(`/vendor/catalogue/${productId}?created=1${photo === 'failed' ? '&photo=failed' : ''}`)
+  if (photo === 'failed')
+    return failed('The item was saved, but the photo could not be. Try another picture.')
+  return done(photo === 'saved' ? 'Product and photo saved.' : 'Product saved.')
 }
 
 export async function toggleAvailabilityAction(fd: FormData): Promise<void> {

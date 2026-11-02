@@ -6,8 +6,8 @@ import {
   notifyWelcome,
 } from '@/server/modules/engagement/dispatch'
 import { notifyAdmin } from '@/server/modules/engagement/admin-alerts'
-import { cookies, headers } from 'next/headers'
-import { forbidden, redirect } from 'next/navigation'
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createHmac, randomInt } from 'node:crypto'
 import { after } from 'next/server'
@@ -28,14 +28,7 @@ import {
   validStudentId,
   type PersonType,
 } from './identity'
-import {
-  MODE_COOKIE,
-  experienceOf,
-  homeFor,
-  isPrivilegedRole,
-  safeNextPath,
-  signUpOutcome,
-} from './policy'
+import { experienceOf, homeFor, isPrivilegedRole, safeNextPath, signUpOutcome } from './policy'
 import { clientIp, rateLimit, recordSecurityEvent, sha256Hex } from './security'
 
 export type FormState = { ok?: boolean; error?: string; message?: string; email?: string }
@@ -223,15 +216,7 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
     return { error: 'Email or password is incorrect.', email }
   }
   notifySignIn(email, (await headers()).get('user-agent'))
-  return finishSignIn(
-    next,
-    formData.get('mode') === 'admin'
-      ? 'admin'
-      : formData.get('mode') === 'customer'
-        ? 'customer'
-        : null,
-    data.user.user_metadata?.intended_role,
-  )
+  return finishSignIn(next, data.user.user_metadata?.intended_role)
 }
 
 /** A fresh confirmation link for an address that signed up but never confirmed. At most one every 5 minutes per address. */
@@ -295,11 +280,7 @@ function applicationPathFor(intent: unknown): '/apply' | '/rider-apply' | null {
 }
 
 /** After a password was accepted: staff and people with an authenticator go to the second step; others are in. */
-async function finishSignIn(
-  next: string,
-  chosen: 'admin' | 'customer' | null = null,
-  intent?: unknown,
-): Promise<never> {
+async function finishSignIn(next: string, intent?: unknown): Promise<never> {
   const who = await loadPrincipal()
   const staff = who.roles.some(isPrivilegedRole)
   // Someone who signed up to sell or deliver is taken to that application until they hold the role.
@@ -310,11 +291,8 @@ async function finishSignIn(
     const home = experienceOf(who)
     if (home === 'vendor' || home === 'rider') next = homeFor(home)
   }
-  // The "sign in as" choice only picks the interface for accounts that already hold a staff role; for anyone else it is ignored.
-  if (staff && chosen) {
-    await setModeCookie(chosen)
-    if (chosen === 'admin' && next === '/') next = '/admin'
-  }
+  // Staff land in Administration.
+  if (staff && next === '/') next = '/admin'
   // Everyone who signs deliveries needs a saved signature to compare against. Accounts made before this existed are
   // asked for one right after sign-in (staff accounts do not sign deliveries).
   if (who.userId && !staff && !(await hasSignature(who.userId)))
@@ -429,43 +407,9 @@ export async function resetPasswordAction(
   return finishSignIn('/')
 }
 
-async function setModeCookie(mode: 'admin' | 'customer') {
-  ;(await cookies()).set(MODE_COOKIE, mode, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-  })
-}
-
-/**
- * Switch a staff member between Administrator and Customer mode. The cookie only chooses which interface is shown;
- * every staff area and action still checks the staff role and the second step on the server, so this cannot grant access.
- * Going back to Administrator mode is refused for anyone without a staff role, and each switch is written to the audit trail.
- */
-export async function switchModeAction(formData: FormData): Promise<void> {
-  const to = formData.get('to') === 'admin' ? 'admin' : 'customer'
-  const next = safeNextPath(String(formData.get('next') ?? ''))
-  const who = await loadPrincipal()
-  if (!who.authenticated || !who.userId) redirect(`/login?next=${encodeURIComponent('/account')}`)
-  const staff = who.roles.some(isPrivilegedRole)
-  if (to === 'admin' && !staff) forbidden()
-  if (!(await rateLimit(`mode:${who.userId}`, 600, 30))) redirect('/account/mode?error=rate')
-  if (to === 'admin' && who.aal !== 'aal2')
-    redirect(
-      `/${who.hasVerifiedFactor ? 'mfa/challenge' : 'mfa/enroll'}?next=${encodeURIComponent('/admin')}`,
-    )
-  await setModeCookie(to)
-  await recordSecurityEvent(who.userId, 'auth.mode_switched', { to })
-  const adminPath = next === '/admin' || next.startsWith('/admin/')
-  redirect(to === 'admin' ? (adminPath ? next : '/admin') : adminPath ? '/' : next)
-}
-
 export async function signOutAction(): Promise<void> {
   const supabase = await createSupabaseServerClient()
   await supabase.auth.signOut({ scope: 'local' })
-  ;(await cookies()).delete(MODE_COOKIE)
   redirect('/')
 }
 

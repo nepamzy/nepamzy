@@ -1,3 +1,4 @@
+import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ProductForm } from '@/components/domain/product-form'
@@ -14,13 +15,20 @@ export default async function EditProduct({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ created?: string }>
+  searchParams: Promise<{ created?: string; photo?: string }>
 }) {
   const vendor = await getMyVendor()
   if (!vendor) return <EmptyState title="No vendor account yet" />
   const product = await getEditableProduct(vendor.id, (await params).id)
   if (!product) notFound()
-  const created = (await searchParams).created
+  const sp = await searchParams
+  // the product belongs to this shop (checked above), so reading its photo flag with the service role is safe
+  const { data: photoRow } = await createSupabaseServiceClient()
+    .from('product_images')
+    .select('product_id')
+    .eq('product_id', product.id)
+    .maybeSingle()
+  const created = sp.created
   return (
     <>
       <PageHeader
@@ -30,7 +38,7 @@ export default async function EditProduct({
           { label: product.name },
         ]}
         title={product.name}
-        subtitle="Edit item. Photos are not available yet because file storage has not been set up."
+        subtitle="Edit the item, its photo, price and options."
       />
       {created && (
         <p
@@ -40,11 +48,20 @@ export default async function EditProduct({
           Item added to your menu.
         </p>
       )}
+      {sp.photo === 'failed' && (
+        <p
+          role="alert"
+          className="mb-4 rounded-[var(--radius-control)] bg-danger-50 px-3 py-2 font-medium text-danger-700"
+        >
+          The item was added, but its photo could not be saved. Add the photo again below.
+        </p>
+      )}
       <Card className="max-w-2xl">
         <ProductForm
           vendorId={vendor.id}
           product={product}
           disabled={vendor.status !== 'approved'}
+          hasPhoto={Boolean(photoRow)}
         />
       </Card>
     </>

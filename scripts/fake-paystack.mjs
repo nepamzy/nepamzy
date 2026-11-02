@@ -109,6 +109,28 @@ createServer(async (req, res) => {
         `<!doctype html><html lang="en"><meta charset="utf-8"><title>Fake Paystack checkout</title><body style="font-family:sans-serif;padding:24px"><h1>Fake Paystack (test)</h1><p>Reference ${t.reference}</p><p>Amount NGN ${(t.amount / 100).toFixed(2)}</p><form method="post"><button name="outcome" value="success">Simulate successful payment</button> <button name="outcome" value="failed">Simulate failed payment</button></form></body></html>`,
       )
     }
+    if (req.method === 'GET' && url.pathname === '/bank') {
+      if (!authorised(req)) return json(res, 401, { status: false, message: 'Invalid key' })
+      return json(res, 200, {
+        status: true,
+        data: [
+          { name: 'Access Bank', code: '044', active: true },
+          { name: 'Guaranty Trust Bank', code: '058', active: true },
+          { name: 'Zenith Bank', code: '057', active: true },
+        ],
+      })
+    }
+    if (req.method === 'GET' && url.pathname === '/bank/resolve') {
+      if (!authorised(req)) return json(res, 401, { status: false, message: 'Invalid key' })
+      const number = url.searchParams.get('account_number') ?? ''
+      // test rule: numbers ending 0000 do not exist; everything else resolves to a fixed test name
+      if (!/^[0-9]{10}$/.test(number) || number.endsWith('0000'))
+        return json(res, 422, { status: false, message: 'Could not resolve account name' })
+      return json(res, 200, {
+        status: true,
+        data: { account_number: number, account_name: 'Ada Obi Test Kitchen' },
+      })
+    }
     if (url.pathname === '/health') return json(res, 200, { ok: true })
     // test hooks: replay / tamper (used by e2e only)
     if (req.method === 'POST' && url.pathname === '/__replay') {

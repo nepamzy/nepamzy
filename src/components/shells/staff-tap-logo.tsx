@@ -15,11 +15,13 @@ export function StaffTapLogo() {
   function onClickCapture(e: MouseEvent) {
     if (!onHome) return
     const now = Date.now()
+    // On the home page the logo points at the page you are already on, so a tap only counts. Letting taps one and two
+    // navigate to "/" could finish after the jump to the staff sign-in and bounce the page back.
+    e.preventDefault()
+    e.stopPropagation()
     taps.current = [...taps.current.filter((t) => now - t < 900), now]
     if (taps.current.length >= 3) {
       taps.current = []
-      e.preventDefault()
-      e.stopPropagation()
       router.push('/staff-login')
     }
   }

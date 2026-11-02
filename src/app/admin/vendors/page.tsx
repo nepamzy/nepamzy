@@ -10,6 +10,7 @@ import { LinkTabs, SearchBar } from '@/components/ui/list-controls'
 import { EmptyState } from '@/components/ui/states'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { UnlockVendorBankForm } from '@/components/domain/vendor-bank-form'
 import { setVendorStatusAction } from '@/server/modules/vendors-and-catalogue/actions'
 
 export const metadata: Metadata = { title: 'Vendors' }
@@ -130,6 +131,12 @@ export default async function VendorsAdmin({
                   {v.status === 'approved' ? 'Suspend' : 'Reinstate'}
                 </Button>
               </form>
+              <details>
+                <summary className="cursor-pointer font-semibold">Payout account</summary>
+                <div className="mt-2">
+                  <UnlockVendorBankForm vendorId={v.id} />
+                </div>
+              </details>
             </li>
           ))}
         </ul>

@@ -135,8 +135,40 @@ export default async function AccountPage() {
       text: 'Copy of your data or close your account.',
     },
   ]
+  const adminTiles: Tile[] = [
+    { href: '/admin', icon: 'home', title: 'Overview', text: 'The administration dashboard.' },
+    {
+      href: '/account/security',
+      icon: 'shield',
+      title: 'Security',
+      text: 'Authenticator app and sign-in protection.',
+    },
+    { href: '/account/profile', icon: 'user', title: 'Profile', text: 'Your name and email.' },
+    {
+      href: '/notifications',
+      icon: 'bell',
+      title: 'Notifications',
+      text: 'Updates and email settings.',
+    },
+    {
+      href: '/admin/audit',
+      icon: 'clipboard',
+      title: 'Audit log',
+      text: 'Who did what, and when.',
+    },
+    {
+      href: '/account/data-requests',
+      icon: 'database',
+      title: 'Your data',
+      text: 'Copy of your data or close your account.',
+    },
+  ]
   const tiles: Tile[] =
-    experience !== 'customer' && experience !== 'admin' ? [...own, ...shared] : customerTiles
+    experience === 'admin'
+      ? adminTiles
+      : experience !== 'customer'
+        ? [...own, ...shared]
+        : customerTiles
   return (
     <>
       <PageHeader
@@ -145,7 +177,9 @@ export default async function AccountPage() {
             ? 'Shop account'
             : experience === 'rider'
               ? 'Rider account'
-              : 'My account'
+              : experience === 'admin'
+                ? 'Administrator account'
+                : 'My account'
         }
         breadcrumbs={[{ label: 'Home', href: homeFor(experience) }, { label: 'Account' }]}
       />
@@ -160,9 +194,7 @@ export default async function AccountPage() {
           <p className="truncate text-muted">{profile.email}</p>
           <p className="mt-1 flex flex-wrap gap-2">
             {who.roles
-              .filter(
-                (r) => r !== 'customer' || experience === 'customer' || experience === 'admin',
-              )
+              .filter((r) => r !== 'customer' || experience === 'customer')
               .map((r) => (
                 <Badge key={r} tone="brand">
                   {ROLE_LABEL[r] ?? r}

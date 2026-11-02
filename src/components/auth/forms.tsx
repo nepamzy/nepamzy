@@ -38,7 +38,7 @@ function Notice({ state }: { state: FormState }) {
   return null
 }
 
-/** `staff` is the hidden administrator entrance (/staff-login): it only picks the administrator interface for accounts that already hold a staff role. */
+/** `staff` is the hidden administrator entrance (/staff-login): it only hides the sign-up link. */
 export function SignInForm({ next, staff = false }: { next: string; staff?: boolean }) {
   const [state, action, pending] = useActionState(signInAction, initial)
   return (
@@ -61,7 +61,6 @@ export function SignInForm({ next, staff = false }: { next: string; staff?: bool
         autoComplete="current-password"
         required
       />
-      {staff && <input type="hidden" name="mode" value="admin" />}
       <Button type="submit" variant="gold" disabled={pending} className="w-full">
         {pending ? 'Signing in…' : 'Sign in'}
       </Button>

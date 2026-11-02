@@ -11,6 +11,9 @@ import { Money } from '@/components/ui/money'
 import { EmptyState } from '@/components/ui/states'
 import { vendorSettlement } from '@/server/modules/settlement/queries'
 import { getMyVendor } from '@/server/modules/vendors-and-catalogue/vendor-queries'
+import { VendorBankForm } from '@/components/domain/vendor-bank-form'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { vendorBankChoices } from '@/server/modules/vendors-and-catalogue/bank-choices'
 
 export const metadata: Metadata = { title: 'Earnings' }
 
@@ -23,6 +26,15 @@ export default async function Earnings() {
   if (!vendor || !s)
     return <EmptyState title="Unavailable">Your earnings could not be loaded.</EmptyState>
   const f = s.finalised
+  const sb = await createSupabaseServerClient()
+  const bank = (await sb.rpc('my_vendor_bank', { p_vendor: vendor.id })).data as {
+    set: boolean
+    bank_name?: string
+    account_name?: string
+    account_masked?: string
+  } | null
+  const owner = vendor.staff_role === 'owner'
+  const banks = owner && !bank?.set ? await vendorBankChoices() : []
   return (
     <>
       <PageHeader
@@ -33,6 +45,31 @@ export default async function Earnings() {
       <Alert tone="warning" plain title="Nothing has been paid out">
         {s.payout.note} These are calculated amounts only.
       </Alert>
+
+      <Section title="Payout account" className="mt-4">
+        <Card className="space-y-3" data-testid="payout-account">
+          {bank?.set ? (
+            <>
+              <p>
+                <span className="block text-sm text-muted">{bank.bank_name}</span>
+                <strong className="text-xl uppercase tracking-wide">{bank.account_name}</strong>
+                <span className="block font-mono">{bank.account_masked}</span>
+              </p>
+              <Badge tone="success">Verified</Badge>
+              <p className="text-sm text-muted">
+                This account cannot be changed unless you contact customer service.
+              </p>
+            </>
+          ) : owner ? (
+            <>
+              <p>Add the bank account where your earnings will be paid.</p>
+              <VendorBankForm banks={banks} />
+            </>
+          ) : (
+            <p className="text-muted">The shop owner has not added a payout account yet.</p>
+          )}
+        </Card>
+      </Section>
 
       <div className="mt-4">
         <MetricGrid>

@@ -1,7 +1,7 @@
 # Vendor Agreement (draft)
 
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
-> Prepared by the engineering team from the behaviour of the application as of 2026-10-13 (HEAD `daee8a4` plus this stage). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
+> Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
 Between [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; not yet registered] (the operator) and the vendor named at application. Support: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED].
 
@@ -52,3 +52,10 @@ Suspension or removal follows a notice stating reasons, a chance to respond, and
 ## 12. Law
 
 [COUNSEL: governing law, disputes, indemnities, limits.]
+
+## Payout account (added 2026-11-01)
+
+- The shop owner chooses a bank and enters an account number. The service asks the payment provider for the account name the bank has on file and shows it in capital letters. The owner confirms by tapping Verify.
+- Once verified, the account **cannot be changed** unless the owner contacts customer service, who may unlock it after a check. Each unlock is recorded with a reason.
+- The account number is stored encrypted; staff see only the last four digits.
+- Being verified does not mean any payout has been made or is promised. [COUNSEL: payout timing and conditions, holdbacks for disputes, and what happens when the account name differs from the registered business name.]

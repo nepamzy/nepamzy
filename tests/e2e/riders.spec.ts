@@ -239,8 +239,11 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   // ---- two-way map: the customer chooses to share where they are, and the rider sees it; stopping hides it ----
   await customer.context.grantPermissions(['geolocation'])
   await customer.context.setGeolocation({ latitude: 0.0103, longitude: 0.01, accuracy: 10 })
-  await c.getByRole('button', { name: 'Share my location with my rider' }).click()
-  await expect(c.getByText('Your rider can see where you are.')).toBeVisible({ timeout: 30000 })
+  // nothing to tap: once the customer's browser allows location, sharing starts by itself
+  await c.reload()
+  await expect(c.getByText('Your rider can see where you are.', { exact: true })).toBeVisible({
+    timeout: 30000,
+  })
   await r.goto('/rider/jobs')
   await expect(r.getByText(/The customer is sharing where they are/)).toBeVisible({
     timeout: 30000,
@@ -260,7 +263,9 @@ test('rider journey: apply -> approve -> terms -> Go Active -> accept -> handove
   // ...but a customer who has allowed location and has not switched it off is shared automatically
   await c.evaluate(() => localStorage.removeItem('afit-share-location'))
   await c.reload()
-  await expect(c.getByText('Your rider can see where you are.')).toBeVisible({ timeout: 30000 })
+  await expect(c.getByText('Your rider can see where you are.', { exact: true })).toBeVisible({
+    timeout: 30000,
+  })
 
   // privacy: other accounts cannot read this order's tracking
   const stranger = await openSession(browser, info, 'rs')

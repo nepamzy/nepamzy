@@ -53,4 +53,8 @@ export const ADMIN_NAV: NavItem[] = [
   { href: '/admin/settings', label: 'Settings', icon: 'sliders', group: 'Platform' },
   { href: '/admin/audit', label: 'Audit log', icon: 'clipboard', group: 'Platform' },
   { href: '/admin/data-requests', label: 'Data requests', icon: 'database', group: 'Platform' },
+  { href: '/admin/legal-drafts', label: 'Legal drafts', icon: 'clipboard', group: 'Platform' },
+  { href: '/account', label: 'My account', icon: 'user', group: 'Account' },
+  { href: '/account/security', label: 'Security', icon: 'shield', group: 'Account' },
+  { href: '/notifications', label: 'Notifications', icon: 'bell', group: 'Account' },
 ]

@@ -14,7 +14,11 @@ describe('every API route authenticates its caller', () => {
   const routes = walk(join(root, 'src/app/api')).filter((f) => f.endsWith('route.ts'))
   it('there are routes to check', () => expect(routes.length).toBeGreaterThanOrEqual(6))
   // Public by design, and why: a monitor must reach it without credentials, so it reveals only ok / not ok and is rate limited.
-  const PUBLIC_BY_DESIGN = ['src/app/api/health/route.ts']
+  // the product photo route is public like the catalogue it belongs to: it serves only photos of active products of approved shops
+  const PUBLIC_BY_DESIGN = [
+    'src/app/api/health/route.ts',
+    'src/app/api/products/[id]/image/route.ts',
+  ]
   for (const file of routes) {
     it(file.replace(root + '/', ''), () => {
       const src = readFileSync(file, 'utf8')
@@ -44,7 +48,10 @@ describe('rate limiting is present where users create content or trigger cost', 
     'src/server/modules/support/actions.ts': 3,
     'src/server/modules/cart-and-checkout/actions.ts': 2,
     'src/server/modules/payments/actions.ts': 1,
-    'src/server/modules/orders-and-state-machine/actions.ts': 3,
+    'src/server/modules/orders-and-state-machine/actions.ts': 1,
+    'src/server/modules/orders-and-state-machine/qr-actions.ts': 1,
+    'src/server/modules/riders/handoff-actions.ts': 2,
+    'src/server/modules/vendors-and-catalogue/bank-actions.ts': 2,
     'src/app/api/payments/return/route.ts': 1,
     'src/app/api/orders/[id]/tracking/route.ts': 1,
   }
@@ -66,7 +73,6 @@ describe('every server action gates access', () => {
     'resetPasswordAction', // public: code + new password (rate limited, five tries per code)
     'submitContactAction', // public contact form: honeypot + rate limited by address and e-mail; only the service role writes
     'signOutAction', // ends the caller's own session; needs no role
-    'switchModeAction', // checks sign-in and the staff role itself; the cookie it sets can only reduce access (audited)
     'startEnrollmentAction', // checks loadPrincipal() itself
     'verifyEnrollmentAction', // checks loadPrincipal() itself
     'verifySignInAction', // completes the challenge for the session that holds the pending factor

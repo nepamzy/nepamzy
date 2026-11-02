@@ -48,17 +48,19 @@ test('customer: sign up -> confirm email -> sign in -> orders without any second
   await uiSignInAttempt(page, email)
   await expect(alertIn(page)).toContainText(/confirm your email/i)
 
-  // 3. Open the real confirmation link delivered to the local mail sink
+  // 3. Open the real confirmation link delivered to the local mail sink. Step 2 may have made the app send a fresh link,
+  //    which replaces the first one: give a second mail a few seconds to arrive and use the newest (the sink lists oldest first).
+  const count = async () =>
+    (await (await fetch(`${MAIL_SINK}/messages?to=${encodeURIComponent(email)}`)).json()).length
+  await expect.poll(count, { timeout: 15000 }).toBeGreaterThan(0)
   await expect
-    .poll(
-      async () =>
-        (await (await fetch(`${MAIL_SINK}/messages?to=${encodeURIComponent(email)}`)).json())
-          .length,
-      { timeout: 15000 },
-    )
-    .toBeGreaterThan(0)
+    .poll(count, { timeout: 6000 })
+    .toBeGreaterThan(1)
+    .catch(() => undefined)
   const mails = await (await fetch(`${MAIL_SINK}/messages?to=${encodeURIComponent(email)}`)).json()
-  const link = (mails[0].text as string).match(/https?:\/\/\S+/)![0].replace(/[)\]>]+$/, '')
+  const link = (mails[mails.length - 1].text as string)
+    .match(/https?:\/\/\S+/)![0]
+    .replace(/[)\]>]+$/, '')
   expect(link).toContain('/auth/confirm?token_hash=')
   await page.goto(link)
   await expect(page).toHaveURL(/\/login\?confirmed=1/)

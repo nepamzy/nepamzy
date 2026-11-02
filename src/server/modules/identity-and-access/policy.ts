@@ -3,8 +3,6 @@
  * unit-testable. The database enforces the same rules independently (RLS + aal2 policies).
  */
 export type Aal = 'aal1' | 'aal2'
-/** Cookie that remembers a staff member's chosen interface (see Principal.mode). */
-export const MODE_COOKIE = 'afit_mode'
 export type AppRole =
   | 'customer'
   | 'vendor_owner'
@@ -37,8 +35,8 @@ export const isBusinessRole = (r: AppRole) =>
 /** Which interface a person works in. Exactly one, so a shop or a rider never lands on the customer screens. */
 export type Experience = 'admin' | 'vendor' | 'rider' | 'customer'
 
-export const experienceOf = (who: Pick<Principal, 'roles' | 'mode'>): Experience => {
-  if (who.roles.some(isPrivilegedRole) && who.mode !== 'customer') return 'admin'
+export const experienceOf = (who: Pick<Principal, 'roles'>): Experience => {
+  if (who.roles.some(isPrivilegedRole)) return 'admin'
   if (who.roles.some((r) => r === 'vendor_owner' || r === 'vendor_staff')) return 'vendor'
   if (who.roles.includes('rider')) return 'rider'
   return 'customer'
@@ -55,11 +53,6 @@ export type Principal = {
   aal: Aal | null
   /** The user has at least one verified TOTP factor. */
   hasVerifiedFactor: boolean
-  /**
-   * Which interface a staff member is using. It only ever REMOVES access (customer mode hides staff areas); it never adds any:
-   * every staff area still requires the staff role, and the second step, whatever this says. Undefined means `admin`.
-   */
-  mode?: 'admin' | 'customer'
 }
 export const ANONYMOUS: Principal = {
   authenticated: false,
@@ -83,7 +76,7 @@ export type Decision =
   | { allow: true }
   | {
       allow: false
-      action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' | 'switch-mode' | 'go-home'
+      action: 'login' | 'forbidden' | 'mfa-enroll' | 'mfa-challenge' | 'go-home'
     }
 
 export function decideAccess(req: AccessRequirement, who: Principal): Decision {
@@ -95,9 +88,6 @@ export function decideAccess(req: AccessRequirement, who: Principal): Decision {
   // Shopping screens belong to customers: a shop or a rider account goes back to its own area.
   if (req.customerOnly && experienceOf(who) !== 'customer' && experienceOf(who) !== 'admin')
     return { allow: false, action: 'go-home' }
-  // A staff-only area is closed while the person is browsing in Customer mode: they switch back on purpose.
-  if (req.roles && req.roles.every((r) => isPrivilegedRole(r)) && who.mode === 'customer')
-    return { allow: false, action: 'switch-mode' }
   const needsAal2 = req.aal === 'aal2' || (!req.mfaSetup && staff)
   // The second step counts as satisfied when it was completed, or when it is optional for this person:
   // not staff and no authenticator set up.
@@ -169,6 +159,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
     requirement: { roles: ['platform_admin', 'finance_admin'], aal: 'aal2' },
   },
   { prefix: '/admin/settings', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
+  { prefix: '/admin/legal-drafts', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   { prefix: '/admin/jobs', requirement: { roles: ['platform_admin'], aal: 'aal2' } },
   {
     prefix: '/admin/audit',
@@ -184,6 +175,7 @@ export const ROUTE_POLICIES: RoutePolicy[] = [
   // The cart is usable at aal1 by plain customers (privileged accounts are lifted to aal2 by decideAccess);
   // checkout, vendor applications and everything that creates orders need aal2.
   { prefix: '/cart', requirement: { roles: ['customer'], aal: 'aal1', customerOnly: true } },
+  { prefix: '/confirm', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   { prefix: '/checkout', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   { prefix: '/apply', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },
   { prefix: '/rider-apply', requirement: { roles: ['customer'], aal: 'aal2', customerOnly: true } },

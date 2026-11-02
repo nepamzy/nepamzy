@@ -64,8 +64,9 @@ export default function VendorHelp() {
             orders. Orders already paid still need to be handled.
           </p>
           <p>
-            <strong>Photos.</strong> Item photos are not available yet because file storage has not
-            been set up.
+            <strong>Photos.</strong> Open an item and press Add a photo. The picture is shrunk on
+            your phone before it is sent. Until you add one, customers see a simple placeholder
+            tile.
           </p>
           <p>
             <strong>Need a person?</strong> Contact{' '}

@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 const MIN_INK_PIXELS = 150
@@ -18,13 +18,17 @@ function inkPixels(c: HTMLCanvasElement): number {
 export function SignaturePad({
   label = 'Recipient signature',
   hint = 'Ask the recipient to sign with a finger or stylus.',
+  name = 'signature',
   onSignedChange,
 }: {
+  /** The form field the drawing is sent in. Use different names when one form holds two pads. */
+  name?: string
   label?: string
   /** The sentence above the signed / not signed status. */
   hint?: string
   onSignedChange?: (signed: boolean) => void
 }) {
+  const uid = useId()
   const canvas = useRef<HTMLCanvasElement>(null)
   const signedRef = useRef(false)
   const drawing = useRef(false)
@@ -58,11 +62,11 @@ export function SignaturePad({
     const onFormData = (e: FormDataEvent) => {
       // A single tap or a dot is not a signature: require a minimum amount of ink before the image is sent at all.
       if (signedRef.current && canvas.current && inkPixels(canvas.current) >= MIN_INK_PIXELS)
-        e.formData.set('signature', canvas.current.toDataURL('image/png'))
+        e.formData.set(name, canvas.current.toDataURL('image/png'))
     }
     form.addEventListener('formdata', onFormData)
     return () => form.removeEventListener('formdata', onFormData)
-  }, [])
+  }, [name])
 
   const pos = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const c = canvas.current!
@@ -99,7 +103,7 @@ export function SignaturePad({
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-semibold" id="sig-label">
+      <p className="text-sm font-semibold" id={`${uid}-label`}>
         {label}
       </p>
       <canvas
@@ -107,15 +111,15 @@ export function SignaturePad({
         width={600}
         height={220}
         role="img"
-        aria-labelledby="sig-label"
-        aria-describedby="sig-hint"
+        aria-labelledby={`${uid}-label`}
+        aria-describedby={`${uid}-hint`}
         className="w-full touch-none rounded-[var(--radius-control)] border-2 border-dashed border-line-strong bg-white"
         onPointerDown={down}
         onPointerMove={move}
         onPointerUp={up}
         onPointerCancel={up}
       />
-      <p id="sig-hint" aria-live="polite" className="text-sm text-muted">
+      <p id={`${uid}-hint`} aria-live="polite" className="text-sm text-muted">
         {hint} {signed ? 'Signature captured.' : 'Nothing signed yet.'}
       </p>
       <Button type="button" variant="secondary" onClick={reset}>

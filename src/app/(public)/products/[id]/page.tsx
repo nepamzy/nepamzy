@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { Icon } from '@/components/ui/icons'
 import { Money } from '@/components/ui/money'
-import { NoImageTile, ProductCard } from '@/components/ui/product-card'
+import { ProductCard } from '@/components/ui/product-card'
+import { ProductPhoto } from '@/components/ui/product-photo'
 import { Section } from '@/components/ui/section'
 import { getMenu, getProduct } from '@/server/modules/vendors-and-catalogue/public'
 import { WishlistButton } from '@/components/domain/customer-forms'
@@ -36,12 +37,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <div>
-          <NoImageTile
+          <ProductPhoto
+            productId={product.id}
             icon="bag"
+            label={product.name}
             className="aspect-[4/3] rounded-[var(--radius-card)]"
-            label="No photo has been added for this item yet"
           />
-          <p className="mt-2 text-sm text-muted">No photo has been added for this item yet.</p>
         </div>
         <div className="space-y-4">
           <div>

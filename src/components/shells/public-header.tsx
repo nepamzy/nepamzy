@@ -1,24 +1,18 @@
 import Link from 'next/link'
 import { signOutAction } from '@/server/modules/identity-and-access/actions'
 import { loadPrincipal } from '@/server/modules/identity-and-access/guard'
-import {
-  experienceOf,
-  homeFor,
-  isPrivilegedRole,
-} from '@/server/modules/identity-and-access/policy'
+import { experienceOf, homeFor } from '@/server/modules/identity-and-access/policy'
 import { cartItemCount } from '@/server/modules/cart-and-checkout/queries'
 import { ButtonLink } from '@/components/ui/button'
 import { Icon } from '@/components/ui/icons'
 import { SearchField } from '@/components/ui/search-field'
 import { Menu } from './menu'
 import { StaffTapLogo } from './staff-tap-logo'
-import { ModePill, ModeSwitch } from './mode-switch'
 
 export async function PublicHeader() {
   const who = await loadPrincipal()
-  const staff = who.roles.some(isPrivilegedRole)
   const experience = experienceOf(who)
-  const shopping = experience === 'customer' || experience === 'admin'
+  const shopping = experience === 'customer'
   const cart = who.authenticated && shopping ? await cartItemCount() : 0
   return (
     <header className="sticky top-0 z-30 border-b border-line border-t-4 border-t-gold-400 bg-card/95 backdrop-blur">
@@ -43,7 +37,6 @@ export async function PublicHeader() {
               {label}
             </Link>
           ))}
-          <ModePill who={who} />
           {who.authenticated ? (
             <>
               {shopping && (
@@ -79,27 +72,34 @@ export async function PublicHeader() {
                 }
               >
                 <ul>
-                  {(shopping
+                  {(experience === 'admin'
                     ? [
+                        ['/admin', 'Overview', 'home'],
                         ['/account', 'My account', 'user'],
-                        ['/orders', 'My orders', 'package'],
                         ['/notifications', 'Notifications', 'bell'],
                         ['/account/security', 'Security', 'shield'],
                       ]
-                    : [
-                        [
-                          homeFor(experience),
-                          experience === 'vendor' ? 'My shop' : 'My deliveries',
-                          experience === 'vendor' ? 'store' : 'truck',
-                        ],
-                        [
-                          '/account',
-                          experience === 'vendor' ? 'Shop account' : 'Rider account',
-                          'user',
-                        ],
-                        ['/notifications', 'Notifications', 'bell'],
-                        ['/account/security', 'Security', 'shield'],
-                      ]
+                    : shopping
+                      ? [
+                          ['/account', 'My account', 'user'],
+                          ['/orders', 'My orders', 'package'],
+                          ['/notifications', 'Notifications', 'bell'],
+                          ['/account/security', 'Security', 'shield'],
+                        ]
+                      : [
+                          [
+                            homeFor(experience),
+                            experience === 'vendor' ? 'My shop' : 'My deliveries',
+                            experience === 'vendor' ? 'store' : 'truck',
+                          ],
+                          [
+                            '/account',
+                            experience === 'vendor' ? 'Shop account' : 'Rider account',
+                            'user',
+                          ],
+                          ['/notifications', 'Notifications', 'bell'],
+                          ['/account/security', 'Security', 'shield'],
+                        ]
                   ).map(([href, label, icon]) => (
                     <li key={href}>
                       <Link
@@ -110,22 +110,7 @@ export async function PublicHeader() {
                       </Link>
                     </li>
                   ))}
-                  {staff && who.mode !== 'customer' && (
-                    <li>
-                      <Link
-                        href="/admin"
-                        className="touch-target flex items-center gap-2 rounded-lg px-3 py-2 font-semibold hover:bg-brand-50"
-                      >
-                        <Icon name="sliders" size={18} /> Administration
-                      </Link>
-                    </li>
-                  )}
                 </ul>
-                {staff && (
-                  <div className="my-2 border-t border-line px-1 pt-3">
-                    <ModeSwitch who={who} />
-                  </div>
-                )}
                 <form action={signOutAction} className="mt-1 border-t border-line pt-1">
                   <button
                     type="submit"

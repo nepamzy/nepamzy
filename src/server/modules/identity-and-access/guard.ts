@@ -9,7 +9,6 @@ import {
   homeFor,
   ROUTE_POLICIES,
   decideAccess,
-  isPrivilegedRole,
   safeNextPath,
   type AccessRequirement,
   type AppRole,
@@ -27,13 +26,10 @@ export const loadPrincipal = cache(async (): Promise<Principal> => {
     supabase.rpc('my_roles'),
   ])
   const roleList = (roles ?? []) as AppRole[]
-  // Staff always work in the administrator interface (the customer-view switch was removed). A non-staff account is always `customer`.
-  const staff = roleList.some(isPrivilegedRole)
   return {
     authenticated: true,
     userId: data.user.id,
     roles: roleList,
-    mode: staff ? 'admin' : 'customer',
     aal: aal?.currentLevel === 'aal2' ? 'aal2' : 'aal1',
     hasVerifiedFactor: aal?.nextLevel === 'aal2' || aal?.currentLevel === 'aal2',
   }
@@ -56,8 +52,6 @@ export async function requireAuth(req: AccessRequirement): Promise<Principal> {
       redirect(`/mfa/enroll?next=${next}`)
     case 'mfa-challenge':
       redirect(`/mfa/challenge?next=${next}`)
-    case 'switch-mode':
-      redirect(`/account/mode?next=${next}`)
     case 'go-home':
       redirect(homeFor(experienceOf(who)))
     case 'forbidden':

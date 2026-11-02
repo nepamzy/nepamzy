@@ -126,10 +126,11 @@ export function OrderTracking({ orderId, mapKey }: { orderId: string; mapKey?: s
       )}
       {body}
       <div className="rounded-[var(--radius-control)] border border-line p-3">
-        <p className="font-semibold">Show your rider where you are</p>
+        <p className="font-semibold">Your rider can see where you are</p>
         <p className="mb-2 text-sm text-muted">
-          Optional. Only your rider sees it, only while they are on this delivery, and it stops by
-          itself when the order is finished.
+          It starts by itself once a rider takes your order, so they can find you. Only your rider
+          sees it, only while they are on this delivery, and it stops by itself when the order is
+          finished. You can stop it here at any time.
         </p>
         {share.on ? (
           <Button type="button" variant="secondary" onClick={share.stop}>
@@ -217,18 +218,31 @@ function useShareLocation(orderId: string) {
       { enableHighAccuracy: true, maximumAge: 10_000, timeout: 30_000 },
     )
   }
-  // Already allowed on this device and not switched off: start by itself, so the rider can find the customer from the
-  // moment the order is accepted without the customer having to tap anything.
+  // Sharing is on by default, so the rider can find the customer from the moment the order is accepted without the
+  // customer tapping anything. The browser asks for permission once; a customer who stopped sharing, or whose browser
+  // has blocked location, is not asked again.
   useEffect(() => {
     let cancelled = false
     void (async () => {
       try {
         if (localStorage.getItem('afit-share-location') === 'off') return
-        const perm = await navigator.permissions?.query({ name: 'geolocation' })
-        if (!cancelled && perm?.state === 'granted') start()
       } catch {
-        /* no permissions API: the customer taps the button instead */
+        /* private window: treat as on */
       }
+      let state: PermissionState | 'unknown' = 'unknown'
+      try {
+        state = (await navigator.permissions?.query({ name: 'geolocation' }))?.state ?? 'unknown'
+      } catch {
+        /* no permissions API: the browser will ask when sharing starts */
+      }
+      if (cancelled) return
+      if (state === 'denied') {
+        setNote(
+          'Location is blocked for this site, so your rider cannot see where you are. Allow location in your browser settings to turn it on.',
+        )
+        return
+      }
+      start()
     })()
     return () => {
       cancelled = true
