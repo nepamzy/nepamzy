@@ -270,7 +270,7 @@ admin_email = "no-reply@afit-market.test"
 sender_name = "AFIT Market (local)"
 
 [auth.email.template.confirmation]
-subject = "Confirm your AFIT Market email"
+subject = "Your AFIT Market code: {{ .Token }}"
 content_path = "./supabase/templates/confirmation.html"
 
 [auth.sms]

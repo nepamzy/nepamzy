@@ -69,6 +69,7 @@ describe('every server action gates access', () => {
   const PRE_AUTH_OR_SELF_CHECKED = new Set([
     'signUpAction', // public sign-up (rate limited by IP and email hash)
     'signInAction', // public sign-in (rate limited)
+    'confirmEmailCodeAction', // public: the e-mailed confirmation code (rate limited by IP and by address, eight tries per 15 minutes)
     'requestPasswordResetAction', // public: e-mails a one-time code (rate limited by IP and email hash)
     'resetPasswordAction', // public: code + new password (rate limited, five tries per code)
     'submitContactAction', // public contact form: honeypot + rate limited by address and e-mail; only the service role writes

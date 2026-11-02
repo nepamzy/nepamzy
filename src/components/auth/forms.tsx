@@ -7,6 +7,7 @@ import { Checkbox, Input } from '@/components/ui/fields'
 import { SignatureStatement } from './signature-statement'
 import {
   requestPasswordResetAction,
+  confirmEmailCodeAction,
   resendConfirmationAction,
   resetPasswordAction,
   signInAction,
@@ -81,56 +82,70 @@ export function SignInForm({ next, staff = false }: { next: string; staff?: bool
   )
 }
 
-/** What to do after creating an account: where the link is, how to ask for it again, and how to carry on. */
+/** After creating an account: type the code from the e-mail. Resend it, go back to sign in, or start again from here. */
 function SignUpDone({ email, message }: { email: string; message?: string }) {
-  const [state, action, pending] = useActionState(resendConfirmationAction, initial)
+  const [resend, resendAction, resending] = useActionState(resendConfirmationAction, initial)
+  const [confirm, confirmAction, confirming] = useActionState(confirmEmailCodeAction, initial)
   return (
     <div className="space-y-4" data-testid="signup-done">
       <p className="text-center text-5xl" aria-hidden="true">
         ✉️
       </p>
       <h2 className="text-center text-xl font-bold">Check your email</h2>
-      <Notice state={{ message: message ?? `We sent a confirmation link to ${email}.` }} />
-      <ol className="list-decimal space-y-1 pl-6">
-        <li>
-          Open the message from <strong>AFIT Market</strong> sent to <strong>{email}</strong>.
-        </li>
-        <li>
-          Tap <strong>Confirm my e-mail</strong>.
-        </li>
-        <li>Then sign in to continue.</li>
-      </ol>
-      <p className="text-sm text-muted">
-        Nothing there after a minute? Look in Spam or Promotions, then ask for a new link below.
-      </p>
-      <form action={action} className="space-y-2">
+      <Notice state={{ message: message ?? `We sent a confirmation code to ${email}.` }} />
+      <form action={confirmAction} className="space-y-3" noValidate>
         <input type="hidden" name="email" value={email} />
-        {state.error && (
+        {confirm.error && (
           <p role="alert" className="font-medium text-danger-700">
-            {state.error}
+            {confirm.error}
           </p>
         )}
-        {state.ok && state.message && (
-          <p role="status" className="font-medium text-success-700">
-            {state.message}
-          </p>
-        )}
-        <Button type="submit" variant="secondary" disabled={pending} className="w-full">
-          {pending ? 'Sending…' : 'Send the confirmation e-mail again'}
+        <Input
+          label="Confirmation code"
+          name="code"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={10}
+          required
+          hint={`Open the message from AFIT Market sent to ${email}, copy the code and paste it here.`}
+        />
+        <Button type="submit" variant="gold" disabled={confirming} className="w-full">
+          {confirming ? 'Checking…' : 'Confirm my email'}
         </Button>
       </form>
-      <Link
-        href="/login"
-        className="touch-target flex w-full items-center justify-center rounded-[var(--radius-control)] bg-gold-400 px-4 font-bold text-ink hover:bg-gold-500"
-      >
-        I have confirmed: sign in
-      </Link>
-      <p className="text-center text-sm text-muted">
-        Wrong address?{' '}
-        <a className="font-semibold text-brand-700 underline" href="/signup">
-          Start again
-        </a>
+      <p className="text-sm text-muted">
+        Nothing there after a minute? Look in Spam or Promotions, then ask for a new code.
       </p>
+      <form action={resendAction} className="space-y-2">
+        <input type="hidden" name="email" value={email} />
+        {resend.error && (
+          <p role="alert" className="font-medium text-danger-700">
+            {resend.error}
+          </p>
+        )}
+        {resend.ok && resend.message && (
+          <p role="status" className="font-medium text-success-700">
+            {resend.message}
+          </p>
+        )}
+        <Button type="submit" variant="secondary" disabled={resending} className="w-full">
+          {resending ? 'Sending…' : 'Send me a new code'}
+        </Button>
+      </form>
+      <div className="grid gap-2 sm:grid-cols-2">
+        <Link
+          href="/login"
+          className="touch-target flex items-center justify-center rounded-[var(--radius-control)] border border-line-strong px-4 font-bold text-navy-900 hover:bg-brand-50"
+        >
+          Back to sign in
+        </Link>
+        <a
+          href="/signup"
+          className="touch-target flex items-center justify-center rounded-[var(--radius-control)] border border-line-strong px-4 font-bold text-navy-900 hover:bg-brand-50"
+        >
+          Use a different email
+        </a>
+      </div>
     </div>
   )
 }

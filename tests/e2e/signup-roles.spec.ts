@@ -185,17 +185,18 @@ test('after sign-up there is always a way forward: resend the link, sign in, or 
   await expect(done.getByRole('heading', { name: 'Check your email' })).toBeVisible()
   await expect(done.getByText(email, { exact: false }).first()).toBeVisible()
   await expect(done.getByText(/Spam/)).toBeVisible()
-  // ask for the link again: the answer is a plain confirmation, not an error
-  await done.getByRole('button', { name: 'Send the confirmation e-mail again' }).click()
-  await expect(done.getByText(/fresh link/)).toBeVisible()
+  // ask for a new code: the answer is a plain confirmation, not an error
+  await done.getByRole('button', { name: 'Send me a new code' }).click()
+  await expect(done.getByText(/fresh code/)).toBeVisible()
   // asking again straight away is politely refused, never a crash
-  await done.getByRole('button', { name: 'Send the confirmation e-mail again' }).click()
+  await done.getByRole('button', { name: 'Send me a new code' }).click()
   await expect(done.getByText(/wait a few minutes/)).toBeVisible()
-  await expect(done.getByRole('link', { name: 'I have confirmed: sign in' })).toHaveAttribute(
+  // the way back to sign-in is always there
+  await expect(done.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
     'href',
     '/login',
   )
-  await done.getByRole('link', { name: 'Start again' }).click()
+  await done.getByRole('link', { name: 'Use a different email' }).click()
   await expect(page).toHaveURL(/\/signup$/)
   await expect(page.getByTestId('signup-step')).toContainText('Step 1 of 3')
   await context.close()
