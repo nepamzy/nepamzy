@@ -99,9 +99,13 @@ test('three quick taps on the logo on the home page open the administrator sign-
   })
   const page = await context.newPage()
   await page.goto('/')
+  // taps only count once the page has started its scripts; before that the logo is a plain link home
+  await page.waitForLoadState('networkidle')
   const logo = page.getByRole('link', { name: 'AFIT Market home' }).first()
   await logo.click()
   await expect(page).toHaveURL(/127\.0\.0\.1:3000\/$/)
+  // the single tap above must not count towards the three (taps only count within a second of each other)
+  await page.waitForTimeout(1100)
   await logo.click({ clickCount: 3, delay: 60 })
   await expect(page).toHaveURL(/\/staff-login$/)
   await expect(page.getByRole('heading', { name: 'Administrator sign-in' })).toBeVisible()
