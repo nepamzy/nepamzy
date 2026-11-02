@@ -622,12 +622,18 @@ export async function uiSignUpSteps(
   page: Page,
   role: 'Customer' | 'Vendor' | 'Rider' = 'Customer',
 ) {
+  const step = (m: string) => console.log(`[signup ${role}] ${new Date().toISOString()} ${m}`)
+  step('choose role')
   await page
     .getByRole('group', { name: 'I want to use AFIT Market as a' })
     .getByRole('radio', { name: new RegExp(role) })
     .check()
   if (role === 'Customer') await page.getByRole('radio', { name: 'Other', exact: true }).check()
+  step('next to signature')
   await page.getByRole('button', { name: 'Next' }).click()
+  step('draw signature')
   await drawSignature(page)
+  step('next to details')
   await page.getByRole('button', { name: 'Next' }).click()
+  step('details step')
 }
