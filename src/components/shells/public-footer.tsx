@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { WhatsAppLogo } from '@/components/landing/whatsapp'
 import { Logo } from '@/components/ui/logo'
+import { WHATSAPP_NUMBER_DISPLAY, WHATSAPP_URL, supportEmail } from '@/lib/contact'
 
 const COLS: { title: string; links: [string, string][] }[] = [
   {
@@ -56,6 +58,28 @@ export function PublicFooter() {
             Shop, sell and deliver on one campus marketplace. Orders and payments are protected by
             your account.
           </p>
+          <ul className="mt-4 space-y-2 text-sm">
+            <li>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-8 items-center gap-2 font-semibold text-white hover:underline"
+              >
+                <WhatsAppLogo size={24} /> WhatsApp {WHATSAPP_NUMBER_DISPLAY}
+              </a>
+            </li>
+            {supportEmail() && (
+              <li>
+                <a
+                  className="font-semibold text-white hover:underline"
+                  href={`mailto:${supportEmail()}`}
+                >
+                  {supportEmail()}
+                </a>
+              </li>
+            )}
+          </ul>
         </div>
         {COLS.map((c) => (
           <nav key={c.title} aria-label={c.title}>

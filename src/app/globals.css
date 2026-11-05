@@ -137,3 +137,76 @@ body {
   fill: var(--color-brand-700);
   fill-opacity: 0.12;
 }
+
+/* Landing page motion. Everything here stops for people who ask their device for less motion. */
+@keyframes afit-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes afit-ride {
+  0% {
+    transform: translateX(-70px);
+  }
+  50% {
+    transform: translateX(110px);
+  }
+  100% {
+    transform: translateX(-70px);
+  }
+}
+@keyframes afit-dash {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+@keyframes afit-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.afit-float-slow {
+  animation: afit-float 7s ease-in-out infinite;
+}
+.afit-bob {
+  animation: afit-float 3.2s ease-in-out infinite;
+}
+.afit-ride {
+  animation: afit-ride 9s ease-in-out infinite;
+}
+.afit-route {
+  animation: afit-dash 1.6s linear infinite;
+}
+.afit-wa-float {
+  animation: afit-float 4s ease-in-out infinite;
+}
+.afit-reveal {
+  opacity: 0;
+}
+.afit-reveal[data-in='1'] {
+  animation: afit-rise 0.6s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .afit-float-slow,
+  .afit-bob,
+  .afit-ride,
+  .afit-route,
+  .afit-wa-float {
+    animation: none;
+  }
+  .afit-reveal {
+    opacity: 1;
+  }
+  .afit-reveal[data-in='1'] {
+    animation: none;
+  }
+}

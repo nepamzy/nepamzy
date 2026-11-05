@@ -1,5 +1,5 @@
 'use client'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { NoImageTile } from '@/components/ui/no-image-tile'
 
@@ -28,9 +28,12 @@ async function shrink(file: File): Promise<string> {
 export function ProductPhotoField({
   productId,
   hasPhoto = false,
+  pickedUrl,
 }: {
   productId?: string
   hasPhoto?: boolean
+  /** a picture from the starter catalogue, loaded into the form when the owner picks an item */
+  pickedUrl?: string | null
 }) {
   const [preview, setPreview] = useState<string | null>(null)
   const [data, setData] = useState('')
@@ -55,6 +58,28 @@ export function ProductPhotoField({
       setNote('We could not read that picture. Try another one.')
     }
   }
+  useEffect(() => {
+    if (!pickedUrl) return
+    let live = true
+    void (async () => {
+      try {
+        const blob = await (await fetch(pickedUrl)).blob()
+        const url = await shrink(
+          new File([blob], 'starter.jpg', { type: blob.type || 'image/jpeg' }),
+        )
+        if (!live) return
+        setPreview(url)
+        setData(url)
+        setRemove(false)
+        setNote(null)
+      } catch {
+        if (live) setNote('We could not load that picture. You can add your own.')
+      }
+    })()
+    return () => {
+      live = false
+    }
+  }, [pickedUrl])
   const showing =
     preview ?? (hasOld && !remove && productId ? `/api/products/${productId}/image` : null)
   return (

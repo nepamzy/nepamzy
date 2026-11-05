@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { ContactForm } from '@/components/domain/contact-form'
 import { InfoPage } from '@/components/shells/info-page'
 import { Icon } from '@/components/ui/icons'
+import { WhatsAppLink } from '@/components/landing/whatsapp'
+import { supportEmail } from '@/lib/contact'
 
 export const metadata: Metadata = { title: 'Contact us' }
 
@@ -13,6 +15,18 @@ export default function Contact() {
     >
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <aside className="space-y-3 rounded-[var(--radius-card)] border border-line bg-card p-5 shadow-[var(--shadow-card)]">
+          <WhatsAppLink className="w-full" />
+          {supportEmail() && (
+            <p className="flex items-start gap-3">
+              <Icon name="mail" className="mt-0.5 text-brand-700" />
+              <span>
+                <span className="block font-bold text-navy-900">Email</span>
+                <a className="text-brand-700 underline" href={`mailto:${supportEmail()}`}>
+                  {supportEmail()}
+                </a>
+              </span>
+            </p>
+          )}
           <p className="flex items-start gap-3">
             <Icon name="mail" className="mt-0.5 text-brand-700" />
             <span>
@@ -32,7 +46,8 @@ export default function Contact() {
             </span>
           </p>
           <p className="text-sm text-muted">
-            There is no public phone line yet. We do not publish an address until one exists.
+            WhatsApp messages are answered during the day. We do not publish a street address until
+            one exists.
           </p>
         </aside>
         <div className="rounded-[var(--radius-card)] border border-line bg-card p-5 shadow-[var(--shadow-card)]">

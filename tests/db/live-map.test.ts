@@ -167,7 +167,7 @@ describe('delivery points on the real map', () => {
 })
 
 describe('identity details are closed to every API role', () => {
-  it('a signed-in person cannot read signatures or ID details directly, and a student record needs its ID number and card', async () => {
+  it('a signed-in person cannot read signatures or ID details directly, and a student record needs its matric number', async () => {
     await isoTx(async (c) => {
       const u = await createUser(c, 'ident')
       await c.query(
@@ -188,7 +188,7 @@ describe('identity details are closed to every API role', () => {
             ])
             expect(r.rows[0].ok, `${role} ${priv} ${table}`).toBe(false)
           }
-      // a student record without the ID number and card is refused
+      // a student record without the matric number is refused
       await expect(
         c.query(
           `insert into public.account_identity (user_id, person_type) values ($1, 'student') on conflict (user_id) do update set person_type = 'student', student_id_cipher = null`,

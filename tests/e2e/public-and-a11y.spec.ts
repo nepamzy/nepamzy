@@ -9,6 +9,15 @@ test.use({
 })
 
 async function expectNoSeriousA11yIssues(page: Page, label: string) {
+  // let fade-ins and slides finish: axe reads colours, and text that is mid-fade measures as low contrast
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.effect?.getComputedTiming().iterations !== Infinity)
+        .map((a) => a.finished.catch(() => undefined)),
+    ),
+  )
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()

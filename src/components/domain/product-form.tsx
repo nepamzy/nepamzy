@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Checkbox, Input, Textarea } from '@/components/ui/fields'
 import { ProductPhotoField } from './product-photo-field'
+import { StarterPicker } from './starter-picker'
+import { starterPhotoUrl, type StarterItem } from '@/lib/starter-catalogue'
 import { saveProductAction } from '@/server/modules/vendors-and-catalogue/actions'
 import type { EditableProduct } from '@/server/modules/vendors-and-catalogue/vendor-queries'
 
@@ -29,6 +31,7 @@ export function ProductForm({
   const [groups, setGroups] = useState<G[]>(
     product?.groups.map(({ name, min, max, options }) => ({ name, min, max, options })) ?? [],
   )
+  const [starter, setStarter] = useState<StarterItem | null>(null)
   const upd = (i: number, patch: Partial<G>) =>
     setGroups((gs) => gs.map((g, j) => (j === i ? { ...g, ...patch } : g)))
   const updOpt = (i: number, k: number, patch: Partial<G['options'][number]>) =>
@@ -44,22 +47,29 @@ export function ProductForm({
       {product && <input type="hidden" name="productId" value={product.id} />}
       <input type="hidden" name="options" value={JSON.stringify(groups)} />
       <fieldset disabled={disabled} className="space-y-4">
+        {!product && <StarterPicker onPick={setStarter} />}
         <h2 className="text-lg font-extrabold text-navy-900">1. About the item</h2>
         <Input
+          key={`n-${starter?.slug ?? ''}`}
           label="Name"
           name="name"
           required
           minLength={2}
           maxLength={80}
-          defaultValue={product?.name}
+          defaultValue={starter?.name ?? product?.name}
         />
         <Textarea
+          key={`d-${starter?.slug ?? ''}`}
           label="Description"
           name="description"
           maxLength={300}
-          defaultValue={product?.description ?? ''}
+          defaultValue={starter?.description ?? product?.description ?? ''}
         />
-        <ProductPhotoField productId={product?.id} hasPhoto={hasPhoto} />
+        <ProductPhotoField
+          productId={product?.id}
+          hasPhoto={hasPhoto}
+          pickedUrl={starter?.photo ? starterPhotoUrl(starter) : null}
+        />
         <h2 className="border-t border-line pt-4 text-lg font-extrabold text-navy-900">
           2. Price and stock
         </h2>
@@ -73,10 +83,11 @@ export function ProductForm({
             hint="For example 1500 or 1500.50"
           />
           <Input
+            key={`s-${starter?.slug ?? ''}`}
             label="Menu section"
             name="section"
             maxLength={40}
-            defaultValue={product?.section ?? ''}
+            defaultValue={starter?.section ?? product?.section ?? ''}
             hint="For example Mains"
           />
           <Input

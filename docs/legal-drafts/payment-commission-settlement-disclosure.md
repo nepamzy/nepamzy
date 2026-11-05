@@ -3,7 +3,7 @@
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
 > Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
-Support: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. The commission model is decided (`docs/financial-model.md`); settlement and payouts are not. **Do not publish until counsel has reviewed it.**
+Support: afitmarket01@gmail.com. The commission model is decided (`docs/financial-model.md`); settlement and payouts are not. **Do not publish until counsel has reviewed it.**
 
 1. **What you see at checkout:** the product subtotal, the delivery fee (separate) and the total. **There is no platform or service fee for customers.**
 2. **How payment works:** through [PAYMENT PROVIDER TBC]; we verify every payment with the provider before confirming an order; we never store card details. The real provider has not been used in live mode; only a local fake has been exercised.

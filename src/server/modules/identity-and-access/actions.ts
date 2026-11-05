@@ -24,6 +24,7 @@ import {
   hasSignature,
   parseIdCard,
   saveIdentity,
+  saveMatricNumber,
   saveSignature,
   validStudentId,
   type PersonType,
@@ -85,10 +86,13 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     personType = t as PersonType
     if (personType === 'student') {
       studentId = String(formData.get('studentId') ?? '').trim()
-      if (!validStudentId(studentId)) return { error: 'Enter your student ID card number.' }
-      const card = parseIdCard(String(formData.get('idCard') ?? ''))
-      if (!card.ok) return { error: 'Add a clear photo of your student ID card.' }
-      idCard = card.jpeg
+      if (!validStudentId(studentId)) return { error: 'Enter your matric number.' }
+      // the ID card photo is optional; a photo that cannot be used is simply not kept
+      const rawCard = String(formData.get('idCard') ?? '')
+      if (rawCard) {
+        const card = parseIdCard(rawCard)
+        if (card.ok) idCard = card.jpeg
+      }
     }
   }
   const ip = await clientIp()
@@ -124,7 +128,8 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
       newUserId = gen.data.user?.id ?? null
       const hashed = gen.data.properties?.hashed_token
       const link = `${serverEnv().SITE_URL}/auth/confirm?token_hash=${encodeURIComponent(hashed ?? '')}&type=signup`
-      const out = await sendMailDetailed(email, confirmEmail(link, serverEnv().SITE_URL), {
+      const code = gen.data.properties?.email_otp
+      const out = await sendMailDetailed(email, confirmEmail(link, serverEnv().SITE_URL, code), {
         config: mail,
       })
       sentByUs = out.result === 'sent'
@@ -175,8 +180,8 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     email,
     message:
       intent === 'customer'
-        ? 'Check your email. We sent a link to confirm your address.'
-        : `Check your email. We sent a link to confirm your address. After you confirm and sign in, you will be taken to the ${intent} application.`,
+        ? 'Check your email. We sent you a confirmation code.'
+        : `Check your email. We sent you a confirmation code. After you confirm and sign in, you will be taken to the ${intent} application.`,
   }
 }
 
@@ -232,9 +237,11 @@ async function resendConfirmation(email: string): Promise<'done' | 'wait'> {
       const hashed = gen.data?.properties?.hashed_token
       if (!gen.error && hashed) {
         const link = `${serverEnv().SITE_URL}/auth/confirm?token_hash=${encodeURIComponent(hashed)}&type=magiclink`
-        const out = await sendMailDetailed(email, confirmEmail(link, serverEnv().SITE_URL), {
-          config: mail,
-        })
+        const out = await sendMailDetailed(
+          email,
+          confirmEmail(link, serverEnv().SITE_URL, gen.data?.properties?.email_otp),
+          { config: mail },
+        )
         if (out.result === 'sent') return 'done'
         logger.warn('confirmation e-mail not sent', { status: out.status, reason: out.reason })
       }
@@ -270,7 +277,42 @@ export async function resendConfirmationAction(
   return {
     ok: true,
     email,
-    message: `If ${email} is waiting for confirmation, we have sent a fresh link. It can take a minute. Check Spam too.`,
+    message: `If ${email} is waiting for confirmation, we have sent a fresh code. It can take a minute. Check Spam too.`,
+  }
+}
+
+/** The code from the confirmation e-mail, typed or pasted on the page shown after sign-up. */
+export async function confirmEmailCodeAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const parsed = emailSchema.safeParse(formData.get('email'))
+  if (!parsed.success) return { error: 'Enter a valid email address.' }
+  const email = parsed.data
+  const code = String(formData.get('code') ?? '').replace(/\s+/g, '')
+  if (!/^[0-9]{6,8}$/.test(code))
+    return { error: 'Enter the code from the email (numbers only).', email }
+  const ip = await clientIp()
+  if (
+    !(await rateLimit(`confirm-code:ip:${ip}`, 900, 30)) ||
+    !(await rateLimit(`confirm-code:email:${sha256Hex(email)}`, 900, 8))
+  )
+    return { error: TOO_MANY, email }
+  const supabase = await createSupabaseServerClient()
+  // A fresh code may have been made for a sign-up or as a sign-in code: the same one-time number, tried by kind.
+  for (const type of ['signup', 'email', 'magiclink'] as const) {
+    const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type })
+    if (!error && data.user) {
+      notifyWelcome(email)
+      // Do not keep the confirmation session: the person signs in normally (password, and the second step if set).
+      await supabase.auth.signOut({ scope: 'local' })
+      redirect('/login?confirmed=1')
+    }
+  }
+  return {
+    error:
+      'That code is not right, or it has expired. Check the newest email from AFIT Market, or ask for a new code below.',
+    email,
   }
 }
 
@@ -519,4 +561,18 @@ export async function removeFactorAction(
   if (error) return { ok: false, error: 'We could not remove that authenticator.' }
   await recordSecurityEvent(who.userId, 'mfa.factor_removed')
   return { ok: true }
+}
+
+/** The Security page: a signed-in person adds or changes their matric number. */
+export async function saveMatricAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const who = await loadPrincipal()
+  if (!who.authenticated || !who.userId) return { error: 'Please sign in first.' }
+  if (!(await rateLimit(`matric:user:${who.userId}`, 3600, 10))) return { error: TOO_MANY }
+  const matric = String(formData.get('matric') ?? '').trim()
+  if (!validStudentId(matric))
+    return { error: 'Enter your matric number (letters, numbers, / . - _).' }
+  const ok = await saveMatricNumber(who.userId, matric)
+  return ok
+    ? { ok: true, message: 'Your matric number is saved.' }
+    : { error: 'Could not save it. Try again.' }
 }

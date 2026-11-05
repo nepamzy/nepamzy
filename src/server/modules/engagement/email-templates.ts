@@ -115,18 +115,31 @@ ${p}${highlight}${details}${button}${note}
 const root = (siteUrl: string) => siteUrl.replace(/\/+$/, '')
 
 /** Sent at sign-up: the one-time link that confirms the address. */
-export function confirmEmail(confirmUrl: string, siteUrl: string): RenderedEmail {
+export function confirmEmail(confirmUrl: string, siteUrl: string, code?: string): RenderedEmail {
   return renderEmail({
-    subject: '\u2709\uFE0F Confirm your AFIT Market account',
-    preheader: 'One tap to confirm your e-mail and finish creating your account.',
+    subject: code
+      ? `\u2709\uFE0F Your AFIT Market code: ${code}`
+      : '\u2709\uFE0F Confirm your AFIT Market account',
+    preheader: code
+      ? `Your confirmation code is ${code}. Paste it on the sign-up page.`
+      : 'One tap to confirm your e-mail and finish creating your account.',
     emoji: '\u2709\uFE0F',
-    heading: 'Confirm your e-mail',
-    paragraphs: [
-      'Welcome! Tap the button below to confirm this e-mail address and finish creating your AFIT Market account.',
-      'After that you can sign in and start using the marketplace.',
-    ],
-    button: { label: '\u2705 Confirm my e-mail', url: confirmUrl },
-    note: 'This link works once and expires after a while. If you did not create an account, you can ignore this message and nothing will happen.',
+    heading: code ? 'Your confirmation code' : 'Confirm your e-mail',
+    paragraphs: code
+      ? [
+          'Welcome to AFIT Market! Copy the code below and paste it into the sign-up page to confirm this e-mail address.',
+          'After that you can sign in and start using the marketplace.',
+        ]
+      : [
+          'Welcome! Tap the button below to confirm this e-mail address and finish creating your AFIT Market account.',
+          'After that you can sign in and start using the marketplace.',
+        ],
+    highlight: code,
+    button: {
+      label: code ? 'Or tap here to confirm' : '\u2705 Confirm my e-mail',
+      url: confirmUrl,
+    },
+    note: 'This code works once and expires after a while. If you did not create an account, you can ignore this message and nothing will happen.',
     siteUrl,
   })
 }

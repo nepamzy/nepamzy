@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { PublicFooter } from '@/components/shells/public-footer'
 import { PublicHeader } from '@/components/shells/public-header'
+import { WhatsAppFloat } from '@/components/landing/whatsapp'
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
       <PublicFooter />
+      <WhatsAppFloat />
     </div>
   )
 }

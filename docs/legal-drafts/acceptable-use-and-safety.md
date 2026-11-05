@@ -3,7 +3,7 @@
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
 > Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
-Report concerns to [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED].
+Report concerns to afitmarket01@gmail.com.
 
 1. **Everyone:** be truthful; no harassment, threats or discrimination; no fraud; protect your account; do not try to bypass the app's controls, share codes or tokens, or interfere with the service.
 2. **Customers:** give accurate delivery information; be present at the delivery point; follow campus access rules; make genuine complaints only.

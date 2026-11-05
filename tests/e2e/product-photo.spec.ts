@@ -45,12 +45,12 @@ test('a vendor adds, replaces and removes a product photo; customers see it; hid
   const anon = await openAnonymous(browser, info)
   await anon.page.goto(`/products/${id}`)
   await expect(anon.page.locator(`img[src="/api/products/${id}/image"]`).first()).toBeVisible()
-  expect(
-    await anon.page
-      .locator(`img[src="/api/products/${id}/image"]`)
-      .first()
-      .evaluate((el: HTMLImageElement) => el.naturalWidth),
-  ).toBeGreaterThan(10)
+  // images load lazily: scroll it into view and wait until the browser has actually decoded it
+  const shown = anon.page.locator(`img[src="/api/products/${id}/image"]`).first()
+  await shown.scrollIntoViewIfNeeded()
+  await expect
+    .poll(() => shown.evaluate((el: HTMLImageElement) => el.naturalWidth), { timeout: 15000 })
+    .toBeGreaterThan(10)
 
   // the vendor's own list shows the thumbnail too
   await p.goto('/vendor/catalogue')

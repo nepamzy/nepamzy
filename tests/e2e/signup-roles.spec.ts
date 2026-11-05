@@ -48,22 +48,35 @@ test('signing up as a vendor or rider records the choice; a customer sign-up rec
       extraHTTPHeaders: { 'x-forwarded-for': randIp() },
     })
     const page = await context.newPage()
+    const mark = (m: string) => console.log(`[t38 ${choice}] ${new Date().toISOString()} ${m}`)
+    page.on('pageerror', (e) => mark(`pageerror ${e.message.slice(0, 200)}`))
+    page.on('requestfailed', (r) => mark(`requestfailed ${r.url().slice(0, 120)}`))
     const email = uniqueEmail(`signup-${choice.toLowerCase()}`)
+    mark('goto /signup')
     await page.goto('/signup')
+    mark('steps 1-2')
     await uiSignUpSteps(page, choice)
+    mark('fill details')
     await page.getByLabel('Email').fill(email)
     await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
     await page.getByLabel('Confirm password').fill(PASSWORD)
     await page.getByLabel(/I confirm that I am 18/).check()
+    mark('submit')
     await page.getByRole('button', { name: 'Create account' }).click()
+    mark('submitted, waiting for the done screen')
     await expect(page.getByTestId('signup-done')).toBeVisible()
+    mark('done screen')
     if (expected) await expect(page.getByText(new RegExp(`${expected} application`))).toBeVisible()
+    mark('look up user')
     const id = await userIdByEmail(email)
+    mark('get user via admin api')
     const { data: found } = await admin().auth.admin.getUserById(id)
+    mark('check roles')
     expect(found.user?.user_metadata?.intended_role).toBe(expected)
     // the choice grants nothing: no role beyond the customer role exists for this account
     const { data: roles } = await admin().from('role_assignments').select('role').eq('user_id', id)
     expect((roles ?? []).map((r) => r.role).filter((r) => r !== 'customer')).toEqual([])
+    mark('close')
     await context.close()
   }
 })
@@ -185,41 +198,24 @@ test('after sign-up there is always a way forward: resend the link, sign in, or 
   await expect(done.getByRole('heading', { name: 'Check your email' })).toBeVisible()
   await expect(done.getByText(email, { exact: false }).first()).toBeVisible()
   await expect(done.getByText(/Spam/)).toBeVisible()
-  // ask for the link again: the answer is a plain confirmation, not an error
-  await done.getByRole('button', { name: 'Send the confirmation e-mail again' }).click()
-  await expect(done.getByText(/fresh link/)).toBeVisible()
+  // ask for a new code: the answer is a plain confirmation, not an error
+  await done.getByRole('button', { name: 'Send me a new code' }).click()
+  await expect(done.getByText(/fresh code/)).toBeVisible()
   // asking again straight away is politely refused, never a crash
-  await done.getByRole('button', { name: 'Send the confirmation e-mail again' }).click()
+  await done.getByRole('button', { name: 'Send me a new code' }).click()
   await expect(done.getByText(/wait a few minutes/)).toBeVisible()
-  await expect(done.getByRole('link', { name: 'I have confirmed: sign in' })).toHaveAttribute(
+  // the way back to sign-in is always there
+  await expect(done.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
     'href',
     '/login',
   )
-  await done.getByRole('link', { name: 'Start again' }).click()
+  await done.getByRole('link', { name: 'Use a different email' }).click()
   await expect(page).toHaveURL(/\/signup$/)
   await expect(page.getByTestId('signup-step')).toContainText('Step 1 of 3')
   await context.close()
 })
 
-/** A real, readable JPEG made in the browser (the form shrinks the photo, so it has to decode as an image). */
-const idCardJpeg = async (page: import('@playwright/test').Page) => {
-  const b64 = await page.evaluate(() => {
-    const c = document.createElement('canvas')
-    c.width = 900
-    c.height = 560
-    const g = c.getContext('2d')!
-    g.fillStyle = '#f5f0e0'
-    g.fillRect(0, 0, 900, 560)
-    for (let i = 0; i < 400; i++) {
-      g.fillStyle = `rgb(${(i * 37) % 255},${(i * 91) % 255},${(i * 53) % 255})`
-      g.fillRect((i * 83) % 880, (i * 47) % 540, 40, 14)
-    }
-    return c.toDataURL('image/jpeg', 0.9).split(',')[1]!
-  })
-  return Buffer.from(b64, 'base64')
-}
-
-test('a student gives an ID number and card photo, sees that it will be reviewed, can edit it, and the account keeps both', async ({
+test('a student signs up with a matric number only; the card photo is optional; the account keeps the number', async ({
   browser,
 }, info) => {
   const context = await browser.newContext({
@@ -230,21 +226,11 @@ test('a student gives an ID number and card photo, sees that it will be reviewed
   const email = uniqueEmail('signup-student')
   await page.goto('/signup')
   await page.getByRole('radio', { name: 'Student', exact: true }).check()
-  // Next stays off until the ID card is saved; nothing says the card cannot be checked
+  // Next stays off until a matric number is typed; no photo is needed
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
-  await expect(page.getByText(/cannot be checked|not verified|unverified/i)).toHaveCount(0)
-  await page.getByLabel('Student ID card number').fill('AFIT/2026/0417')
-  await page.locator('#idcard-file').setInputFiles({
-    name: 'id.jpg',
-    mimeType: 'image/jpeg',
-    buffer: await idCardJpeg(page),
-  })
-  await page.getByRole('button', { name: 'Save ID card' }).click()
-  await expect(page.getByText('Your ID card will be reviewed.')).toBeVisible()
-  // editing is possible, and saving again brings the same message back
-  await page.getByRole('button', { name: 'Edit ID card' }).click()
-  await expect(page.getByLabel('Student ID card number')).toHaveValue('AFIT/2026/0417')
-  await page.getByRole('button', { name: 'Save ID card' }).click()
+  await expect(page.getByText(/ID card number/i)).toHaveCount(0)
+  await expect(page.getByText('Photo of your student ID card (optional)')).toBeVisible()
+  await page.getByLabel('Matric number').fill('AFIT/2026/0417')
   await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
   await page.getByRole('button', { name: 'Next' }).click()
   // the signature step carries the statement
@@ -267,7 +253,7 @@ test('a student gives an ID number and card photo, sees that it will be reviewed
       .single()
   ).data!
   expect(ident.person_type).toBe('student')
-  expect(ident.id_card_jpeg).toBeTruthy()
+  expect(ident.id_card_jpeg).toBeNull()
   // the number is stored encrypted, never as typed
   expect(ident.student_id_cipher).not.toContain('2026')
   const sig = await admin().from('user_signatures').select('user_id').eq('user_id', id)
@@ -291,7 +277,7 @@ test('military, lecturer and other customers need no ID card, vendors and riders
     const email = uniqueEmail(`signup-${type}`)
     await page.goto('/signup')
     await page.getByRole('radio', { name: kind, exact: true }).check()
-    await expect(page.getByLabel('Student ID card number')).toHaveCount(0)
+    await expect(page.getByLabel('Matric number')).toHaveCount(0)
     await page.getByRole('button', { name: 'Next' }).click()
     await drawSignature(page)
     await page.getByRole('button', { name: 'Next' }).click()
@@ -341,4 +327,31 @@ test('an account with no saved signature is asked for one right after signing in
   await page.context().clearCookies()
   await uiSignIn(page, u.email)
   await expect(page).not.toHaveURL(/signature-setup/)
+})
+
+test('a signed-in person can add and change their matric number under Security', async ({
+  browser,
+}, info) => {
+  const u = await createUser('matric')
+  const context = await browser.newContext({
+    viewport: info.project.use.viewport ?? undefined,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  const page = await context.newPage()
+  await uiSignIn(page, u.email, PASSWORD, '/account/security')
+  await page.getByLabel('Matric number').fill('AFIT/2026/0999')
+  await page.getByRole('button', { name: 'Save matric number' }).click()
+  await expect(page.getByText('Your matric number is saved.')).toBeVisible()
+  const row = (
+    await admin()
+      .from('account_identity')
+      .select('person_type, student_id_cipher')
+      .eq('user_id', u.id)
+      .single()
+  ).data!
+  expect(row.person_type).toBe('student')
+  expect(row.student_id_cipher).not.toContain('0999')
+  await page.reload()
+  await expect(page.getByLabel('Matric number')).toHaveValue('AFIT/2026/0999')
+  await context.close()
 })

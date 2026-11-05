@@ -18,9 +18,19 @@ export const SUPABASE_URL = process.env.SUPABASE_URL!
 export const MAIL_SINK = process.env.MAIL_SINK_URL ?? 'http://127.0.0.1:54326'
 export const PASSWORD = 'Correct-Horse-9-Battery'
 
+// Test-side calls to the local stack get a time limit: a call that never answers would otherwise wait until the whole test
+// times out, hiding which call it was. With a limit it fails at once and says which address did not answer.
+const limitedFetch: typeof fetch = (input, init) =>
+  fetch(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(30_000) }).catch((e) => {
+    throw new Error(
+      `test helper: no answer from ${String((input as Request).url ?? input)} (${e instanceof Error ? e.name : 'error'})`,
+    )
+  })
+
 export const admin = () =>
   createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: limitedFetch },
   })
 
 export const totp = (secret: string) =>
@@ -182,7 +192,13 @@ export async function uiSignInWithMfa(page: Page, email: string, secret: string,
 }
 
 let _pool: pg.Pool | undefined
-const pool = () => (_pool ??= new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 2 }))
+const pool = () =>
+  (_pool ??= new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 2,
+    connectionTimeoutMillis: 20_000,
+    query_timeout: 30_000,
+  }))
 /** Look a user up by email (local database only; the Auth admin list is paginated and unreliable at scale). */
 export async function userIdByEmail(email: string): Promise<string> {
   const r = await pool().query('select id from auth.users where email = $1', [email])
@@ -606,12 +622,18 @@ export async function uiSignUpSteps(
   page: Page,
   role: 'Customer' | 'Vendor' | 'Rider' = 'Customer',
 ) {
+  const step = (m: string) => console.log(`[signup ${role}] ${new Date().toISOString()} ${m}`)
+  step('choose role')
   await page
     .getByRole('group', { name: 'I want to use AFIT Market as a' })
     .getByRole('radio', { name: new RegExp(role) })
     .check()
   if (role === 'Customer') await page.getByRole('radio', { name: 'Other', exact: true }).check()
+  step('next to signature')
   await page.getByRole('button', { name: 'Next' }).click()
+  step('draw signature')
   await drawSignature(page)
+  step('next to details')
   await page.getByRole('button', { name: 'Next' }).click()
+  step('details step')
 }

@@ -14,10 +14,19 @@ export default defineConfig({
   workers: 1,
   // Several journeys sign in 3 to 5 roles and walk many screens; CI runners are slower than a developer machine, and two
   // different long tests exceeded the 30 s default on otherwise identical commits. Individual expectations keep their own short timeouts.
-  timeout: 90_000,
+  // On CI the whole run has taken from 40 to 66 minutes depending on the runner, so one slow test passing 90 s there is a slow
+  // runner, not a wrong answer: CI gets more room, a developer machine keeps the stricter limit.
+  timeout: process.env.CI ? 150_000 : 90_000,
   retries: 0,
   reporter: [['list']],
-  use: { baseURL: 'http://127.0.0.1:3000', trace: 'retain-on-failure' },
+  // A click or fill waits for its element until the whole test times out, so one stuck step hides which step it was. 20 s per
+  // action makes a stuck step fail with its own name and what it was waiting for, in the CI log.
+  use: {
+    baseURL: 'http://127.0.0.1:3000',
+    trace: 'retain-on-failure',
+    actionTimeout: 20_000,
+    navigationTimeout: 45_000,
+  },
   projects: [
     {
       name: 'mobile-360',

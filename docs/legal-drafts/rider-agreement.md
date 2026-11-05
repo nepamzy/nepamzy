@@ -3,7 +3,7 @@
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
 > Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
-Between [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; not yet registered] and the rider. Support: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. **This draft deliberately does not describe the rider as an employee, contractor or agent; counsel must advise on the relationship before any rider is onboarded.**
+Between [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; not yet registered] and the rider. Support: afitmarket01@gmail.com. **This draft deliberately does not describe the rider as an employee, contractor or agent; counsel must advise on the relationship before any rider is onboarded.**
 
 ## 1. Eligibility and verification
 
@@ -35,7 +35,7 @@ Customers pay delivery fees in the app. **The rider's share, timing and treatmen
 
 ## 8. Incidents
 
-Report incidents through the app's issue report; serious incidents also to the contact in [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. [OWNER: incident procedure undefined.]
+Report incidents through the app's issue report; serious incidents also to the contact in afitmarket01@gmail.com. [OWNER: incident procedure undefined.]
 
 ## 9. Privacy
 
