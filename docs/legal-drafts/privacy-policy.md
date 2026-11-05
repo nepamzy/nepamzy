@@ -3,7 +3,7 @@
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
 > Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
-Operator: [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; not yet registered]. Privacy contact: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED].
+Operator: [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; not yet registered]. Privacy contact: afitmarket01@gmail.com.
 
 ## 1. Who we are and roles
 
@@ -43,7 +43,7 @@ Providers may process data outside Nigeria. [COUNSEL: NDPA cross-border requirem
 
 ## 7. Your rights and how to use them
 
-You may ask for access, correction, deletion (subject to records we must keep), objection and, where the law gives it, portability; and you may complain to the Nigeria Data Protection Commission. Send requests to [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. **Today there is no export or deletion tool; requests are handled by a manual procedure** (see the Account Closure and Data Requests draft). [COUNSEL: statutory response times.]
+You may ask for access, correction, deletion (subject to records we must keep), objection and, where the law gives it, portability; and you may complain to the Nigeria Data Protection Commission. Send requests to afitmarket01@gmail.com. **Today there is no export or deletion tool; requests are handled by a manual procedure** (see the Account Closure and Data Requests draft). [COUNSEL: statutory response times.]
 
 ## 8. Rider location (summary)
 
@@ -67,4 +67,4 @@ The service is for adults (18+). If we learn an account holder is under 18 we ma
 
 ## 13. Changes and contact
 
-[COUNSEL] Contact: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED].
+[COUNSEL] Contact: afitmarket01@gmail.com.

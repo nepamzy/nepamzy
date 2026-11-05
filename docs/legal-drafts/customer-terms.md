@@ -3,7 +3,7 @@
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
 > Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
-Operator: [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; not yet registered]. Support: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED].
+Operator: [NOBS AGENT — LEGAL NAME, REGISTRATION AND ADDRESS TO BE VERIFIED; not yet registered]. Support: afitmarket01@gmail.com.
 
 ## 1. Who may use AFIT Market
 
@@ -30,7 +30,7 @@ Products are offered by independent vendors. Listings, prices and availability a
 
 5.1 You may collect an order (pickup) or, where available, have it delivered to an approved delivery point.
 5.2 For pickup you receive a one-time code valid for **[48 hours]**; keep it private. After repeated wrong attempts the code locks. [OWNER: reissue/unlock policy undecided.]
-5.3 For delivery, the order is completed only when **the account holder** gives the delivery confirmation to the rider. The current process requires a **drawn signature** on the device. [OWNER: kept as is; the signature pad is not operable by keyboard; an accessible alternative is under review, not approved.] If you cannot provide the signature, contact support ([AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]); support may investigate or release the parcel under its exception rules but **cannot mark an order delivered that was not delivered**.
+5.3 For delivery, the order is completed only when **the account holder** gives the delivery confirmation to the rider. The current process requires a **drawn signature** on the device. [OWNER: kept as is; the signature pad is not operable by keyboard; an accessible alternative is under review, not approved.] If you cannot provide the signature, contact support (afitmarket01@gmail.com); support may investigate or release the parcel under its exception rules but **cannot mark an order delivered that was not delivered**.
 5.4 Delivery times are estimates.
 
 ## 6. Delivery charges
@@ -67,7 +67,7 @@ We do not promise uninterrupted service. Maintenance, outages and provider failu
 
 ## 14. Complaints and appeals
 
-Contact [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. Describe the order and the problem. [OWNER: response times and appeal route undecided.]
+Contact afitmarket01@gmail.com. Describe the order and the problem. [OWNER: response times and appeal route undecided.]
 
 ## 15. Changes to these terms
 

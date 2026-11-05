@@ -27,6 +27,6 @@ These drafts are shown only to the administrator, at **Administration > Legal dr
 ## Facts used throughout (placeholders must be completed by the owner)
 
 - Operator: [NOBS AGENT — LEGAL NAME, REGISTRATION STATUS, NUMBER AND REGISTERED ADDRESS TO BE VERIFIED; the owner reports the company is intended to be registered soon and is **not yet registered**].
-- Support contact: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED] (a placeholder; no working address exists yet and none should be implied).
+- Support contact: afitmarket01@gmail.com (a placeholder; no working address exists yet and none should be implied).
 - Platform: AFIT Market, a marketplace first intended for the Air Force Institute of Technology community, Kaduna, Nigeria. **AFIT authorisation is pending; these documents must not state or imply AFIT approval, ownership or data-controller status.**
 - Minimum age 18; non-AFIT adults may register; registration grants no access to restricted campus zones.

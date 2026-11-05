@@ -3,7 +3,7 @@
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
 > Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
-Support: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED]. Nothing here removes any consumer right that cannot lawfully be excluded. [COUNSEL]
+Support: afitmarket01@gmail.com. Nothing here removes any consumer right that cannot lawfully be excluded. [COUNSEL]
 
 ## 1. How it works today (matches the application)
 

@@ -3,7 +3,7 @@
 > **DRAFT — NOT APPROVED FOR PUBLICATION — REQUIRES REVIEW BY A QUALIFIED NIGERIAN LEGAL PROFESSIONAL**
 > Prepared by the engineering team from the behaviour of the application as of 2026-11-01 (updated from the 2026-10-13 version). Square-bracket items are unverified facts or unmade decisions. Nothing here is legal advice, and nothing here has been approved by the owner, AFIT, or counsel. Do not publish.
 
-Prepared for the qualified Nigerian legal professional. Support contact: [AFIT MARKET SUPPORT EMAIL — TO BE PROVIDED].
+Prepared for the qualified Nigerian legal professional. Support contact: afitmarket01@gmail.com.
 
 ## A. Business assumptions (from the owner, to be confirmed)
 
