@@ -21,6 +21,7 @@ export const STARTER_ITEMS: StarterItem[] = [
   },
   {
     slug: 'fried-rice-chicken',
+    photo: true,
     name: 'Fried rice and chicken',
     description: 'Fried rice with vegetables and chicken.',
     section: 'Mains',
@@ -34,6 +35,7 @@ export const STARTER_ITEMS: StarterItem[] = [
   },
   {
     slug: 'jollof-spaghetti',
+    photo: true,
     name: 'Jollof spaghetti',
     description: 'Spaghetti cooked in jollof sauce.',
     section: 'Mains',
@@ -47,6 +49,7 @@ export const STARTER_ITEMS: StarterItem[] = [
   },
   {
     slug: 'beans-plantain',
+    photo: true,
     name: 'Beans and plantain',
     description: 'Stewed beans with fried plantain.',
     section: 'Mains',

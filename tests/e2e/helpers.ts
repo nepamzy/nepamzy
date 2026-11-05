@@ -1,4 +1,5 @@
 import { PNG } from 'pngjs'
+import { idCardJpeg } from '../fixtures/id-card'
 import { existsSync, readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
@@ -631,6 +632,24 @@ export async function uiSignUpSteps(
     .getByRole('radio', { name: new RegExp(role) })
     .check()
   if (role === 'Customer') await page.getByRole('radio', { name: 'Other', exact: true }).check()
+  if (role === 'Rider') {
+    // new riders give a matric number, a phone number and the front (with its QR code) and back of the new ID card
+    step('rider details')
+    await page.getByLabel('Matric number').fill('AFIT/2026/0777')
+    await page.getByLabel('Phone number').fill('0803 123 4567')
+    await page.locator('#rider-id-front').setInputFiles({
+      name: 'front.jpg',
+      mimeType: 'image/jpeg',
+      buffer: await idCardJpeg('front-with-qr'),
+    })
+    await expect(page.getByText('QR code found on the front of your card.')).toBeVisible()
+    await page.locator('#rider-id-back').setInputFiles({
+      name: 'back.jpg',
+      mimeType: 'image/jpeg',
+      buffer: await idCardJpeg('back'),
+    })
+    await expect(page.getByText('Back of the card added.')).toBeVisible()
+  }
   step('next to signature')
   await page.getByRole('button', { name: 'Next' }).click()
   step('draw signature')

@@ -1,4 +1,5 @@
 'use client'
+import jsQR from 'jsqr'
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -174,6 +175,31 @@ async function shrinkToJpeg(file: File): Promise<string | null> {
   }
 }
 
+/** The same photo as it will be sent (shrunk), and whether a QR code can be read in it. Only the NEW student ID card has one on the front. */
+async function readCard(file: File): Promise<{ url: string; qr: boolean } | null> {
+  const url = await shrinkToJpeg(file)
+  if (!url) return null
+  try {
+    const img = new Image()
+    img.src = url
+    await img.decode()
+    const c = document.createElement('canvas')
+    c.width = img.naturalWidth
+    c.height = img.naturalHeight
+    const g = c.getContext('2d')!
+    g.drawImage(img, 0, 0)
+    const d = g.getImageData(0, 0, c.width, c.height)
+    const code = jsQR(d.data, d.width, d.height, { inversionAttempts: 'attemptBoth' })
+    return { url, qr: Boolean(code) }
+  } catch {
+    return { url, qr: false }
+  }
+}
+
+/** A Nigerian mobile number as people type it: 0803 123 4567 or +234 803 123 4567. */
+const looksLikePhone = (v: string) =>
+  /^(?:\+234|234|0)[789][01]\d{8}$/.test(v.replace(/[\s()-]/g, ''))
+
 const ROLE_HELP: Record<Intent, [string, string]> = {
   customer: ['Customer', 'Buy food and items and get them delivered or ready for pickup.'],
   vendor: [
@@ -253,20 +279,42 @@ export function SignUpForm() {
   const [personType, setPersonType] = useState<PersonType | null>(null)
   const [studentId, setStudentId] = useState('')
   const [idCard, setIdCard] = useState<string | null>(null)
+  const [idBack, setIdBack] = useState<string | null>(null)
+  const [phone, setPhone] = useState('')
+  const [frontQr, setFrontQr] = useState<'none' | 'ok' | 'noqr'>('none')
   const [signed, setSigned] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   if (state.ok) return <SignUpDone email={state.email ?? ''} message={state.message} />
 
   const isStudent = intent === 'customer' && personType === 'student'
-  const step1Ready =
-    intent !== 'customer' ||
-    (personType !== null && (personType !== 'student' || studentId.trim().length >= 3))
+  const isRider = intent === 'rider'
+  const riderReady =
+    studentId.trim().length >= 3 &&
+    looksLikePhone(phone) &&
+    !!idCard &&
+    !!idBack &&
+    frontQr === 'ok'
+  const step1Ready = isRider
+    ? riderReady
+    : intent !== 'customer' ||
+      (personType !== null && (personType !== 'student' || studentId.trim().length >= 3))
   const goNext = () => {
     setProblem(null)
     if (step === 1) {
       if (intent === 'customer' && !personType)
         return setProblem('Choose whether you are a student, military, a lecturer or other.')
       if (isStudent && studentId.trim().length < 3) return setProblem('Enter your matric number.')
+      if (isRider) {
+        if (studentId.trim().length < 3) return setProblem('Enter your matric number.')
+        if (!looksLikePhone(phone))
+          return setProblem('Enter a valid Nigerian phone number, for example 0803 123 4567.')
+        if (!idCard) return setProblem('Add a clear photo of the front of your ID card.')
+        if (frontQr !== 'ok')
+          return setProblem(
+            'The front of your ID card must show the QR code. Only the new ID card has one.',
+          )
+        if (!idBack) return setProblem('Add a clear photo of the back of your ID card.')
+      }
       return setStep(2)
     }
     if (step === 2) {
@@ -294,8 +342,10 @@ export function SignUpForm() {
       {intent === 'customer' && personType && (
         <input type="hidden" name="personType" value={personType} />
       )}
-      {isStudent && <input type="hidden" name="studentId" value={studentId} />}
-      {isStudent && idCard && <input type="hidden" name="idCard" value={idCard} />}
+      {(isStudent || isRider) && <input type="hidden" name="studentId" value={studentId} />}
+      {(isStudent || isRider) && idCard && <input type="hidden" name="idCard" value={idCard} />}
+      {isRider && <input type="hidden" name="phone" value={phone} />}
+      {isRider && idBack && <input type="hidden" name="idCardBack" value={idBack} />}
 
       <div className={step === 1 ? 'space-y-4' : 'hidden'}>
         <fieldset className="rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
@@ -400,6 +450,91 @@ export function SignUpForm() {
                 You can skip this now. You can add your matric number or card later under Security
                 in your account.
               </p>
+            </div>
+          </div>
+        )}
+        {isRider && (
+          <div className="space-y-3 rounded-[var(--radius-control)] border border-line p-3">
+            <p className="font-semibold text-navy-900">Rider details</p>
+            <Input
+              label="Matric number"
+              name="riderMatricInput"
+              autoComplete="off"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+            />
+            <Input
+              label="Phone number"
+              name="riderPhoneInput"
+              type="tel"
+              autoComplete="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              hint="For example 0803 123 4567"
+            />
+            <div className="space-y-1">
+              <label htmlFor="rider-id-front" className="text-sm font-semibold">
+                Photo of the FRONT of your new student ID card
+              </label>
+              <input
+                id="rider-id-front"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="block w-full text-sm"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0]
+                  setProblem(null)
+                  setIdCard(null)
+                  setFrontQr('none')
+                  if (!f) return
+                  const r = await readCard(f)
+                  if (!r) return setProblem('That photo could not be used. Try another one.')
+                  setIdCard(r.url)
+                  setFrontQr(r.qr ? 'ok' : 'noqr')
+                }}
+              />
+              {frontQr === 'ok' && (
+                <p role="status" className="text-sm font-medium text-success-700">
+                  QR code found on the front of your card.
+                </p>
+              )}
+              {frontQr === 'noqr' && (
+                <p role="alert" className="text-sm font-medium text-danger-700">
+                  We cannot see a QR code on the front of this card. Only the new ID card has one.
+                  Take a clear, flat photo of the whole front, or use your new card.
+                </p>
+              )}
+              <p className="text-xs text-muted">
+                Take it flat, in good light, with all four corners and the QR code showing.
+              </p>
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="rider-id-back" className="text-sm font-semibold">
+                Photo of the BACK of your ID card
+              </label>
+              <input
+                id="rider-id-back"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="block w-full text-sm"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0]
+                  setProblem(null)
+                  setIdBack(null)
+                  if (!f) return
+                  const url = await shrinkToJpeg(f)
+                  if (!url) return setProblem('That photo could not be used. Try another one.')
+                  setIdBack(url)
+                }}
+              />
+              {idBack && (
+                <p role="status" className="text-sm font-medium text-success-700">
+                  Back of the card added.
+                </p>
+              )}
             </div>
           </div>
         )}

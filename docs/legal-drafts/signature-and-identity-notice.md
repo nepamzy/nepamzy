@@ -27,6 +27,14 @@ If you say you are a student we ask for your matriculation (matric) number. You 
 - **Sensitive content:** an ID card photo can show a face and other personal details. [COUNSEL: advise whether this is "sensitive personal data" under the NDPA, whether explicit consent is needed, and the retention period.]
 - **Deletion:** erased with your account.
 
+## 3a. Riders: matric number, phone number and ID card photos (new)
+
+New riders give their matric number, a phone number, and clear photos of the **front and back** of their new student ID card. The system reads the front photo and refuses it if no QR code can be found on it (only the new card has one). This is an automatic check of the photo only; it does not confirm the card is real or belongs to the person. [COUNSEL: confirm the wording, whether explicit consent is needed, the retention period, and whether a phone number may be used for rider safety and support.]
+
+- **Where it is kept:** the matric number and phone number are encrypted; the two photos are stored privately. Only an administrator can open them, and each look is recorded in the audit log.
+- **Riders who signed up before this change** were not asked for these details.
+- **Deletion:** erased with the account.
+
 ## 4. Consent text shown at sign-up
 
 "I understand that my signature will be compared with the signature I draw when a delivery or pick-up is handed over, and that my matric number and any ID card photo I choose to add (students only) are kept privately and may be looked at by AFIT Market staff."

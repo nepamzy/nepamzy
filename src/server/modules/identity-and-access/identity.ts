@@ -3,6 +3,7 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { decryptField, encryptField } from '@/server/security/field-crypto'
 import { parseSignature } from '@/server/modules/orders-and-state-machine/signature'
 import { signaturesMatch } from './signature-match'
+export { jpegHasQr, normalizePhone } from './id-card-check'
 
 /**
  * What people tell us about themselves when they sign up: the signature they sign deliveries with, the kind of customer
@@ -152,4 +153,63 @@ export async function saveMatricNumber(userId: string, matric: string): Promise<
 export async function matricForOwner(userId: string): Promise<string | null> {
   const id = await identityForAdmin(userId)
   return id?.studentId ?? null
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+// Riders: matric number, phone number and the front and back of the NEW student ID card
+// ---------------------------------------------------------------------------------------------------------------------
+
+export async function saveRiderIdentity(
+  userId: string,
+  a: { matric: string; phone: string; front: Buffer; back: Buffer },
+): Promise<boolean> {
+  const { error } = await createSupabaseServiceClient()
+    .from('rider_identity')
+    .upsert(
+      {
+        user_id: userId,
+        matric_cipher: encryptField(a.matric.trim().toUpperCase()),
+        phone_cipher: encryptField(a.phone),
+        id_front_jpeg: toHex(a.front),
+        id_back_jpeg: toHex(a.back),
+        qr_found: true,
+      },
+      { onConflict: 'user_id' },
+    )
+  return !error
+}
+
+/** What an administrator may see about a rider's sign-up details. Decrypted only here, for this call. */
+export async function riderIdentityForAdmin(userId: string) {
+  const { data } = await createSupabaseServiceClient()
+    .from('rider_identity')
+    .select('matric_cipher, phone_cipher, created_at')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (!data) return null
+  const dec = (v: string | null) => {
+    try {
+      return v ? decryptField(v) : null
+    } catch {
+      return null
+    }
+  }
+  return {
+    matric: dec(data.matric_cipher),
+    phone: dec(data.phone_cipher),
+    createdAt: data.created_at as string,
+  }
+}
+
+export async function riderIdCardForAdmin(
+  userId: string,
+  side: 'front' | 'back',
+): Promise<Buffer | null> {
+  const col = side === 'front' ? 'id_front_jpeg' : 'id_back_jpeg'
+  const { data } = await createSupabaseServiceClient()
+    .from('rider_identity')
+    .select(col)
+    .eq('user_id', userId)
+    .maybeSingle()
+  return fromHex((data as Record<string, unknown> | null)?.[col])
 }

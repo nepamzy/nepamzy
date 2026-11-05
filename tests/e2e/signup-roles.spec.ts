@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { idCardJpeg } from '../fixtures/id-card'
 import {
   PASSWORD,
   admin,
@@ -353,5 +354,76 @@ test('a signed-in person can add and change their matric number under Security',
   expect(row.student_id_cipher).not.toContain('0999')
   await page.reload()
   await expect(page.getByLabel('Matric number')).toHaveValue('AFIT/2026/0999')
+  await context.close()
+})
+
+test('a new rider must give a matric number, a phone number and the front and back of the new ID card; a front with no QR code is refused', async ({
+  browser,
+}, info) => {
+  const context = await browser.newContext({
+    viewport: info.project.use.viewport ?? undefined,
+    extraHTTPHeaders: { 'x-forwarded-for': randIp() },
+  })
+  const page = await context.newPage()
+  const email = uniqueEmail('signup-rider-id')
+  await page.goto('/signup')
+  await page
+    .getByRole('group', { name: 'I want to use AFIT Market as a' })
+    .getByRole('radio', { name: /Rider/ })
+    .check()
+
+  // nothing given yet: no way forward
+  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
+  await page.getByLabel('Matric number').fill('AFIT/2026/0777')
+  await page.getByLabel('Phone number').fill('12345')
+  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
+  await page.getByLabel('Phone number').fill('0803 123 4567')
+
+  // the OLD card (no QR code on the front) is refused with a clear reason
+  await page.locator('#rider-id-front').setInputFiles({
+    name: 'old-front.jpg',
+    mimeType: 'image/jpeg',
+    buffer: await idCardJpeg('front-no-qr'),
+  })
+  await expect(page.getByText(/cannot see a QR code on the front/i)).toBeVisible()
+  await page.locator('#rider-id-back').setInputFiles({
+    name: 'back.jpg',
+    mimeType: 'image/jpeg',
+    buffer: await idCardJpeg('back'),
+  })
+  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
+
+  // the new card (QR code on the front) is accepted
+  await page.locator('#rider-id-front').setInputFiles({
+    name: 'front.jpg',
+    mimeType: 'image/jpeg',
+    buffer: await idCardJpeg('front-with-qr'),
+  })
+  await expect(page.getByText('QR code found on the front of your card.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
+  await page.getByRole('button', { name: 'Next' }).click()
+  await drawSignature(page)
+  await page.getByRole('button', { name: 'Next' }).click()
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password', { exact: true }).fill(PASSWORD)
+  await page.getByLabel('Confirm password').fill(PASSWORD)
+  await page.getByLabel(/I confirm that I am 18/).check()
+  await page.getByRole('button', { name: 'Create account' }).click()
+  await expect(page.getByTestId('signup-done')).toBeVisible()
+
+  // kept privately: the number and phone are encrypted, both photos are stored, and the QR check is recorded
+  const id = await userIdByEmail(email)
+  const row = (
+    await admin()
+      .from('rider_identity')
+      .select('matric_cipher, phone_cipher, id_front_jpeg, id_back_jpeg, qr_found')
+      .eq('user_id', id)
+      .single()
+  ).data!
+  expect(row.qr_found).toBe(true)
+  expect(row.id_front_jpeg).toBeTruthy()
+  expect(row.id_back_jpeg).toBeTruthy()
+  expect(row.matric_cipher).not.toContain('0777')
+  expect(row.phone_cipher).not.toContain('8031234567')
   await context.close()
 })

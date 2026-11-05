@@ -22,7 +22,10 @@ import { checkAccess, loadPrincipal } from './guard'
 import {
   PERSON_TYPES,
   hasSignature,
+  jpegHasQr,
+  normalizePhone,
   parseIdCard,
+  saveRiderIdentity,
   saveIdentity,
   saveMatricNumber,
   saveSignature,
@@ -79,6 +82,24 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   let personType: PersonType | null = null
   let studentId: string | undefined
   let idCard: Buffer | undefined
+  // riders: matric number, phone number and the front and back of the NEW student ID card (only it has a QR code)
+  let rider: { matric: string; phone: string; front: Buffer; back: Buffer } | undefined
+  if (intent === 'rider') {
+    const matric = String(formData.get('studentId') ?? '').trim()
+    if (!validStudentId(matric)) return { error: 'Enter your matric number.' }
+    const phone = normalizePhone(String(formData.get('phone') ?? ''))
+    if (!phone) return { error: 'Enter a valid Nigerian phone number, for example 0803 123 4567.' }
+    const front = parseIdCard(String(formData.get('idCard') ?? ''))
+    if (!front.ok) return { error: 'Add a clear photo of the front of your ID card.' }
+    const back = parseIdCard(String(formData.get('idCardBack') ?? ''))
+    if (!back.ok) return { error: 'Add a clear photo of the back of your ID card.' }
+    if (!jpegHasQr(front.jpeg))
+      return {
+        error:
+          'We could not find the QR code on the front of your ID card. Only the new ID card has one. Use a clear, flat photo of the whole front.',
+      }
+    rider = { matric, phone, front: front.jpeg, back: back.jpeg }
+  }
   if (intent === 'customer') {
     const t = String(formData.get('personType') ?? '')
     if (!PERSON_TYPES.includes(t as PersonType))
@@ -165,6 +186,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
     try {
       await saveSignature(newUserId, String(formData.get('signature') ?? ''))
       if (personType) await saveIdentity(newUserId, { personType, studentId, idCard })
+      if (rider) await saveRiderIdentity(newUserId, rider)
     } catch (e) {
       logger.warn('sign-up details not saved', { err: e instanceof Error ? e.name : 'error' })
     }
