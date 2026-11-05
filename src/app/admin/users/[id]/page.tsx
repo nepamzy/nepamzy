@@ -8,7 +8,10 @@ import { Card, PageHeader } from '@/components/ui/card'
 import { z } from 'zod'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { userDetail } from '@/server/modules/admin/queries'
-import { identityForAdmin } from '@/server/modules/identity-and-access/identity'
+import {
+  identityForAdmin,
+  riderIdentityForAdmin,
+} from '@/server/modules/identity-and-access/identity'
 
 export const metadata: Metadata = { title: 'User' }
 
@@ -18,8 +21,9 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
   const u = await userDetail(id)
   if (!u) notFound()
   const identity = await identityForAdmin(id)
+  const riderId = await riderIdentityForAdmin(id)
   // Looking at someone's ID details is recorded.
-  if (identity?.studentId)
+  if (identity?.studentId || riderId)
     await (await createSupabaseServerClient()).rpc('admin_log_identity_view', { p_user: id })
   const row = (k: string, v: React.ReactNode) => (
     <div className="flex flex-wrap justify-between gap-2 border-b border-line py-2 last:border-b-0">
@@ -65,6 +69,35 @@ export default async function UserPage({ params }: { params: Promise<{ id: strin
           <p className="mt-2 text-sm text-muted">
             These details are what the person typed and uploaded. They are not checked
             automatically.
+          </p>
+        </Card>
+      )}
+      {riderId && (
+        <Card className="mb-4">
+          <h2 className="mb-2 text-lg font-extrabold text-navy-900">
+            Rider details given at sign-up
+          </h2>
+          <dl>
+            {row('Matric number', riderId.matric ?? 'Could not be read')}
+            {row('Phone number', riderId.phone ?? 'Could not be read')}
+            {(['front', 'back'] as const).map((side) =>
+              row(
+                `ID card, ${side}`,
+                <a
+                  key={side}
+                  className="font-semibold text-brand-700 underline"
+                  href={`/admin/users/${id}/rider-id/${side}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  View the photo (opens in a new tab, the look is logged)
+                </a>,
+              ),
+            )}
+          </dl>
+          <p className="mt-2 text-sm text-muted">
+            The front photo was checked by the system for a QR code (only the new card has one).
+            Nothing else is verified automatically.
           </p>
         </Card>
       )}

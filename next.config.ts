@@ -16,7 +16,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   // `forbidden()` (HTTP 403 pages) is still experimental in Next 16; tracked in docs/known-issues.md.
-  experimental: { authInterrupts: true },
+  // the rider sign-up sends two ID card photos with the form, which is more than the 1 MB default
+  experimental: { authInterrupts: true, serverActions: { bodySizeLimit: '4mb' } },
   async headers() {
     // Location is blocked everywhere EXCEPT the rider area (where a rider who chose Go Active can share it).
     return [
