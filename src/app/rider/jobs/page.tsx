@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
   AcceptButton,
+  ArrivedButton,
   LocationSharing,
   ReportIssueForm,
   StartRouteButton,
@@ -124,10 +125,13 @@ export default async function Jobs() {
               {a.status === 'accepted' && <TokenCard assignmentId={a.assignment_id} />}
               {a.status === 'picked_up' && <StartRouteButton assignmentId={a.assignment_id} />}
               {a.status === 'en_route' && !a.arrival_detected_at && (
-                <p className="text-sm text-muted">
-                  On the way. Arrival is detected automatically from your GPS; there is no button
-                  for it.
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted">
+                    On the way. When you reach the customer, tap the button. If your GPS notices
+                    first, the hand-over opens by itself.
+                  </p>
+                  <ArrivedButton assignmentId={a.assignment_id} />
+                </div>
               )}
               {a.arrival_detected_at && (
                 <RiderHandoff orderId={a.order_id} orderNumber={a.order_number} />

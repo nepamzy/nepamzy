@@ -482,7 +482,9 @@ export async function seedArrivedOrder(
   shop: { vendorId: string; pointId: string; pointLabel: string },
   customerId: string,
   rider: { id: string; shift: string | null },
+  opts: { arrived?: boolean } = {},
 ) {
+  const arrived = opts.arrived ?? true
   const a = admin()
   const order_number = `AFM-T${tag()}`
   const { data: o, error } = await a
@@ -496,7 +498,7 @@ export async function seedArrivedOrder(
       delivery_point_id: shop.pointId,
       delivery_point_label: shop.pointLabel,
       pickup_location_snapshot: 'Counter (placeholder)',
-      status: 'ARRIVAL_DETECTED',
+      status: arrived ? 'ARRIVAL_DETECTED' : 'EN_ROUTE',
       items_total_kobo: 300000,
       delivery_fee_kobo: 50000,
       platform_fee_kobo: 15000,
@@ -523,7 +525,7 @@ export async function seedArrivedOrder(
       shift_id: rider.shift,
       slot: 1,
       status: 'en_route',
-      arrival_detected_at: new Date().toISOString(),
+      arrival_detected_at: arrived ? new Date().toISOString() : null,
       dest_lat: SYNTH_POINT.lat,
       dest_lng: SYNTH_POINT.lng,
       dest_radius_m: SYNTH_POINT.radius,

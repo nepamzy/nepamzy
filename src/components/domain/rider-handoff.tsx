@@ -1,5 +1,5 @@
 'use client'
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { ActionForm } from '@/components/forms/action-form'
 import { SignaturePad } from '@/components/domain/signature-pad'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,11 @@ export function RiderHandoff({ orderId, orderNumber }: { orderId: string; orderN
   const [customerSigned, setCustomerSigned] = useState(false)
   const [qr, setQr] = useState<QrOpen | null>(null)
   const [pending, start] = useTransition()
+  const box = useRef<HTMLElement>(null)
+  // the rider has just tapped "I have arrived": bring the hand-over into view so there is nothing to look for
+  useEffect(() => {
+    box.current?.scrollIntoView({ block: 'start', behavior: 'auto' })
+  }, [])
 
   const openQr = () =>
     start(async () => {
@@ -29,6 +34,7 @@ export function RiderHandoff({ orderId, orderNumber }: { orderId: string; orderN
 
   return (
     <section
+      ref={box}
       aria-labelledby={`handoff-${orderId}`}
       className="space-y-3 rounded-[var(--radius-card)] border-2 border-brand-700 p-4"
     >

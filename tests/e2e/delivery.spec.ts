@@ -303,3 +303,40 @@ test('support handles a recipient who never shows up: the parcel is released, a 
   )
   await Promise.all([customer.context.close(), support.context.close()])
 })
+
+test('the rider taps "I have arrived" and the hand-over opens straight away; GPS is not needed', async ({
+  browser,
+}, info) => {
+  const customer = await openSession(browser, info, 'tapc')
+  const ownerId = (await openSession(browser, info, 'tapo')).user.id
+  const shop = await makeShopWithPoint(ownerId, `Fixture dish ${tag()}`)
+  const rider = await seedRider({ active: true })
+  const o = await seedArrivedOrder(shop, customer.user.id, rider, { arrived: false })
+  const r = (await openSessionFor(browser, info, rider)).page
+
+  await r.goto('/rider/jobs')
+  const main = r.locator('main')
+  // on the way: one clear button, and no hand-over yet
+  await expect(main.getByRole('button', { name: 'I have arrived' })).toBeVisible()
+  await expect(
+    main.getByRole('heading', { name: new RegExp(`hand over order ${o.number}`) }),
+  ).toHaveCount(0)
+  await a11yClean(r, '/rider/jobs (on the way)')
+
+  await clickAndWait(r, () => main.getByRole('button', { name: 'I have arrived' }).click())
+  // the hand-over is there, with the signature option first
+  await expect(
+    main.getByRole('heading', { name: new RegExp(`hand over order ${o.number}`) }),
+  ).toBeVisible()
+  await expect(main.getByRole('button', { name: 'Confirm with signatures' })).toBeVisible()
+  await expect(main.getByRole('button', { name: 'I have arrived' })).toHaveCount(0)
+  expect((await orderRow(o.id)).status).toBe('ARRIVAL_DETECTED')
+  const asg = (
+    await admin()
+      .from('delivery_assignments')
+      .select('arrival_source')
+      .eq('id', o.assignmentId)
+      .single()
+  ).data!
+  expect(asg.arrival_source).toBe('rider_tap')
+})
