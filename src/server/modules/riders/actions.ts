@@ -133,6 +133,21 @@ export async function startRouteAction(_p: ActionState, fd: FormData): Promise<A
   return done('On your way. Keep this screen open so your location can be shared.')
 }
 
+/** "I have arrived": the rider marks arrival instead of waiting for the GPS; the hand-over (signatures or QR code) opens straight away. */
+export async function arrivedAction(_p: ActionState, fd: FormData): Promise<ActionState> {
+  const id = text(fd, 'assignmentId', 40)
+  if (!uuid.safeParse(id).success) return failed('That delivery was not found.')
+  const g = await gate(RIDER)
+  if ('state' in g) return g.state
+  if (!(await rateLimit(`arrived:${g.who.userId}`, 300, 20)))
+    return failed('Too many attempts. Please wait a moment.')
+  const sb = await createSupabaseServerClient()
+  const { error } = await sb.rpc('rider_tap_arrived', { p_assignment: id })
+  if (error) return dbFailed(error)
+  revalidatePath('/rider/jobs')
+  return done('Marked as arrived. Now hand the order over.')
+}
+
 const REASONS = [
   'vendor_not_ready',
   'recipient_unavailable',

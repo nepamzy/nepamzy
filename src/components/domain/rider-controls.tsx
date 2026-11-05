@@ -14,6 +14,7 @@ import {
   postLocationAction,
   reportIssueAction,
   startRouteAction,
+  arrivedAction,
   submitRiderApplicationAction,
   type TokenState,
 } from '@/server/modules/riders/actions'
@@ -172,6 +173,20 @@ export function TokenCard({ assignmentId }: { assignmentId: string }) {
 export function StartRouteButton({ assignmentId }: { assignmentId: string }) {
   return (
     <ActionForm action={startRouteAction} submitLabel="Start route" pendingLabel="Starting…">
+      <input type="hidden" name="assignmentId" value={assignmentId} />
+    </ActionForm>
+  )
+}
+
+/** One big button for the rider at the customer's door. It opens the hand-over (customer signature, or QR code) at once. */
+export function ArrivedButton({ assignmentId }: { assignmentId: string }) {
+  return (
+    <ActionForm
+      action={arrivedAction}
+      submitLabel="I have arrived"
+      pendingLabel="Opening hand-over…"
+      variant="gold"
+    >
       <input type="hidden" name="assignmentId" value={assignmentId} />
     </ActionForm>
   )
