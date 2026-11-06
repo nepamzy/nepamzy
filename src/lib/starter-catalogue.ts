@@ -96,7 +96,13 @@ export const STARTER_ITEMS: StarterItem[] = [
     description: 'Hot and spicy goat meat pepper soup.',
     section: 'Soups and swallows',
   },
-  { slug: 'moi-moi', name: 'Moi moi', description: 'Steamed bean pudding.', section: 'Sides' },
+  {
+    slug: 'moi-moi',
+    name: 'Moi moi',
+    description: 'Steamed bean pudding.',
+    section: 'Sides',
+    photo: true,
+  },
   {
     slug: 'fried-plantain',
     name: 'Fried plantain (dodo)',
