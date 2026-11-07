@@ -35,14 +35,21 @@ self.addEventListener('push', (event) => {
     typeof data.url === 'string' && /^\/[A-Za-z0-9_/-]{0,120}$/.test(data.url)
       ? data.url
       : '/notifications'
+  // Tell any open AFIT Market window, so it can play the app sound (the page de-duplicates by id).
+  const id = typeof data.id === 'string' && /^[0-9a-f-]{36}$/.test(data.id) ? data.id : null
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: String(data.body || '').slice(0, 200),
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
-      tag: url,
-      data: { url },
-    }),
+    Promise.all([
+      self.clients
+        .matchAll({ type: 'window', includeUncontrolled: true })
+        .then((list) => list.forEach((c) => c.postMessage({ type: 'afit-notification', id }))),
+      self.registration.showNotification(title, {
+        body: String(data.body || '').slice(0, 200),
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        tag: url,
+        data: { url },
+      }),
+    ]),
   )
 })
 self.addEventListener('notificationclick', (event) => {

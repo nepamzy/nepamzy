@@ -13,7 +13,7 @@ import { logger } from '@/lib/logger'
  */
 export type PushConfig = { publicKey: string; privateKey: string; subject: string }
 export type PushSub = { endpoint: string; p256dh: string; auth: string }
-export type PushPayload = { title: string; body: string; url: string }
+export type PushPayload = { id?: string; title: string; body: string; url: string }
 export type PushResult = 'sent' | 'gone' | 'failed' | 'disabled'
 
 const ALLOWED_HOSTS = [

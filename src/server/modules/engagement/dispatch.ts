@@ -22,6 +22,7 @@ import {
   type PushResult,
   type PushSub,
 } from './push'
+import { safePushText } from '@/lib/push-text'
 
 /**
  * Delivery worker: turns each in-app notification (written by the database triggers for orders, refunds, returns and
@@ -113,9 +114,11 @@ export async function drainNotifications(
         const mine = subs.get(n.user_id) ?? []
         if (!deps.push || mine.length === 0) pushStatus = 'skipped'
         else {
+          const text = safePushText(n.title, n.body)
           const payload: PushPayload = {
-            title: n.title,
-            body: n.body,
+            id: n.id,
+            title: text.title,
+            body: text.body,
             url: n.link && /^\/[A-Za-z0-9_/-]{0,120}$/.test(n.link) ? n.link : '/notifications',
           }
           const results = await Promise.all(

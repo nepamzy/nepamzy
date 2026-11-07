@@ -3,6 +3,9 @@ import { connection } from 'next/server'
 import type { ReactNode } from 'react'
 import { OfflineBanner } from '@/components/ui/states'
 import { RegisterServiceWorker } from '@/components/register-sw'
+import { AppBar } from '@/components/app-bar'
+import { NotificationSound } from '@/components/notification-sound'
+import { pushConfig } from '@/server/modules/engagement/push'
 import { ToastProvider } from '@/components/ui/toast'
 import './globals.css'
 
@@ -37,7 +40,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         >
           Skip to main content
         </a>
+        <AppBar publicKey={pushConfig()?.publicKey ?? null} />
         <OfflineBanner />
+        <NotificationSound />
         <RegisterServiceWorker />
         <ToastProvider>{children}</ToastProvider>
       </body>

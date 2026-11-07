@@ -196,3 +196,18 @@ describe('drainNotifications', () => {
     await expect(drainNotifications(5, d)).resolves.toMatchObject({ claimed: 0 })
   })
 })
+
+describe('phone pop-up text', () => {
+  it('is short, carries the notification id, and holds no private data', async () => {
+    const sendPush = vi.fn(async () => 'sent' as const)
+    const { d } = deps(
+      [N({ title: 'Rider assigned', body: 'Call 08031234567. Handover code: 4821. ada@x.com' })],
+      { sendPush },
+    )
+    await drainNotifications(1, d)
+    const payload = (sendPush.mock.calls[0] as unknown as [unknown, Record<string, string>])[1]
+    expect(payload.id).toBe('n1')
+    expect(JSON.stringify(payload)).not.toMatch(/0803|4821|@/)
+    expect(payload.body?.length ?? 0).toBeLessThanOrEqual(120)
+  })
+})
