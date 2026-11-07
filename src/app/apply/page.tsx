@@ -19,6 +19,9 @@ export default async function ApplyPage() {
     sb.rpc('my_vendor'),
     sb.rpc('vendor_commission_terms'),
   ])
+  const { data: who } = await sb.auth.getUser()
+  const chosen = who.user?.user_metadata?.intended_category
+  const defaultCategory = typeof chosen === 'string' ? chosen : undefined
   const commissionBps = Number((terms as { commission_bps?: number } | null)?.commission_bps ?? 450)
   const pending = (apps ?? []).find((a) => a.status === 'pending')
   return (
@@ -49,7 +52,11 @@ export default async function ApplyPage() {
         </Card>
       ) : (
         <Card className="max-w-xl">
-          <ApplicationForm categories={cats} commissionBps={commissionBps} />
+          <ApplicationForm
+            categories={cats}
+            commissionBps={commissionBps}
+            defaultCategory={defaultCategory}
+          />
         </Card>
       )}
       {(apps ?? []).filter((a) => a.status !== 'pending').length > 0 && (

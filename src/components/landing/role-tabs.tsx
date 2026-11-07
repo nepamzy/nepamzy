@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { useId, useRef, useState } from 'react'
 import { Icon, type IconName } from '@/components/ui/icons'
 import { cn } from '@/components/ui/cn'
-import { CustomerArt, RiderArt, VendorArt } from './illustrations'
+import { RolePhoto } from './role-photo'
 import { Watermark } from './watermark'
 
 const ROLES = [
@@ -11,7 +11,7 @@ const ROLES = [
     id: 'customer',
     label: 'I want to order',
     icon: 'bag' as IconName,
-    art: CustomerArt,
+    photo: 'customer' as const,
     title: 'Order from campus shops',
     lead: 'Food, printing and everyday items from approved shops, collected or brought to you.',
     points: [
@@ -27,7 +27,7 @@ const ROLES = [
     id: 'vendor',
     label: 'I run a shop',
     icon: 'store' as IconName,
-    art: VendorArt,
+    photo: 'vendor' as const,
     title: 'Sell to the whole campus',
     lead: 'Put your menu online, take paid orders and hand them to a rider when they are ready.',
     points: [
@@ -43,7 +43,7 @@ const ROLES = [
     id: 'rider',
     label: 'I want to deliver',
     icon: 'bike' as IconName,
-    art: RiderArt,
+    photo: 'rider' as const,
     title: 'Deliver and earn',
     lead: 'Take nearby deliveries, follow the route on the map and finish each one at the door.',
     points: [
@@ -63,7 +63,6 @@ export function RoleTabs() {
   const uid = useId()
   const refs = useRef<(HTMLButtonElement | null)[]>([])
   const role = ROLES[i]!
-  const Art = role.art
   const move = (to: number) => {
     const n = (to + ROLES.length) % ROLES.length
     setI(n)
@@ -134,7 +133,10 @@ export function RoleTabs() {
           </Link>
         </div>
         <div className="relative z-10 mx-auto w-full max-w-xs">
-          <Art className="afit-float-slow h-auto w-full" />
+          <RolePhoto
+            kind={role.photo}
+            className="afit-float-slow w-full shadow-[0_18px_40px_-20px_rgb(11_42_92/.5)]"
+          />
         </div>
       </div>
     </div>

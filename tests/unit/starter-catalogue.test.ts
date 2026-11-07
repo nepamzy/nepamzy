@@ -1,3 +1,4 @@
+import { existsSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { STARTER_ITEMS, categoryOf, sectionsOf, startersFor } from '@/lib/starter-catalogue'
 
@@ -35,5 +36,16 @@ describe('ready-made catalogue', () => {
 
   it('lists sections in first-seen order', () => {
     expect(sectionsOf(startersFor('clothing'))).toEqual(['Tops', 'Bottoms', 'Shoes'])
+  })
+
+  it('marks an item as having a photo exactly when its file exists', () => {
+    const files = new Set(readdirSync('public/catalogue').map((f) => f.replace(/\.jpg$/, '')))
+    for (const i of STARTER_ITEMS)
+      expect(Boolean(i.photo), i.slug).toBe(existsSync(`public/catalogue/${i.slug}.jpg`))
+    for (const f of files)
+      expect(
+        STARTER_ITEMS.some((i) => i.slug === f),
+        `${f}.jpg has no item`,
+      ).toBe(true)
   })
 })

@@ -18,6 +18,7 @@ import { createSupabaseServiceClient } from '@/lib/supabase/service'
 import { confirmEmail, resetCodeEmail } from '@/server/modules/engagement/email-templates'
 import { mailConfig, sendMail, sendMailDetailed } from '@/server/modules/engagement/mail'
 import { parseSignature } from '@/server/modules/orders-and-state-machine/signature'
+import { listCategories } from '@/server/modules/vendors-and-catalogue/public'
 import { checkAccess, loadPrincipal } from './guard'
 import {
   PERSON_TYPES,
@@ -100,6 +101,15 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
       }
     rider = { matric, phone, front: front.jpeg, back: back.jpeg }
   }
+  // vendors must say what the shop will sell: it has to be one of the active categories
+  let vendorCategory: string | undefined
+  if (intent === 'vendor') {
+    const raw = String(formData.get('category') ?? '')
+    const known = (await listCategories()).some((c) => c.id === raw)
+    if (!z.uuid().safeParse(raw).success || !known)
+      return { error: 'Choose what your shop will sell.' }
+    vendorCategory = raw
+  }
   if (intent === 'customer') {
     const t = String(formData.get('personType') ?? '')
     if (!PERSON_TYPES.includes(t as PersonType))
@@ -126,6 +136,7 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   const metadata = {
     adult_declared: true,
     ...(intent === 'customer' ? {} : { intended_role: intent }),
+    ...(vendorCategory ? { intended_category: vendorCategory } : {}),
   }
   const mail = mailConfig()
   const supabase = await createSupabaseServerClient()

@@ -219,12 +219,68 @@ export const STARTER_ITEMS: StarterItem[] = [
   },
 ]
 
+/** Ready-made items (other than food and drinks) that have a photo in public/catalogue. */
+const HAS_PHOTO = new Set([
+  'plain-tshirt',
+  'polo-shirt',
+  'hoodie',
+  'ankara-shirt',
+  'jeans',
+  'jogging-pants',
+  'canvas-sneakers',
+  'slippers',
+  'wrist-watch',
+  'sunglasses',
+  'backpack',
+  'leather-belt',
+  'wallet',
+  'necklace',
+  'phone-charger',
+  'power-bank',
+  'earphones',
+  'bluetooth-speaker',
+  'flash-drive',
+  'phone-case',
+  'laptop-sleeve',
+  'computer-mouse',
+  'ludo-board',
+  'scrabble',
+  'playing-cards',
+  'whot-cards',
+  'chess-set',
+  'draughts',
+  'football',
+  'table-tennis-set',
+  'black-white-print',
+  'colour-print',
+  'photocopy',
+  'scanning',
+  'spiral-binding',
+  'project-binding',
+  'lamination',
+  'passport-photos',
+  'biro-pen-pack',
+  'a4-paper-ream',
+  'campus-keyring',
+  'souvenir-tshirt',
+  'souvenir-cap',
+  'lanyard',
+  'sticker-pack',
+])
+
 const mk = (
   category: StarterCategory,
   section: string,
   rows: [slug: string, name: string, description: string][],
 ): StarterItem[] =>
-  rows.map(([slug, name, description]) => ({ slug, name, description, section, category }))
+  rows.map(([slug, name, description]) => ({
+    slug,
+    name,
+    description,
+    section,
+    category,
+    ...(HAS_PHOTO.has(slug) ? { photo: true as const } : {}),
+  }))
 
 STARTER_ITEMS.push(
   ...mk('clothing', 'Tops', [

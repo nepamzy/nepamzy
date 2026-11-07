@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { Button, ButtonLink } from '@/components/ui/button'
 import { SignaturePad } from '@/components/domain/signature-pad'
-import { Checkbox, Input } from '@/components/ui/fields'
+import { Checkbox, Input, Select } from '@/components/ui/fields'
 import { SignatureStatement } from './signature-statement'
-import { CustomerArt, RiderArt, VendorArt } from '@/components/landing/illustrations'
+import { RolePhoto } from '@/components/landing/role-photo'
 import { Watermark } from '@/components/landing/watermark'
 import {
   requestPasswordResetAction,
@@ -216,12 +216,6 @@ const TYPE_LABEL: Record<PersonType, string> = {
   other: 'Other',
 }
 
-const ROLE_ART: Record<Intent, (p: { className?: string }) => React.JSX.Element> = {
-  customer: CustomerArt,
-  vendor: VendorArt,
-  rider: RiderArt,
-}
-
 /** Small flat badges for the "I am a" choices. Decorative: the words beside them carry the meaning. */
 function PersonIcon({ kind }: { kind: PersonType }) {
   const common = {
@@ -273,7 +267,9 @@ function PersonIcon({ kind }: { kind: PersonType }) {
   )
 }
 
-export function SignUpForm() {
+export type SignUpCategory = { id: string; name: string }
+
+export function SignUpForm({ categories = [] }: { categories?: SignUpCategory[] }) {
   const [state, action, pending] = useActionState(signUpAction, initial)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [intent, setIntent] = useState<Intent>('customer')
@@ -282,6 +278,7 @@ export function SignUpForm() {
   const [idCard, setIdCard] = useState<string | null>(null)
   const [idBack, setIdBack] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
+  const [category, setCategory] = useState('')
   const [frontQr, setFrontQr] = useState<'none' | 'ok' | 'noqr'>('none')
   const [signed, setSigned] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
@@ -289,6 +286,7 @@ export function SignUpForm() {
 
   const isStudent = intent === 'customer' && personType === 'student'
   const isRider = intent === 'rider'
+  const isVendor = intent === 'vendor'
   const riderReady =
     studentId.trim().length >= 3 &&
     looksLikePhone(phone) &&
@@ -297,11 +295,14 @@ export function SignUpForm() {
     frontQr === 'ok'
   const step1Ready = isRider
     ? riderReady
-    : intent !== 'customer' ||
-      (personType !== null && (personType !== 'student' || studentId.trim().length >= 3))
+    : isVendor
+      ? category !== ''
+      : intent !== 'customer' ||
+        (personType !== null && (personType !== 'student' || studentId.trim().length >= 3))
   const goNext = () => {
     setProblem(null)
     if (step === 1) {
+      if (isVendor && !category) return setProblem('Choose what your shop will sell.')
       if (intent === 'customer' && !personType)
         return setProblem('Choose whether you are a student, military, a lecturer or other.')
       if (isStudent && studentId.trim().length < 3) return setProblem('Enter your matric number.')
@@ -347,6 +348,7 @@ export function SignUpForm() {
       {(isStudent || isRider) && idCard && <input type="hidden" name="idCard" value={idCard} />}
       {isRider && <input type="hidden" name="phone" value={phone} />}
       {isRider && idBack && <input type="hidden" name="idCardBack" value={idBack} />}
+      {isVendor && category && <input type="hidden" name="category" value={category} />}
 
       <div className={step === 1 ? 'space-y-4' : 'hidden'}>
         <fieldset className="relative isolate overflow-hidden rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
@@ -356,7 +358,6 @@ export function SignUpForm() {
           </legend>
           <div className="relative z-10 grid gap-2 sm:grid-cols-3">
             {(Object.keys(ROLE_HELP) as Intent[]).map((value) => {
-              const Art = ROLE_ART[value]
               return (
                 <label
                   key={value}
@@ -373,7 +374,10 @@ export function SignUpForm() {
                     }}
                     className="absolute inset-0 z-10 m-0 size-full cursor-pointer opacity-0"
                   />
-                  <Art className="h-20 w-16 shrink-0 transition-transform duration-300 group-hover:scale-105 group-has-[:checked]:scale-110 sm:h-28 sm:w-24" />
+                  <RolePhoto
+                    kind={value}
+                    className="size-20 shrink-0 transition-transform duration-300 group-hover:scale-105 group-has-[:checked]:scale-105 sm:size-28"
+                  />
                   <span>
                     <span className="block font-bold text-navy-900">{ROLE_HELP[value][0]}</span>
                     <span className="block text-sm text-muted">{ROLE_HELP[value][1]}</span>
@@ -420,6 +424,30 @@ export function SignUpForm() {
               ))}
             </div>
           </fieldset>
+        )}
+
+        {isVendor && (
+          <div className="space-y-2 rounded-[var(--radius-control)] border border-line p-3">
+            <Select
+              label="What will your shop sell? (required)"
+              name="categoryChoice"
+              value={category}
+              onChange={(e) => {
+                setCategory(e.target.value)
+                setProblem(null)
+              }}
+              hint="Pick the one that fits best. After you are approved, you can add ready-made items for this category with their pictures."
+            >
+              <option value="" disabled>
+                Choose a category
+              </option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </Select>
+          </div>
         )}
 
         {isStudent && (

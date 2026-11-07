@@ -8,9 +8,12 @@ const pct = (bps: number) => `${(bps / 100).toFixed(bps % 100 === 0 ? 0 : 1)}%`
 export function ApplicationForm({
   categories,
   commissionBps,
+  defaultCategory,
 }: {
   categories: Category[]
   commissionBps: number
+  /** the category chosen at sign-up */
+  defaultCategory?: string
 }) {
   return (
     <ActionForm
@@ -19,7 +22,12 @@ export function ApplicationForm({
       pendingLabel="Sending…"
     >
       <Input label="Business name" name="businessName" required minLength={2} maxLength={80} />
-      <Select label="Category" name="category" required defaultValue="">
+      <Select
+        label="Category"
+        name="category"
+        required
+        defaultValue={categories.some((c) => c.id === defaultCategory) ? defaultCategory : ''}
+      >
         <option value="" disabled>
           Choose one
         </option>
