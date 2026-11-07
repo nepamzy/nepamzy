@@ -56,7 +56,7 @@ test('top bar: shows both buttons, 44px tall, install help, close for 7 days', a
   await expect(notify).toBeVisible()
   for (const b of [install, notify])
     expect((await b.boundingBox())!.height).toBeGreaterThanOrEqual(44)
-  await expect(bar.getByTestId('bar-state')).toContainText('not from the Play Store')
+  await expect(bar.getByTestId('bar-state')).toHaveCount(0) // no extra writing under the buttons
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
     (await page.viewportSize())!.width,
   )
@@ -95,9 +95,7 @@ test('top bar: iPhone gets step-by-step help; installed app shows "App installed
   await expect(help).toContainText('Share')
   await expect(help).toContainText('Add to Home Screen')
   await expect(help).toContainText('Add')
-  await expect(p.getByTestId('bar-state')).toContainText(
-    'only after you add the app to your Home Screen',
-  )
+  await expect(help).toContainText('then tap “Turn on notifications”')
   await shot(p, 'bar-iphone-help')
   await iphone.close()
 

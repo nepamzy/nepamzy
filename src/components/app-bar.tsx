@@ -150,15 +150,12 @@ export function AppBar({ publicKey }: { publicKey: string | null }) {
         >
           ×
         </button>
-        <p className="basis-full text-xs text-white/85" role="status" data-testid="bar-state">
-          {!installed &&
-            'This puts AFIT Market on your phone as an icon. It is not from the Play Store or App Store. '}
-          {pushWords(push.phase)}
-          {push.error ? ` ${push.error}` : ''}
-          {ios && !installed
-            ? ' On iPhone, notifications work only after you add the app to your Home Screen.'
-            : ''}
-        </p>
+        {(push.error || ['blocked', 'unsupported', 'signin'].includes(push.phase)) && (
+          <p className="basis-full text-xs text-white/85" role="status" data-testid="bar-state">
+            {pushWords(push.phase)}
+            {push.error ? ` ${push.error}` : ''}
+          </p>
+        )}
         {help === 'ios' && (
           <ol
             className="basis-full list-decimal space-y-1 rounded-lg bg-white/10 p-3 pl-8 text-sm"
