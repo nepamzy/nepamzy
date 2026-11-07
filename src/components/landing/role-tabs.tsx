@@ -4,6 +4,7 @@ import { useId, useRef, useState } from 'react'
 import { Icon, type IconName } from '@/components/ui/icons'
 import { cn } from '@/components/ui/cn'
 import { CustomerArt, RiderArt, VendorArt } from './illustrations'
+import { Watermark } from './watermark'
 
 const ROLES = [
   {
@@ -110,9 +111,10 @@ export function RoleTabs() {
         role="tabpanel"
         id={`${uid}-panel`}
         aria-labelledby={`${uid}-tab-${role.id}`}
-        className="grid items-center gap-6 p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] md:p-8"
+        className="relative isolate grid items-center gap-6 overflow-hidden p-5 md:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)] md:p-8"
       >
-        <div>
+        <Watermark />
+        <div className="relative z-10">
           <p className="text-sm font-bold uppercase tracking-wider text-brand-700">{role.where}</p>
           <h3 className="mt-1 text-2xl font-extrabold text-navy-900 sm:text-3xl">{role.title}</h3>
           <p className="mt-2 text-lg text-muted">{role.lead}</p>
@@ -131,7 +133,7 @@ export function RoleTabs() {
             {role.cta.label} →
           </Link>
         </div>
-        <div className="mx-auto w-full max-w-xs">
+        <div className="relative z-10 mx-auto w-full max-w-xs">
           <Art className="afit-float-slow h-auto w-full" />
         </div>
       </div>

@@ -2,11 +2,12 @@
 import jsQR from 'jsqr'
 import Link from 'next/link'
 import { useActionState, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button, ButtonLink } from '@/components/ui/button'
 import { SignaturePad } from '@/components/domain/signature-pad'
 import { Checkbox, Input } from '@/components/ui/fields'
 import { SignatureStatement } from './signature-statement'
 import { CustomerArt, RiderArt, VendorArt } from '@/components/landing/illustrations'
+import { Watermark } from '@/components/landing/watermark'
 import {
   requestPasswordResetAction,
   confirmEmailCodeAction,
@@ -348,11 +349,12 @@ export function SignUpForm() {
       {isRider && idBack && <input type="hidden" name="idCardBack" value={idBack} />}
 
       <div className={step === 1 ? 'space-y-4' : 'hidden'}>
-        <fieldset className="rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
-          <legend className="px-1 text-sm font-bold text-navy-900">
+        <fieldset className="relative isolate overflow-hidden rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
+          <Watermark />
+          <legend className="relative z-10 px-1 text-sm font-bold text-navy-900">
             I want to use AFIT Market as a
           </legend>
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="relative z-10 grid gap-2 sm:grid-cols-3">
             {(Object.keys(ROLE_HELP) as Intent[]).map((value) => {
               const Art = ROLE_ART[value]
               return (
@@ -386,7 +388,7 @@ export function SignUpForm() {
               )
             })}
           </div>
-          <p className="text-xs text-muted">
+          <p className="relative z-10 mt-2 text-xs text-muted">
             Choosing Vendor or Rider takes you to the application after you sign in; nothing is
             switched on until it is approved.
           </p>
@@ -538,9 +540,14 @@ export function SignUpForm() {
             </div>
           </div>
         )}
-        <Button type="button" onClick={goNext} disabled={!step1Ready} className="w-full">
-          Next
-        </Button>
+        <div className="flex gap-2">
+          <ButtonLink href="/" variant="secondary" data-testid="signup-back-home">
+            Back
+          </ButtonLink>
+          <Button type="button" onClick={goNext} disabled={!step1Ready} className="flex-1">
+            Next
+          </Button>
+        </div>
       </div>
 
       {/* The signature box stays on the page (hidden) so a drawn signature is not lost when moving between steps. */}

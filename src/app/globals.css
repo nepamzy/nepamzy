@@ -195,7 +195,35 @@ body {
 .afit-reveal[data-in='1'] {
   animation: afit-rise 0.6s ease-out forwards;
 }
+@keyframes afit-kenburns {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06) translate(-1%, -1%);
+  }
+}
+.afit-kenburns {
+  animation: afit-kenburns 18s ease-in-out infinite;
+  transform-origin: 40% 50%;
+}
+@keyframes afit-drift {
+  0%,
+  100% {
+    transform: translate(-52%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-48%, -50%) scale(1.05);
+  }
+}
+.afit-drift {
+  animation: afit-drift 22s ease-in-out infinite;
+  transform: translate(-50%, -50%);
+}
 @media (prefers-reduced-motion: reduce) {
+  .afit-drift,
+  .afit-kenburns,
   .afit-float-slow,
   .afit-bob,
   .afit-ride,

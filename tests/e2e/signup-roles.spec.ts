@@ -36,6 +36,14 @@ test('the public pages never mention the administrator, and sign-up offers custo
   await expect(group.getByRole('radio', { name: /Rider/ })).not.toBeChecked()
 })
 
+test('the first sign-up step has a Back button that returns to the home page', async ({
+  page,
+}) => {
+  await page.goto('/signup')
+  await page.getByTestId('signup-back-home').click()
+  await expect(page).toHaveURL(/\/$/)
+})
+
 test('signing up as a vendor or rider records the choice; a customer sign-up records none', async ({
   browser,
 }, info) => {

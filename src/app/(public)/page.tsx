@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { VendorCardView } from '@/components/domain/vendor-card'
 import { ContactBand } from '@/components/landing/contact-band'
 import { Faq } from '@/components/landing/faq'
-import { HeroScene } from '@/components/landing/illustrations'
+import { HeroPhoto } from '@/components/landing/hero-photo'
 import { OrderDemo } from '@/components/landing/order-demo'
 import { Reveal } from '@/components/landing/reveal'
 import { RoleTabs } from '@/components/landing/role-tabs'
@@ -144,7 +144,7 @@ export default async function Home() {
               )}
             </ul>
           </div>
-          <HeroScene className="h-auto w-full drop-shadow-2xl" />
+          <HeroPhoto className="w-full" />
         </div>
         <span aria-hidden="true" className="absolute -bottom-6 left-0 h-3 w-1/3 bg-gold-400" />
       </section>
