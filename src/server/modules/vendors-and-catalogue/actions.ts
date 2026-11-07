@@ -20,6 +20,7 @@ import {
   text,
   type ActionState,
 } from '@/server/modules/shared/action-helpers'
+import { STARTER_ITEMS, startersFor } from '@/lib/starter-catalogue'
 import { buildHoursJson } from './hours'
 import { parseOptionGroups } from './options'
 
@@ -332,4 +333,81 @@ export async function archiveProductAction(fd: FormData): Promise<void> {
   await sb.rpc('product_archive', { p_product: id })
   revalidatePath('/vendor/catalogue')
   redirect('/vendor/catalogue')
+}
+
+// ---------------------------------------------------------------- add from the ready-made list
+const MAX_PICKS = 20
+const JPEG_URL = /^data:image\/jpeg;base64,([A-Za-z0-9+/]+={0,2})$/
+
+/**
+ * "Add from the list": the shop ticks ready-made items for its category. An item with a price becomes a product now (with the
+ * catalogue photo if the browser sent it); an item without a price is only remembered, so nothing without a real price is ever
+ * shown to customers. Only items from the shop's own category list are accepted.
+ */
+export async function addFromListAction(_p: ActionState, fd: FormData): Promise<ActionState> {
+  const g = await gate(asReq(VENDOR))
+  if ('state' in g) return g.state
+  const v = await vendorId(fd)
+  if (!v) return failed('Vendor not found.')
+  const slugs = [...new Set(fd.getAll('pick').map(String))]
+  if (slugs.length === 0) return failed('Tick at least one item.')
+  if (slugs.length > MAX_PICKS) return failed(`Add up to ${MAX_PICKS} items at a time.`)
+  const sb = await createSupabaseServerClient()
+  const { data: me } = await sb.rpc('my_vendor')
+  const mine = me as { id?: string; category_slug?: string | null } | null
+  if (!mine || mine.id !== v) return failed('Vendor not found.')
+  const allowed = new Map(startersFor(mine.category_slug).map((i) => [i.slug, i]))
+  let added = 0
+  const later: string[] = []
+  for (const slug of slugs) {
+    const item = allowed.get(slug)
+    if (!item || !STARTER_ITEMS.includes(item)) continue
+    const price = nairaToKobo(text(fd, `price:${slug}`, 20))
+    if (price === null || price < 1) {
+      later.push(slug)
+      continue
+    }
+    const { data, error } = await sb.rpc('product_upsert', {
+      p_vendor: v,
+      p_product: null,
+      p_name: item.name,
+      p_description: item.description,
+      p_price: price,
+      p_section: item.section,
+      p_available: true,
+      p_stock: null,
+      p_options: [],
+    })
+    if (error) return dbFailed(error, `Could not add ${item.name}.`)
+    added++
+    const m = JPEG_URL.exec(String(fd.get(`image:${slug}`) ?? ''))
+    const buf = m ? Buffer.from(m[1]!, 'base64') : null
+    if (buf && buf.length >= 500 && buf.length <= 350_000 && buf[0] === 0xff && buf[1] === 0xd8)
+      await sb.rpc('vendor_set_product_image', {
+        p_product: String(data),
+        p_jpeg: '\\x' + buf.toString('hex'),
+      })
+    await sb.rpc('vendor_picks_remove', { p_vendor: v, p_slug: slug })
+  }
+  if (later.length) await sb.rpc('vendor_picks_add', { p_vendor: v, p_slugs: later })
+  revalidatePath('/vendor/catalogue')
+  revalidatePath('/vendor/catalogue/quick-add')
+  revalidatePath('/products')
+  if (added === 0 && later.length === 0) return failed('Those items are not in your category list.')
+  const parts = []
+  if (added) parts.push(`${added} item${added === 1 ? '' : 's'} added to your menu`)
+  if (later.length)
+    parts.push(`${later.length} saved until you set a price (customers cannot see them yet)`)
+  return done(parts.join('; ') + '.')
+}
+
+export async function forgetPickAction(fd: FormData): Promise<void> {
+  const g = await gate(asReq(VENDOR))
+  if ('state' in g) return
+  const v = await vendorId(fd)
+  const slug = String(fd.get('slug') ?? '')
+  if (!v || !/^[a-z0-9-]{2,60}$/.test(slug)) return
+  const sb = await createSupabaseServerClient()
+  await sb.rpc('vendor_picks_remove', { p_vendor: v, p_slug: slug })
+  revalidatePath('/vendor/catalogue/quick-add')
 }

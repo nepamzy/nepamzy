@@ -181,7 +181,9 @@ describe('fix validation', () => {
         `select p.proname, pg_get_function_arguments(p.oid) a from pg_proc p join pg_namespace n on n.oid=p.pronamespace
           where n.nspname='public' and (p.proname ilike '%arriv%' or pg_get_function_arguments(p.oid) ilike '%arriv%')`,
       )
-      expect(all.rows).toEqual([])
+      // The one deliberate exception is the rider's own "I have arrived" tap: it takes only the assignment id (no position,
+      // no claim), records that the RIDER said so, and only opens the hand-over; it never completes the order.
+      expect(all.rows).toEqual([{ proname: 'rider_tap_arrived', a: 'p_assignment uuid' }])
     })
   })
 })

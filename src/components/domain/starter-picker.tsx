@@ -1,14 +1,20 @@
 'use client'
 import { useState } from 'react'
 import { artKind, productArtSvg } from '@/lib/art/scenes'
-import { STARTER_ITEMS, starterPhotoUrl, type StarterItem } from '@/lib/starter-catalogue'
-
-const SECTIONS = ['Mains', 'Soups and swallows', 'Sides', 'Snacks', 'Drinks'] as const
+import { sectionsOf, startersFor, starterPhotoUrl, type StarterItem } from '@/lib/starter-catalogue'
 
 /** "Start from a popular Nigerian dish or drink": picking one fills in the name, description, menu section and photo. All of it can be changed, and the price is always the owner's. */
-export function StarterPicker({ onPick }: { onPick: (item: StarterItem) => void }) {
+export function StarterPicker({
+  categorySlug,
+  onPick,
+}: {
+  categorySlug?: string | null
+  onPick: (item: StarterItem) => void
+}) {
   const [open, setOpen] = useState(false)
   const [picked, setPicked] = useState<string | null>(null)
+  const all = startersFor(categorySlug)
+  if (all.length === 0) return null
   return (
     <section
       aria-labelledby="starter-title"
@@ -20,8 +26,8 @@ export function StarterPicker({ onPick }: { onPick: (item: StarterItem) => void 
             Start from a popular item
           </h2>
           <p className="text-sm text-muted">
-            Pick a dish or drink to fill in the name, description and photo. You can change
-            everything and you set the price.
+            Pick an item to fill in the name, description and photo. You can change everything and
+            you set the price.
           </p>
         </div>
         <button
@@ -34,8 +40,8 @@ export function StarterPicker({ onPick }: { onPick: (item: StarterItem) => void 
         </button>
       </div>
       {open &&
-        SECTIONS.map((section) => {
-          const items = STARTER_ITEMS.filter((i) => i.section === section)
+        sectionsOf(all).map((section) => {
+          const items = all.filter((i) => i.section === section)
           if (!items.length) return null
           return (
             <div key={section} className="space-y-2">

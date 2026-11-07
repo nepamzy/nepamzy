@@ -3,7 +3,8 @@
  * public image route (which sends it as an image) and the pages (which draw it inline). Nothing here comes from user input
  * except the kind, which is picked from a fixed list, so it is safe to inline.
  */
-export type ArtKind = 'food' | 'drink' | 'print' | 'souvenir' | 'general'
+export type ArtKind =
+  'food' | 'drink' | 'print' | 'souvenir' | 'clothing' | 'gadget' | 'game' | 'general'
 
 const NAVY = 'rgb(11,42,92)'
 const BLUE = 'rgb(23,74,156)'
@@ -26,7 +27,27 @@ export function artKind(name: string, categorySlug?: string | null): ArtKind {
   )
     return 'food'
   if (/print|copy|binding|poster|photocopy|scan|laminat|document|stationery/.test(t)) return 'print'
-  if (/souvenir|gift|notebook|shirt|cap|mug|keyring|bag|hoodie|badge|branded/.test(t))
+  if (
+    /gadget|charger|power ?bank|earphone|headphone|speaker|flash ?drive|usb|mouse|laptop|phone|cable/.test(
+      t,
+    )
+  )
+    return 'gadget'
+  if (
+    /game|ludo|scrabble|chess|draught|whot|card|football|ball|table tennis|puzzle|console/.test(t)
+  )
+    return 'game'
+  if (
+    /clothing|clothes|shirt|polo|hoodie|jean|trouser|jogging|ankara|dress|skirt|sneaker|slipper|shoe|sandal|sock/.test(
+      t,
+    )
+  )
+    return 'clothing'
+  if (
+    /souvenir|gift|notebook|cap|mug|keyring|bag|badge|branded|lanyard|sticker|accessor|watch|sunglass|wallet|belt|necklace/.test(
+      t,
+    )
+  )
     return 'souvenir'
   return 'general'
 }
@@ -79,6 +100,30 @@ const SOUVENIR = `
 <g transform="rotate(10 290 200)"><rect x="244" y="156" width="92" height="82" rx="8" fill="${WHITE}"/><rect x="244" y="186" width="92" height="14" fill="${RED}"/><rect x="283" y="156" width="14" height="82" fill="${RED}"/>
 <path d="M290 156c-20-26-44-8-26 4zM290 156c20-26 44-8 26 4z" fill="${RED}"/></g>`
 
+const CLOTHING = `
+<ellipse cx="200" cy="262" rx="120" ry="12" fill="rgb(0,0,0)" opacity=".25"/>
+<path d="M146 70l-62 34 22 40 28-14v112h132V130l28 14 22-40-62-34c-6 18-22 28-54 28s-48-10-54-28z" fill="${WHITE}"/>
+<path d="M146 70c6 18 22 28 54 28s48-10 54-28" fill="none" stroke="${GOLD}" stroke-width="9" stroke-linecap="round"/>
+<path d="M106 144l28-14v22l-34 0z" fill="${GOLD}" opacity=".55"/>
+<g transform="translate(200 176)"><path d="m0-22 7 14 16 2-12 11 3 16-14-8-14 8 3-16-12-11 16-2z" fill="${NAVY}"/></g>`
+
+const GADGET = `
+<ellipse cx="200" cy="262" rx="120" ry="12" fill="rgb(0,0,0)" opacity=".25"/>
+<rect x="136" y="46" width="128" height="212" rx="22" fill="${NAVY}" stroke="${WHITE}" stroke-width="6"/>
+<rect x="148" y="70" width="104" height="164" rx="8" fill="${BLUE}"/>
+<circle cx="200" cy="58" r="4" fill="${WHITE}" opacity=".6"/>
+<path d="M214 110l-34 48h24l-8 40 38-54h-24z" fill="${GOLD}"/>
+<path d="M264 220c30 0 44 10 52 30" stroke="${WHITE}" stroke-width="6" stroke-linecap="round" fill="none" opacity=".8"/>
+<rect x="306" y="244" width="22" height="26" rx="5" fill="${WHITE}"/>`
+
+const GAME = `
+<ellipse cx="200" cy="262" rx="130" ry="12" fill="rgb(0,0,0)" opacity=".25"/>
+<g transform="rotate(-12 150 170)"><rect x="92" y="112" width="100" height="100" rx="18" fill="${WHITE}"/>
+<g fill="${NAVY}"><circle cx="120" cy="140" r="9"/><circle cx="164" cy="140" r="9"/><circle cx="142" cy="162" r="9"/><circle cx="120" cy="184" r="9"/><circle cx="164" cy="184" r="9"/></g></g>
+<g transform="rotate(14 270 150)"><rect x="228" y="100" width="88" height="88" rx="16" fill="${GOLD}"/>
+<g fill="${NAVY}"><circle cx="252" cy="124" r="9"/><circle cx="292" cy="164" r="9"/></g></g>
+<g transform="rotate(-6 250 232)"><rect x="196" y="204" width="96" height="44" rx="6" fill="${RED}"/><path d="M212 226h64" stroke="${WHITE}" stroke-width="6" stroke-linecap="round"/></g>`
+
 const GENERAL = `
 <ellipse cx="200" cy="262" rx="110" ry="12" fill="rgb(0,0,0)" opacity=".25"/>
 <g fill="none" stroke="${GOLD}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"><path d="M138 120h124l14 120H124z"/><path d="M170 120v-22a30 30 0 0 1 60 0v22"/></g>`
@@ -88,6 +133,9 @@ const BODY: Record<ArtKind, string> = {
   drink: DRINK,
   print: PRINT,
   souvenir: SOUVENIR,
+  clothing: CLOTHING,
+  gadget: GADGET,
+  game: GAME,
   general: GENERAL,
 }
 
@@ -102,6 +150,9 @@ const WINDOW: Record<ArtKind, string> = {
   drink: `<g><rect x="96" y="150" width="120" height="14" rx="4" fill="${NAVY}"/><path d="M110 112h28l-4 38h-20z" fill="${RED}"/><path d="M152 100h26l-4 50h-18z" fill="${GREEN}"/><path d="M190 120h24l-4 30h-16z" fill="${GOLD}"/></g>`,
   print: `<g><rect x="104" y="116" width="96" height="48" rx="8" fill="${GOLD}"/><rect x="118" y="100" width="62" height="24" fill="${WHITE}"/><path d="M126 108h46" stroke="${BLUE}" stroke-width="4" stroke-linecap="round"/><rect x="120" y="150" width="60" height="22" fill="${WHITE}"/></g>`,
   souvenir: `<g><rect x="100" y="120" width="52" height="44" rx="4" fill="${GOLD}"/><path d="m126 130 5 10 11 1-8 8 2 11-10-5-10 5 2-11-8-8 11-1z" fill="${NAVY}"/><rect x="164" y="132" width="44" height="32" rx="3" fill="${WHITE}"/><rect x="164" y="144" width="44" height="7" fill="${RED}"/></g>`,
+  clothing: `<g><path d="M118 114l-22 12 8 16 10-5v40h56v-40l10 5 8-16-22-12c-2 7-8 11-16 11s-14-4-16-11z" fill="${WHITE}"/></g>`,
+  gadget: `<g><rect x="124" y="100" width="40" height="66" rx="8" fill="${NAVY}" stroke="${WHITE}" stroke-width="3"/><path d="M148 116l-12 18h9l-3 14 14-20h-9z" fill="${GOLD}"/><rect x="176" y="136" width="34" height="30" rx="6" fill="${WHITE}"/></g>`,
+  game: `<g><rect x="108" y="124" width="42" height="42" rx="8" fill="${WHITE}"/><g fill="${NAVY}"><circle cx="120" cy="136" r="4"/><circle cx="138" cy="136" r="4"/><circle cx="129" cy="145" r="4"/><circle cx="120" cy="156" r="4"/><circle cx="138" cy="156" r="4"/></g><rect x="162" y="134" width="40" height="32" rx="4" fill="${RED}"/></g>`,
   general: `<g fill="none" stroke="${GOLD}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M122 120h66l8 48h-82z"/><path d="M140 120v-12a16 16 0 0 1 32 0v12"/></g>`,
 }
 

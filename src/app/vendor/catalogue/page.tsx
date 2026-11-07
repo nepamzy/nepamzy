@@ -31,9 +31,14 @@ export default async function Catalogue() {
         subtitle="Your menu as customers see it"
         actions={
           approved ? (
-            <ButtonLink href="/vendor/catalogue/new" variant="gold">
-              Add an item
-            </ButtonLink>
+            <div className="flex flex-wrap gap-2">
+              <ButtonLink href="/vendor/catalogue/quick-add" variant="gold">
+                Add from the list
+              </ButtonLink>
+              <ButtonLink href="/vendor/catalogue/new" variant="secondary">
+                Add my own item
+              </ButtonLink>
+            </div>
           ) : undefined
         }
       />
@@ -55,7 +60,7 @@ export default async function Catalogue() {
         {products.length === 0 ? (
           <EmptyState
             title="Your menu is empty"
-            action={<ButtonLink href="/vendor/catalogue/new">Add your first item</ButtonLink>}
+            action={<ButtonLink href="/vendor/catalogue/quick-add">Add from the list</ButtonLink>}
           >
             Customers can only see items you add here.
           </EmptyState>

@@ -2,14 +2,23 @@
  * Popular Nigerian dishes and drinks a shop owner can start from when adding an item: the name, a short description and a photo
  * are filled in and can be changed; the owner always sets the price. Photos live in public/catalogue/<slug>.jpg.
  */
+export type StarterCategory =
+  'food' | 'drinks' | 'printing' | 'souvenirs' | 'clothing' | 'accessories' | 'gadgets' | 'games'
+
 export type StarterItem = {
   slug: string
   name: string
   description: string
-  section: 'Mains' | 'Soups and swallows' | 'Snacks' | 'Sides' | 'Drinks'
+  /** the menu section the item is filed under in the shop */
+  section: string
+  /** left out for food (everything but Drinks) and drinks (the Drinks section) */
+  category?: StarterCategory
   /** true once public/catalogue/<slug>.jpg exists */
   photo?: true
 }
+
+export const categoryOf = (i: StarterItem): StarterCategory =>
+  i.category ?? (i.section === 'Drinks' ? 'drinks' : 'food')
 
 export const STARTER_ITEMS: StarterItem[] = [
   {
@@ -208,6 +217,110 @@ export const STARTER_ITEMS: StarterItem[] = [
     description: 'Freshly squeezed orange juice.',
     section: 'Drinks',
   },
+]
+
+const mk = (
+  category: StarterCategory,
+  section: string,
+  rows: [slug: string, name: string, description: string][],
+): StarterItem[] =>
+  rows.map(([slug, name, description]) => ({ slug, name, description, section, category }))
+
+STARTER_ITEMS.push(
+  ...mk('clothing', 'Tops', [
+    ['plain-tshirt', 'Plain T-shirt', 'Soft cotton T-shirt. Say which sizes you have.'],
+    ['polo-shirt', 'Polo shirt', 'Neat collared polo shirt.'],
+    ['hoodie', 'Hoodie', 'Warm pullover hoodie.'],
+    ['ankara-shirt', 'Ankara shirt', 'Colourful Ankara print shirt.'],
+  ]),
+  ...mk('clothing', 'Bottoms', [
+    ['jeans', 'Jeans', 'Denim jeans. Say which sizes you have.'],
+    ['jogging-pants', 'Jogging pants', 'Comfortable jogging pants.'],
+  ]),
+  ...mk('clothing', 'Shoes', [
+    ['canvas-sneakers', 'Canvas sneakers', 'Light canvas sneakers.'],
+    ['slippers', 'Slippers', 'Comfortable everyday slippers.'],
+  ]),
+  ...mk('accessories', 'Accessories', [
+    ['wrist-watch', 'Wrist watch', 'Simple everyday wrist watch.'],
+    ['sunglasses', 'Sunglasses', 'Sunglasses with UV protection.'],
+    ['backpack', 'Backpack', 'Roomy backpack for books and a laptop.'],
+    ['leather-belt', 'Belt', 'Strong belt in black or brown.'],
+    ['wallet', 'Wallet', 'Slim wallet with card slots.'],
+    ['necklace', 'Necklace', 'Light fashion necklace.'],
+  ]),
+  ...mk('gadgets', 'Gadgets', [
+    ['phone-charger', 'Phone charger', 'Fast charger with cable.'],
+    ['power-bank', 'Power bank', 'Portable battery for your phone.'],
+    ['earphones', 'Earphones', 'Wired earphones with a microphone.'],
+    ['bluetooth-speaker', 'Bluetooth speaker', 'Small wireless speaker.'],
+    ['flash-drive', 'Flash drive', 'USB flash drive for your files.'],
+    ['phone-case', 'Phone case', 'Protective case. Say which phone it fits.'],
+    ['laptop-sleeve', 'Laptop sleeve', 'Padded sleeve for a laptop.'],
+    ['computer-mouse', 'Computer mouse', 'Wireless mouse.'],
+  ]),
+  ...mk('games', 'Games', [
+    ['ludo-board', 'Ludo board', 'Ludo board with pieces and dice.'],
+    ['scrabble', 'Scrabble', 'Word board game.'],
+    ['playing-cards', 'Playing cards', 'Standard deck of playing cards.'],
+    ['whot-cards', 'Whot cards', 'A pack of Whot cards.'],
+    ['chess-set', 'Chess set', 'Chess board with pieces.'],
+    ['draughts', 'Draughts', 'Draughts board with pieces.'],
+    ['football', 'Football', 'Size 5 football.'],
+    ['table-tennis-set', 'Table tennis set', 'Two bats and balls.'],
+  ]),
+  ...mk('printing', 'Printing', [
+    [
+      'black-white-print',
+      'Black and white printing (per page)',
+      'Clear black and white print on A4.',
+    ],
+    ['colour-print', 'Colour printing (per page)', 'Full colour print on A4.'],
+    ['photocopy', 'Photocopy (per page)', 'Photocopy on A4.'],
+    ['scanning', 'Scanning (per page)', 'Scan to PDF and send to your e-mail.'],
+    ['spiral-binding', 'Spiral binding', 'Spiral binding for notes and reports.'],
+    ['project-binding', 'Project binding', 'Hard cover binding for your project.'],
+    ['lamination', 'Lamination', 'Lamination of one A4 page.'],
+    ['passport-photos', 'Passport photographs', 'A set of passport photographs.'],
+  ]),
+  ...mk('printing', 'Stationery', [
+    ['notebook', 'Notebook', 'Ruled notebook.'],
+    ['biro-pen-pack', 'Pens (pack)', 'A pack of ballpoint pens.'],
+    ['a4-paper-ream', 'A4 paper (ream)', 'A ream of A4 paper.'],
+  ]),
+  ...mk('souvenirs', 'Souvenirs', [
+    ['campus-keyring', 'Campus keyring', 'Keyring to remember your campus.'],
+    ['souvenir-mug', 'Souvenir mug', 'Ceramic mug.'],
+    ['souvenir-tshirt', 'Souvenir T-shirt', 'T-shirt printed for the campus.'],
+    ['souvenir-cap', 'Souvenir cap', 'Cap printed for the campus.'],
+    ['lanyard', 'Lanyard', 'Neck strap for your ID card.'],
+    ['sticker-pack', 'Sticker pack', 'A pack of stickers.'],
+  ]),
+)
+
+/** Category names an administrator may have typed slightly differently (for example a spelling slip) map to the right list. */
+const ALIASES: Record<string, StarterCategory> = {
+  acccessories: 'accessories',
+  accessory: 'accessories',
+  souvenir: 'souvenirs',
+  game: 'games',
+  gadget: 'gadgets',
+  print: 'printing',
+  stationery: 'printing',
+}
+
+/** The ready-made items for a shop category. Food and drinks shops see both lists; a category we have no list for gets none (the shop adds its own). */
+export function startersFor(categorySlug: string | null | undefined): StarterItem[] {
+  const raw = (categorySlug ?? '').toLowerCase()
+  const slug = ALIASES[raw] ?? raw
+  const wanted: StarterCategory[] =
+    slug === 'food' || slug === 'drinks' ? ['food', 'drinks'] : [slug as StarterCategory]
+  return STARTER_ITEMS.filter((i) => wanted.includes(categoryOf(i)))
+}
+
+/** The menu sections in the order they first appear. */
+export const sectionsOf = (items: StarterItem[]): string[] => [
+  ...new Set(items.map((i) => i.section)),
 ]
 
 export const starterPhotoUrl = (i: StarterItem) => `/catalogue/${i.slug}.jpg`
