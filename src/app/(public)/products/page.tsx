@@ -40,6 +40,10 @@ export default async function Products({
     return `/products${s ? `?${s}` : ''}`
   }
   const hasNext = (rows?.length ?? 0) > PAGE_SIZE
+  // only a few categories show at first; the one being used always does, the rest sit behind "See all categories"
+  const VISIBLE = 5
+  const shown = cats.filter((c, i) => i < VISIBLE || c.slug === f.category)
+  const rest = cats.filter((c) => !shown.includes(c))
   const chip = (active: boolean) =>
     cn(
       'touch-target inline-flex items-center rounded-full border px-4 text-sm font-bold',
@@ -47,6 +51,17 @@ export default async function Products({
         ? 'border-navy-900 bg-navy-900 text-white'
         : 'border-line-strong bg-card text-navy-900 hover:bg-brand-50',
     )
+  const catChip = (c: (typeof cats)[number]) => (
+    <Link
+      key={c.id}
+      href={href({ category: c.slug })}
+      className={chip(f.category === c.slug)}
+      aria-current={f.category === c.slug ? 'true' : undefined}
+    >
+      <Icon name={categoryIcon(c.slug)} size={16} className="mr-1.5" />
+      {c.name}
+    </Link>
+  )
   return (
     <>
       <PageHeader
@@ -54,25 +69,26 @@ export default async function Products({
         subtitle="Everything from approved campus shops"
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Items' }]}
       />
-      <nav aria-label="Categories" className="mb-4 flex flex-wrap gap-2">
-        <Link
-          href={href({ category: undefined, page: undefined })}
-          className={chip(!f.category)}
-          aria-current={!f.category ? 'true' : undefined}
-        >
-          All
-        </Link>
-        {cats.map((c) => (
+      <nav aria-label="Categories" className="mb-4" data-testid="category-chips">
+        <div className="flex flex-wrap gap-2">
           <Link
-            key={c.id}
-            href={href({ category: c.slug })}
-            className={chip(f.category === c.slug)}
-            aria-current={f.category === c.slug ? 'true' : undefined}
+            href={href({ category: undefined, page: undefined })}
+            className={chip(!f.category)}
+            aria-current={!f.category ? 'true' : undefined}
           >
-            <Icon name={categoryIcon(c.slug)} size={16} className="mr-1.5" />
-            {c.name}
+            All
           </Link>
-        ))}
+          {shown.map(catChip)}
+        </div>
+        {rest.length > 0 && (
+          <details className="group mt-2">
+            <summary className="touch-target inline-flex cursor-pointer list-none items-center gap-1 rounded-full border border-line-strong bg-card px-4 text-sm font-bold text-brand-700 hover:bg-brand-50 [&::-webkit-details-marker]:hidden">
+              <span className="group-open:hidden">See all categories ({cats.length})</span>
+              <span className="hidden group-open:inline">Show fewer categories</span>
+            </summary>
+            <div className="mt-2 flex flex-wrap gap-2">{rest.map(catChip)}</div>
+          </details>
+        )}
       </nav>
       <ShopFilters action="/products" filters={f} categories={cats} />
       {!allowed ? (

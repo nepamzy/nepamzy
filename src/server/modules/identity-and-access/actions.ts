@@ -274,7 +274,11 @@ export async function signInAction(_prev: FormState, formData: FormData): Promis
       }
     }
     await recordSecurityEvent(null, 'auth.login_failed', { email_hash: emailKey.slice(0, 16) })
-    return { error: 'Email or password is incorrect.', email }
+    return {
+      error:
+        'Email or password is incorrect. Check for a capital letter or a space, or use "Forgot your password?" below.',
+      email,
+    }
   }
   notifySignIn(email, (await headers()).get('user-agent'))
   return finishSignIn(next, data.user.user_metadata?.intended_role)

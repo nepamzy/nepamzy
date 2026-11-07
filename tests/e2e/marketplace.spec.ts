@@ -254,7 +254,8 @@ test('browse, search and filter; cart rules (one vendor at a time, quantities, r
     await p.goto(`/vendors?q=${q}`)
     await expect(p.getByText('No matches')).toBeVisible()
   }
-  await p.goto('/vendors?q=jollof')
+  // (other tests add their own jollof dishes, so search for the full name)
+  await p.goto('/vendors?q=Jollof%20rice%20and%20chicken')
   await expect(p.getByRole('heading', { name: 'Matching items' })).toBeVisible()
   await expect(p.getByRole('link', { name: 'Jollof rice and chicken' })).toBeVisible()
   await p.goto('/vendors/sample-kitchen')

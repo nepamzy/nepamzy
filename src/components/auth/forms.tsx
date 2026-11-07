@@ -62,6 +62,9 @@ export function SignInForm({ next, staff = false }: { next: string; staff?: bool
         type="email"
         autoComplete="email"
         inputMode="email"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         required
         defaultValue={state.email ?? ''}
       />
@@ -70,6 +73,9 @@ export function SignInForm({ next, staff = false }: { next: string; staff?: bool
         name="password"
         type="password"
         autoComplete="current-password"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
         required
       />
       <Button type="submit" variant="gold" disabled={pending} className="w-full">

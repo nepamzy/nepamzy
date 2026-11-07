@@ -165,12 +165,12 @@ export default async function Home() {
           id="cats"
           actions={
             <Link href="/products" className="font-bold text-brand-700 hover:underline">
-              All items →
+              View all →
             </Link>
           }
         >
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {cats.map((c) => (
+            {cats.slice(0, 5).map((c) => (
               <li key={c.id}>
                 <Link
                   href={`/products?category=${c.slug}`}

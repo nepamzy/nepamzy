@@ -64,3 +64,34 @@ test('the landing page: illustrated people, interactive tabs and order walk-thro
   await a11yClean(page, '/contact')
   expect(errors, errors.join('\n')).toEqual([])
 })
+
+test('the home page shows only five categories, and the items page tucks the rest behind "See all categories"', async ({
+  page,
+}) => {
+  await page.goto('/')
+  const section = page
+    .getByRole('heading', { name: 'Shop by category' })
+    .locator('xpath=ancestor::section[1]')
+  await expect(section.locator('li')).toHaveCount(5)
+  await expect(section.getByRole('link', { name: /View all/ })).toBeVisible()
+
+  await page.goto('/products')
+  const chips = page.getByTestId('category-chips')
+  // "All" plus five categories are visible; the others are inside the closed disclosure
+  await expect(chips.locator(':scope > div > a')).toHaveCount(6)
+  const more = chips.getByText(/See all categories/)
+  await expect(more).toBeVisible()
+  await expect(chips.locator('details a').first()).toBeHidden()
+  await more.click()
+  await expect(chips.locator('details a').first()).toBeVisible()
+
+  // using a category that was tucked away keeps it visible
+  const hidden = chips.locator('details a').first()
+  const slug = new URL((await hidden.getAttribute('href'))!, 'http://x').searchParams.get(
+    'category',
+  )
+  await page.goto(`/products?category=${slug}`)
+  await expect(
+    page.getByTestId('category-chips').locator(':scope > div > a[aria-current="true"]'),
+  ).toHaveCount(1)
+})
