@@ -1,0 +1,80 @@
+label,latitude,longitude,kind,confidence,source,notes
+AETD Hangar,10.608951,7.442875,other,medium,OSM (Overpass),amenity university
+AED Hangar,10.608945,7.442878,other,medium,OSM (Overpass),hangar
+AFIT COMPUTER BUSINESS CENTRE,10.610029,7.440993,shop,medium,OSM (Overpass),"printing and photocopying; a second copy 'COMPUTER BUSINESS CENTRE' 10.610033,7.441017"
+WORKSHOP TECHNOLOGY SECTION (MACHINE TOOLS WORKSHOP),10.608999,7.441506,department,medium,OSM (Overpass),"also 10.608972,7.440663"
+METALLURGICAL AND MATERIALS ENGINEERING WORKSHOP,10.609036,7.440260,department,medium,OSM (Overpass),"copy at 10.609040,7.440254"
+FOUNDRY WORKSHOP,10.609495,7.440476,department,medium,OSM (Overpass),
+Lecture room 191,10.609438,7.441063,department,medium,OSM (Overpass),
+Lecture room 192,10.609445,7.441168,department,medium,OSM (Overpass),
+Lecture room 193,10.609453,7.441259,department,medium,OSM (Overpass),
+Lecture room 194,10.609459,7.441353,department,medium,OSM (Overpass),
+Block Of Classrooms,10.609484,7.441202,department,medium,OSM (Overpass),
+Mechanical Lecture Room,10.612096,7.441914,department,medium,OSM (Overpass),
+GENERAL STUDIES UNIT,10.609137,7.442388,department,medium,OSM (Overpass),"copy 10.609138,7.442372"
+AFIT CLINIC,10.612907,7.446148,clinic,medium,OSM (Overpass),"copy 10.612908,7.446105"
+AFIT Girls Hostel,10.613417,7.447447,hostel,medium,OSM (Overpass),
+NAFIL Girls Hostel,10.613138,7.448173,hostel,medium,OSM (Overpass),
+NAFIL GIRLS HOSTEL,10.606705,7.443944,hostel,medium,OSM (Overpass),"second NAFIL hostel, different place from 'NAFIL Girls Hostel' (about 800 m south)"
+TETFUND PHASE 1 GIRLS HOSTEL (a),10.607485,7.444403,hostel,medium,OSM (Overpass),two buildings with this name
+TETFUND PHASE 1 GIRLS HOSTEL (b),10.607430,7.444796,hostel,medium,OSM (Overpass),two buildings with this name
+TETFUND PHASE 2 GIRLS HOSTEL (a),10.607958,7.444263,hostel,medium,OSM (Overpass),two buildings with this name
+TETFUND PHASE 2 GIRLS HOSTEL (b),10.607938,7.444523,hostel,medium,OSM (Overpass),two buildings with this name
+36 BY ONE HOSTEL,10.617499,7.442744,hostel,low,OSM (Overpass),about 800 m north of the campus centre: probably outside the campus
+AFIT Stadium,10.613781,7.449652,sports,medium,OSM (Overpass),"another point 'AFIT STADIUM' 10.614437,7.450129 (about 80 m away)"
+SPORT COMPLEX,10.611334,7.448190,sports,medium,OSM (Overpass),pitch
+Statictics Department,10.609315,7.444758,department,medium,OSM (Overpass),spelling as on the map
+Economics,10.609734,7.445134,department,medium,OSM (Overpass),
+LR 301 and LR 302,10.612569,7.442542,department,medium,OSM (Overpass),"copy 10.612597,7.442629"
+BURSARY DEPARTMENT,10.607808,7.441539,office,medium,OSM (Overpass),
+Post Graduate School,10.610540,7.439717,department,medium,OSM (Overpass),
+Post Graduate Building,10.610768,7.439705,department,medium,OSM (Overpass),
+Licensing School,10.610944,7.439698,department,medium,OSM (Overpass),
+Mosugu Hall,10.608848,7.444228,other,medium,OSM (Overpass),events venue
+Ibrahim Alfa Auditorium,10.608983,7.443903,other,medium,OSM (Overpass),events venue
+Business Administration Department - NBTE,10.610816,7.443396,department,medium,OSM (Overpass),"another copy 'Business Administration Department' 10.609680,7.444951"
+Purchasing And Supply Chain Management Department- NBTE,10.610683,7.443482,department,medium,OSM (Overpass),
+Technology Education Department,10.612192,7.441978,department,medium,OSM (Overpass),"also 'Faculty of Technology Education' 10.612143,7.441921"
+Aersopace Engineering Department,10.611836,7.441133,department,medium,OSM (Overpass),spelling as on the map
+Automotive Engineering Department,10.611797,7.440912,department,medium,OSM (Overpass),
+Faculty of Air Engineering (FAE),10.611801,7.441015,faculty,medium,OSM (Overpass),
+FOS - New LR 1,10.609820,7.444553,department,medium,OSM (Overpass),Faculty of Science lecture room
+FOS - New LR 2,10.609655,7.444310,department,medium,OSM (Overpass),
+FOS - LR 1,10.609381,7.444727,department,medium,OSM (Overpass),
+FOS - LR 2,10.609204,7.444537,department,medium,OSM (Overpass),
+FOS - LR 3,10.609317,7.444513,department,medium,OSM (Overpass),
+FOS - LR 4,10.609433,7.444636,department,medium,OSM (Overpass),
+Faculty of Science Lecture Rooms,10.609714,7.444423,department,medium,OSM (Overpass),
+Faculty of Science Laboratories,10.612090,7.446424,department,medium,OSM (Overpass),
+Mathematics Department,10.609163,7.444673,department,medium,OSM (Overpass),
+Computer Science Department,10.610347,7.445862,department,medium,OSM (Overpass),
+Faculty of Computing,10.610421,7.445939,faculty,medium,OSM (Overpass),
+Cyber Security Department,10.610476,7.446026,department,medium,OSM (Overpass),
+Chemistry Department,10.609387,7.444589,department,medium,OSM (Overpass),
+Physics with Elect Department,10.609179,7.444610,department,medium,OSM (Overpass),
+Physics Department,10.609229,7.444774,department,medium,OSM (Overpass),
+Accounting Department,10.609571,7.445203,department,medium,OSM (Overpass),
+International Relations Department,10.609559,7.444965,department,medium,OSM (Overpass),
+BioTechnology Department / Faculty of Science,10.612046,7.442606,department,medium,OSM (Overpass),
+Mechanical Engineering Department / Met & Mat Engineering Department,10.613178,7.441850,department,medium,OSM (Overpass),
+Center fo Entrepreneurship Development,10.613196,7.443271,other,medium,OSM (Overpass),spelling as on the map
+108 CBT HUB,10.612889,7.443285,other,medium,OSM (Overpass),
+800 ICT HUB,10.613637,7.443891,other,medium,OSM (Overpass),
+560 ICT HUB,10.613663,7.443389,other,medium,OSM (Overpass),
+Professorial and Senior Lecturer Offices,10.611115,7.442418,office,medium,OSM (Overpass),
+TetFund Career Service Centre Intervention,10.609814,7.441466,office,medium,OSM (Overpass),
+STUDENT AFFARIS DIVISION,10.609447,7.440868,office,medium,OSM (Overpass),spelling as on the map
+ACADEMIC BRANCH,10.608635,7.440707,office,medium,OSM (Overpass),
+Marshal Alex Barde Research Centre,10.610713,7.442566,office,medium,OSM (Overpass),
+Content Creation Centre,10.610744,7.442884,office,medium,OSM (Overpass),
+AFIT HEADQUARTERS (TEMP),10.613060,7.442543,office,medium,OSM (Overpass),"temporary headquarters, near 'HEADQUATERS' alternative"
+AIR ENGINEERING LIBRARY,10.610135,7.441458,library,medium,OSM (Overpass),"also 'FACULTY OF AIR ENGINEERING LIBRARY' 10.610129,7.441454"
+AFIT Day Care,10.608001,7.443524,other,medium,OSM (Overpass),
+AFIT Car Wash,10.609748,7.439784,shop,medium,OSM (Overpass),
+CEED / Telcom - FGCE,10.612595,7.442534,department,medium,OSM (Overpass),
+HQ Carport 1,10.607743,7.441318,other,medium,OSM (Overpass),parking
+HQ Carport 2,10.607845,7.441416,other,medium,OSM (Overpass),parking
+SPGS Carport 1,10.610168,7.439681,other,medium,OSM (Overpass),parking
+SPGS Carport 2,10.610165,7.439732,other,medium,OSM (Overpass),parking
+Academic Branch Carport 1,10.608301,7.440609,other,medium,OSM (Overpass),parking
+Hall C,10.611922,7.439954,department,medium,OSM (Overpass),likely part of the AED lecture rooms

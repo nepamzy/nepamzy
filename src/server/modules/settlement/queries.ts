@@ -19,7 +19,17 @@ export type VendorSettlement = {
     estimated_commission_kobo: number
     note: string
   }
-  payout: { status: string; note: string }
+  payout: {
+    status: string
+    note: string
+    hold_hours?: number
+    scheduled_orders?: number
+    held_orders?: number
+    failed_orders?: number
+    paid_orders?: number
+    paid_kobo?: number
+    next_at?: string | null
+  }
   recent: {
     order_id: string
     order_number: string
@@ -31,6 +41,8 @@ export type VendorSettlement = {
     commission_reversed_kobo: number
     payable_kobo: number
     delivery_fee_kobo: number
+    payout_status?: string | null
+    payout_at?: string | null
   }[]
 }
 

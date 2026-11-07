@@ -23,6 +23,7 @@ import {
 import { STARTER_ITEMS, startersFor } from '@/lib/starter-catalogue'
 import { buildHoursJson } from './hours'
 import { parseOptionGroups } from './options'
+import { parseVendorChoices } from './vendor-choices'
 
 const uuid = z.uuid()
 const VENDOR = { roles: ['vendor_owner', 'vendor_staff'] as const, aal: 'aal2' as const }
@@ -38,16 +39,21 @@ export async function submitApplicationAction(_p: ActionState, fd: FormData): Pr
   if ('state' in g) return g.state
   if (!(await rateLimit(`apply:${g.who.userId}`, 86400, 5)))
     return failed('Too many applications today. Please try again tomorrow.')
-  const category = text(fd, 'category', 40)
-  if (!uuid.safeParse(category).success) return failed('Choose a category.')
+  const { listCategories } = await import('./public')
+  const choices = parseVendorChoices(fd, await listCategories())
+  if (!choices.ok) return failed(choices.error)
   const sb = await createSupabaseServerClient()
   const { error } = await sb.rpc('submit_vendor_application', {
     p_business_name: text(fd, 'businessName', 80),
     p_phone: text(fd, 'phone', 20),
-    p_category: category,
+    p_category: choices.main,
     p_description: text(fd, 'description', 500),
     p_pickup: text(fd, 'pickup', 200),
     p_accept: fd.get('accept') === 'on',
+    p_extra_categories: choices.extras,
+    p_other_category: choices.other,
+    p_vendor_type: choices.type,
+    p_shop_place: choices.place,
   })
   if (error)
     return dbFailed(
@@ -410,4 +416,35 @@ export async function forgetPickAction(fd: FormData): Promise<void> {
   const sb = await createSupabaseServerClient()
   await sb.rpc('vendor_picks_remove', { p_vendor: v, p_slug: slug })
   revalidatePath('/vendor/catalogue/quick-add')
+}
+
+// ---------------------------------------------------------------- what the shop sells (owner)
+export async function saveShopCategoriesAction(
+  _p: ActionState,
+  fd: FormData,
+): Promise<ActionState> {
+  const g = await gate({ roles: ['vendor_owner'], aal: 'aal2' })
+  if ('state' in g) return g.state
+  const v = await vendorId(fd)
+  const main = String(fd.get('main') ?? '')
+  if (!v || !uuid.safeParse(main).success) return failed('Choose a main category.')
+  const extra = [...new Set(fd.getAll('extra').map(String))].filter(
+    (x) => uuid.safeParse(x).success && x !== main,
+  )
+  if (extra.length > 8) return failed('Choose up to 9 categories in all.')
+  const other = text(fd, 'otherCategory', 60)
+  if (other !== '' && other.length < 3)
+    return failed('Say what else you sell in at least 3 letters.')
+  const sb = await createSupabaseServerClient()
+  const { error } = await sb.rpc('vendor_set_categories', {
+    p_vendor: v,
+    p_main: main,
+    p_extra: extra,
+    p_other: other || null,
+  })
+  if (error) return dbFailed(error, 'We could not save the categories.')
+  revalidatePath('/vendor/profile')
+  revalidatePath('/vendor/catalogue/quick-add')
+  revalidatePath('/vendors')
+  return done('Categories saved.')
 }

@@ -21,7 +21,7 @@ export default async function Applications({
     sb
       .from('vendor_applications')
       .select(
-        'id, business_name, contact_phone, description, pickup_location_text, status, decision_reason, created_at, category_id',
+        'id, business_name, contact_phone, description, pickup_location_text, status, decision_reason, created_at, category_id, extra_category_ids, other_category, vendor_type, shop_place',
       )
       .order('created_at', { ascending: false })
       .limit(50),
@@ -37,6 +37,7 @@ export default async function Applications({
   const rows = (data ?? []).map((r) => ({
     ...r,
     category: catName.get(r.category_id) ?? 'Unknown category',
+    alsoSells: ((r.extra_category_ids ?? []) as string[]).map((id) => catName.get(id) ?? 'Unknown'),
   }))
   const pending = rows.filter((r) => r.status === 'pending')
   const decided = rows.filter((r) => r.status !== 'pending')
@@ -84,6 +85,25 @@ export default async function Applications({
                 <p className="text-sm">
                   <strong>Pickup:</strong> {a.pickup_location_text}
                 </p>
+                <p className="text-sm" data-testid="application-who">
+                  <strong>Who:</strong>{' '}
+                  {a.vendor_type === 'student'
+                    ? 'AFIT student'
+                    : a.vendor_type === 'afit_shop'
+                      ? 'Shop already verified by AFIT (check it before approving)'
+                      : a.vendor_type === 'other'
+                        ? 'Other'
+                        : 'Not said'}
+                  {a.shop_place ? ` · shop on campus: ${a.shop_place}` : ''}
+                </p>
+                {(a.alsoSells.length > 0 || a.other_category) && (
+                  <p className="text-sm">
+                    <strong>Also sells:</strong>{' '}
+                    {[...a.alsoSells, a.other_category ? `Other: ${a.other_category}` : null]
+                      .filter(Boolean)
+                      .join(', ')}
+                  </p>
+                )}
                 <form action={decideApplicationAction} className="space-y-3">
                   <input type="hidden" name="applicationId" value={a.id} />
                   <Input label="Reason (required to reject)" name="reason" maxLength={500} />

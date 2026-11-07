@@ -14,6 +14,15 @@ export default function Payments() {
         </p>
       </section>
       <section>
+        <h2>When the shop is paid</h2>
+        <p>
+          Your payment is held safely. The shop is paid automatically 24 hours after your order is
+          completed. During those 24 hours you can report a problem from your order page and ask for
+          your money back. A complaint that is still open holds the shop&apos;s payment until it is
+          settled.
+        </p>
+      </section>
+      <section>
         <h2>Test mode</h2>
         <p>
           While AFIT Market is a pre-launch preview, payments run in test mode. No real money moves

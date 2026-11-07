@@ -365,13 +365,19 @@ const ALIASES: Record<string, StarterCategory> = {
   stationery: 'printing',
 }
 
-/** The ready-made items for a shop category. Food and drinks shops see both lists; a category we have no list for gets none (the shop adds its own). */
-export function startersFor(categorySlug: string | null | undefined): StarterItem[] {
-  const raw = (categorySlug ?? '').toLowerCase()
-  const slug = ALIASES[raw] ?? raw
-  const wanted: StarterCategory[] =
-    slug === 'food' || slug === 'drinks' ? ['food', 'drinks'] : [slug as StarterCategory]
-  return STARTER_ITEMS.filter((i) => wanted.includes(categoryOf(i)))
+/** The ready-made items for a shop's categories (one or several). Food and drinks shops see both lists; a category we have no list for adds nothing (the shop adds its own). */
+export function startersFor(categorySlugs: string | string[] | null | undefined): StarterItem[] {
+  const list = Array.isArray(categorySlugs) ? categorySlugs : [categorySlugs]
+  const wanted = new Set<StarterCategory>()
+  for (const raw of list) {
+    const lower = (raw ?? '').toLowerCase()
+    const slug = ALIASES[lower] ?? lower
+    if (slug === 'food' || slug === 'drinks') {
+      wanted.add('food')
+      wanted.add('drinks')
+    } else wanted.add(slug as StarterCategory)
+  }
+  return STARTER_ITEMS.filter((i) => wanted.has(categoryOf(i)))
 }
 
 /** The menu sections in the order they first appear. */

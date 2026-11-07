@@ -36,7 +36,7 @@ test('the public pages never mention the administrator, and sign-up offers custo
   await expect(group.getByRole('radio', { name: /Rider/ })).not.toBeChecked()
 })
 
-test('a vendor must pick what the shop sells before signing up goes on, the list has the shop categories, and the choice is waiting on the application', async ({
+test('a vendor says who they are and what the shop sells (one or more categories, or their own words) before signing up goes on', async ({
   page,
 }) => {
   await page.goto('/signup')
@@ -44,11 +44,12 @@ test('a vendor must pick what the shop sells before signing up goes on, the list
     .getByRole('group', { name: 'I want to use AFIT Market as a' })
     .getByRole('radio', { name: /Vendor/ })
     .check()
-  const select = page.getByLabel('What will your shop sell? (required)')
-  await expect(select).toBeVisible()
-  // nothing chosen: Next is not available
-  await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
-  const labels = await select.locator('option').allTextContents()
+  const choices = page.getByTestId('vendor-choices')
+  await expect(choices).toBeVisible()
+  const next = page.getByRole('button', { name: 'Next' })
+  await expect(next).toBeDisabled()
+  // the category list has the shop categories and no spelling slip
+  const labels = await choices.locator('fieldset').nth(1).locator('li').allTextContents()
   for (const wanted of [
     'Food',
     'Drinks',
@@ -57,17 +58,37 @@ test('a vendor must pick what the shop sells before signing up goes on, the list
     'Gadgets',
     'Games',
     'Books and textbooks',
+    'Other',
   ])
-    expect(labels).toContain(wanted)
+    expect(labels.map((l) => l.trim())).toContain(wanted)
   expect(labels.join('|')).not.toMatch(/acccessories/i)
-  await select.selectOption({ label: 'Clothing' })
-  await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
+  // a type alone is not enough, nor are categories alone
+  await choices.getByRole('radio', { name: /^Other/ }).check()
+  await expect(next).toBeDisabled()
+  await choices.getByLabel('Clothing', { exact: true }).check()
+  await choices.getByLabel('Gadgets', { exact: true }).check()
+  await expect(next).toBeEnabled()
+  // "Other" needs the vendor's own words
+  await choices.getByLabel('Other', { exact: true }).check()
+  await expect(next).toBeDisabled()
+  await choices.getByLabel('What else will you sell?').fill('Handmade bead jewellery')
+  await expect(next).toBeEnabled()
+  // a shop AFIT already knows says where it is
+  await choices.getByRole('radio', { name: /^Shop already verified by AFIT/ }).check()
+  await expect(next).toBeDisabled()
+  await choices.getByLabel('Where is your shop on campus?').fill('Beside the main gate')
+  await expect(next).toBeEnabled()
+  // a student gives a matric number
+  await choices.getByRole('radio', { name: /^AFIT student/ }).check()
+  await expect(next).toBeDisabled()
+  await page.getByLabel('Matric number').fill('AFIT/2026/0123')
+  await expect(next).toBeEnabled()
   // customers and riders are not asked
   await page
     .getByRole('group', { name: 'I want to use AFIT Market as a' })
     .getByRole('radio', { name: /Customer/ })
     .check()
-  await expect(select).toHaveCount(0)
+  await expect(choices).toHaveCount(0)
 })
 
 test('the first sign-up step has a Back button that returns to the home page', async ({ page }) => {
@@ -122,6 +143,8 @@ test('signing up as a vendor or rider records the choice; a customer sign-up rec
         .eq('slug', 'food')
         .single()
       expect(found.user?.user_metadata?.intended_category).toBe(food!.id)
+      expect(found.user?.user_metadata?.intended_categories).toEqual([food!.id])
+      expect(found.user?.user_metadata?.vendor_type).toBe('other')
     } else expect(found.user?.user_metadata?.intended_category).toBeUndefined()
     // the choice grants nothing: no role beyond the customer role exists for this account
     const { data: roles } = await admin().from('role_assignments').select('role').eq('user_id', id)
@@ -357,9 +380,11 @@ test('military, lecturer and other customers need no ID card, vendors and riders
   await page.goto('/signup')
   await page.getByRole('radio', { name: /Vendor/ }).check()
   await expect(page.getByRole('radio', { name: 'Student', exact: true })).toHaveCount(0)
-  // ... but must first say what the shop sells
+  // ... but must first say who they are and what the shop sells
   await expect(page.getByRole('button', { name: 'Next' })).toBeDisabled()
-  await page.getByLabel('What will your shop sell? (required)').selectOption({ label: 'Food' })
+  const choices = page.getByTestId('vendor-choices')
+  await choices.getByRole('radio', { name: /^Other/ }).check()
+  await choices.getByLabel('Food', { exact: true }).check()
   await expect(page.getByRole('button', { name: 'Next' })).toBeEnabled()
   await context.close()
 })

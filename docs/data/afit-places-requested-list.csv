@@ -1,0 +1,22 @@
+label,latitude,longitude,kind,confidence,source,notes
+AED lecture Room,10.611687,7.440104,department,medium,OSM (Overpass),"OSM name 'AED lecture Room (Hall A, Hall B2. Hall B3, Hall C2, Hall C3)'; centre of building. Also 'AED - Hall A, Hall B' 10.611576,7.440034 and 'AED BUILDING' 10.610862,7.441387 (about 100 m away) - unsure which one students mean"
+AFIT Armament Engineering Department,10.611197,7.443496,department,medium,OSM (Overpass),"centre of building. Other OSM copies: 10.611214,7.443379 and 'Armament Engineering Department - NBTE' 10.611658,7.443378 (about 50 m apart)"
+AFIT Electrical Electronics Department,10.610539,7.440575,department,medium,OSM (Overpass),"exact OSM name; centre of building. Other copies: 'Electrical Electronics Department' 10.610809,7.440548 and 'Electrical Electrionics Engineering Department EEED - NUC' 10.612821,7.441904 (about 250 m away)"
+Air Force Research And Development Centre (AFRDC),10.610696,7.442885,other,medium,OSM (Overpass),centre of building
+ALPHA HALL,,,hostel,not found,OSM (Overpass),No name containing Alpha in 148 named OSM items; not on Google Maps search either. Not guessed
+AMAO HALL,10.609812,7.440214,hostel,medium,OSM (Overpass),"OSM name 'AMAO hall'; second copy 10.609800,7.440208. Centre of building; may be a lecture hall, not a hostel - check kind"
+BUKA POT(amal feli feli),,,canteen,not found,OSM (Overpass),No OSM item; not guessed
+BUSH CANTEEN,10.610515,7.444629,canteen,medium,OSM (Overpass),centre of building
+Civil and Environmental Engineering Department (CEED),10.609974,7.443343,department,medium,OSM (Overpass),"OSM 'CEED - MILITARY' (second copy 10.609939,7.443371). A different copy 'CEED - NBTE' is at 10.612665,7.441893, about 330 m away; 'CEED / Telcom - FGCE' 10.612595,7.442534. Unsure which is the main student building. Centre of building"
+FACULTY OF SCIENCE and COMPUTING (FOC),10.609302,7.444644,faculty,unsure,OSM (Overpass),"Best match: OSM 'Faculty of Science'; 'FOC Parking Aisle' is right next to it. 'Faculty of Computing' is a separate OSM item at 10.610421,7.445939 (see extras). Centre of building"
+Faculty of social and management science,10.609640,7.445072,faculty,unsure,OSM (Overpass),"OSM '- NUC' copy next to FSMS parking aisles. Other copy 'Faculty of Social and Management Science - NBTE' 10.610784,7.443424 (about 200 m away). Centre of building"
+HEADQUATERS,10.607937,7.441859,office,medium,OSM (Overpass),"OSM 'HEADQUARTERS' (2nd copy 10.607913,7.441778), beside 'HQ Carport 1/2'. A separate 'AFIT HEADQUARTERS (TEMP)' is at 10.613060,7.442543 (see extras). Centre of building"
+LOVE GARDEN,10.610021,7.442781,other,medium,OSM (Overpass),park; single point
+Masjid,10.609572,7.441524,worship,medium,OSM (Overpass),"'AFIT Mosque(Masjid)' and 'Masjid' agree (10.609576,7.441526)"
+MECHATRONICS AND AREOSPACE GROUND ENGR,10.608856,7.441446,department,low,OSM (Overpass),Name differs: OSM 'MECHANICAL & AEROSPACE GROUND ENGINEERING'. Not found under 'Mechatronics'. Centre of building
+"School of Basic and Remidal Studies,",10.609055,7.441981,faculty,medium,OSM (Overpass),"OSM 'SCHOOL OF BASIC AND REMEDIAL STUDIES'. Another copy 10.609342,7.442674 (about 80 m away, long name). Centre of building"
+Souvenir Shop,10.609820,7.440995,shop,medium,OSM (Overpass),copies within 3 m of each other
+yisadoko hall,10.608885,7.441949,hostel,medium,OSM (Overpass),OSM name 'Yisa Doko Hall' (spelling differs). Centre of building
+Main gate,10.608157,7.439128,gate,medium,OSM (Overpass),OSM 'AFIT Main Gate' (tagged ceremonial). This is the gate point itself; confirm on satellite which side a rider stops
+Library entrance,10.609853,7.442004,library,low,OSM (Overpass),"OSM 'AFIT library'; centre of building, NOT the entrance. Another library: 'AIR ENGINEERING LIBRARY' (see extras)"
+AFIT ICT  centre,10.611085,7.440114,other,medium,OSM (Overpass),"OSM 'Main ICT Center'. Other ICT items: '108 CBT HUB', '800 ICT HUB', '560 ICT HUB' near 10.6136,7.4335"

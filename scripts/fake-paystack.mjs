@@ -10,6 +10,7 @@ const PORT = Number(process.env.FAKE_PAYSTACK_PORT ?? 3002)
 const SECRET = process.env.PAYSTACK_SECRET_KEY ?? 'sk_test_local_fake_key_for_dev'
 const HOOK = process.env.APP_WEBHOOK_URL ?? 'http://127.0.0.1:3000/api/webhooks/paystack'
 const txns = new Map()
+const transfers = new Map()
 let seq = 4000
 
 const json = (res, code, body) => {
@@ -108,6 +109,53 @@ createServer(async (req, res) => {
       return res.end(
         `<!doctype html><html lang="en"><meta charset="utf-8"><title>Fake Paystack checkout</title><body style="font-family:sans-serif;padding:24px"><h1>Fake Paystack (test)</h1><p>Reference ${t.reference}</p><p>Amount NGN ${(t.amount / 100).toFixed(2)}</p><form method="post"><button name="outcome" value="success">Simulate successful payment</button> <button name="outcome" value="failed">Simulate failed payment</button></form></body></html>`,
       )
+    }
+    // ---- transfers (paying shops). FAKE_TRANSFER_MODE: success (default) | pending | failed | otp
+    if (req.method === 'POST' && url.pathname === '/transferrecipient') {
+      if (!authorised(req)) return json(res, 401, { status: false, message: 'Invalid key' })
+      const b = JSON.parse(await readBody(req))
+      return json(res, 200, {
+        status: true,
+        message: 'Recipient created',
+        data: { recipient_code: `RCP_fake${++seq}`, name: b.name, type: 'nuban' },
+      })
+    }
+    if (req.method === 'POST' && url.pathname === '/transfer') {
+      if (!authorised(req)) return json(res, 401, { status: false, message: 'Invalid key' })
+      const b = JSON.parse(await readBody(req))
+      if (transfers.has(b.reference))
+        return json(res, 400, { status: false, message: 'Transfer reference already exists' })
+      const mode = process.env.FAKE_TRANSFER_MODE ?? 'success'
+      const t = {
+        reference: b.reference,
+        amount: b.amount,
+        transfer_code: `TRF_fake${++seq}`,
+        status:
+          mode === 'otp'
+            ? 'otp'
+            : mode === 'pending'
+              ? 'pending'
+              : mode === 'failed'
+                ? 'failed'
+                : 'success',
+      }
+      transfers.set(t.reference, t)
+      return json(res, 200, { status: true, message: 'Transfer has been queued', data: t })
+    }
+    if (req.method === 'POST' && url.pathname === '/transfer/finalize_transfer') {
+      if (!authorised(req)) return json(res, 401, { status: false, message: 'Invalid key' })
+      const b = JSON.parse(await readBody(req))
+      const t = [...transfers.values()].find((x) => x.transfer_code === b.transfer_code)
+      if (!t || b.otp !== '123456') return json(res, 400, { status: false, message: 'Invalid OTP' })
+      t.status = 'success'
+      return json(res, 200, { status: true, message: 'Transfer has been queued', data: t })
+    }
+    const tv = /^\/transfer\/verify\/(.+)$/.exec(url.pathname)
+    if (req.method === 'GET' && tv) {
+      if (!authorised(req)) return json(res, 401, { status: false, message: 'Invalid key' })
+      const t = transfers.get(decodeURIComponent(tv[1]))
+      if (!t) return json(res, 404, { status: false, message: 'Transfer not found' })
+      return json(res, 200, { status: true, message: 'Transfer retrieved', data: t })
     }
     if (req.method === 'GET' && url.pathname === '/bank') {
       if (!authorised(req)) return json(res, 401, { status: false, message: 'Invalid key' })

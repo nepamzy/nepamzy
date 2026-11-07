@@ -4,7 +4,13 @@ import Link from 'next/link'
 import { useActionState, useState } from 'react'
 import { Button, ButtonLink } from '@/components/ui/button'
 import { SignaturePad } from '@/components/domain/signature-pad'
-import { Checkbox, Input, Select } from '@/components/ui/fields'
+import { Checkbox, Input } from '@/components/ui/fields'
+import {
+  VendorChoices,
+  vendorChoicesReady,
+  type CategoryChoice,
+  type VendorChoicesState,
+} from '@/components/domain/vendor-choices'
 import { SignatureStatement } from './signature-statement'
 import { RolePhoto } from '@/components/landing/role-photo'
 import { Watermark } from '@/components/landing/watermark'
@@ -267,9 +273,7 @@ function PersonIcon({ kind }: { kind: PersonType }) {
   )
 }
 
-export type SignUpCategory = { id: string; name: string }
-
-export function SignUpForm({ categories = [] }: { categories?: SignUpCategory[] }) {
+export function SignUpForm({ categories = [] }: { categories?: CategoryChoice[] }) {
   const [state, action, pending] = useActionState(signUpAction, initial)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [intent, setIntent] = useState<Intent>('customer')
@@ -278,15 +282,22 @@ export function SignUpForm({ categories = [] }: { categories?: SignUpCategory[] 
   const [idCard, setIdCard] = useState<string | null>(null)
   const [idBack, setIdBack] = useState<string | null>(null)
   const [phone, setPhone] = useState('')
-  const [category, setCategory] = useState('')
+  const [vendor, setVendor] = useState<VendorChoicesState>({
+    vendorType: '',
+    categories: [],
+    other: '',
+    place: '',
+  })
   const [frontQr, setFrontQr] = useState<'none' | 'ok' | 'noqr'>('none')
   const [signed, setSigned] = useState(false)
   const [problem, setProblem] = useState<string | null>(null)
   if (state.ok) return <SignUpDone email={state.email ?? ''} message={state.message} />
 
-  const isStudent = intent === 'customer' && personType === 'student'
   const isRider = intent === 'rider'
   const isVendor = intent === 'vendor'
+  const isStudent =
+    (intent === 'customer' && personType === 'student') ||
+    (isVendor && vendor.vendorType === 'student')
   const riderReady =
     studentId.trim().length >= 3 &&
     looksLikePhone(phone) &&
@@ -296,13 +307,26 @@ export function SignUpForm({ categories = [] }: { categories?: SignUpCategory[] 
   const step1Ready = isRider
     ? riderReady
     : isVendor
-      ? category !== ''
+      ? vendorChoicesReady(vendor, categories) &&
+        (vendor.vendorType !== 'student' || studentId.trim().length >= 3)
       : intent !== 'customer' ||
         (personType !== null && (personType !== 'student' || studentId.trim().length >= 3))
   const goNext = () => {
     setProblem(null)
     if (step === 1) {
-      if (isVendor && !category) return setProblem('Choose what your shop will sell.')
+      if (isVendor) {
+        if (!vendor.vendorType)
+          return setProblem(
+            'Choose whether you are a student, a shop AFIT already knows, or other.',
+          )
+        if (vendor.categories.length === 0) return setProblem('Choose what your shop will sell.')
+        if (!vendorChoicesReady(vendor, categories))
+          return setProblem(
+            vendor.vendorType === 'afit_shop' && vendor.place.trim().length < 3
+              ? 'Say where your shop is on campus.'
+              : 'Tell us what else your shop will sell.',
+          )
+      }
       if (intent === 'customer' && !personType)
         return setProblem('Choose whether you are a student, military, a lecturer or other.')
       if (isStudent && studentId.trim().length < 3) return setProblem('Enter your matric number.')
@@ -348,7 +372,9 @@ export function SignUpForm({ categories = [] }: { categories?: SignUpCategory[] 
       {(isStudent || isRider) && idCard && <input type="hidden" name="idCard" value={idCard} />}
       {isRider && <input type="hidden" name="phone" value={phone} />}
       {isRider && idBack && <input type="hidden" name="idCardBack" value={idBack} />}
-      {isVendor && category && <input type="hidden" name="category" value={category} />}
+      {isVendor && vendor.vendorType === 'student' && (
+        <input type="hidden" name="personType" value="student" />
+      )}
 
       <div className={step === 1 ? 'space-y-4' : 'hidden'}>
         <fieldset className="relative isolate overflow-hidden rounded-[var(--radius-control)] border border-line bg-accent-50/60 p-3">
@@ -427,27 +453,13 @@ export function SignUpForm({ categories = [] }: { categories?: SignUpCategory[] 
         )}
 
         {isVendor && (
-          <div className="space-y-2 rounded-[var(--radius-control)] border border-line p-3">
-            <Select
-              label="What will your shop sell? (required)"
-              name="categoryChoice"
-              value={category}
-              onChange={(e) => {
-                setCategory(e.target.value)
-                setProblem(null)
-              }}
-              hint="Pick the one that fits best. After you are approved, you can add ready-made items for this category with their pictures."
-            >
-              <option value="" disabled>
-                Choose a category
-              </option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          </div>
+          <VendorChoices
+            categories={categories}
+            onChange={(v) => {
+              setVendor(v)
+              setProblem(null)
+            }}
+          />
         )}
 
         {isStudent && (

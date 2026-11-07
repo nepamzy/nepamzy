@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
 import { MetricCard, MetricGrid } from '@/components/ui/metric-card'
 import { Section } from '@/components/ui/section'
+import { ShopCategoriesForm } from '@/components/domain/shop-categories-form'
+import { listCategories } from '@/server/modules/vendors-and-catalogue/public'
 import { EmptyState } from '@/components/ui/states'
 import { setClosedAction } from '@/server/modules/vendors-and-catalogue/actions'
 import { getMyVendor, getShop } from '@/server/modules/vendors-and-catalogue/vendor-queries'
@@ -17,6 +19,7 @@ export default async function ShopPage() {
   const { vendor, hours, staff } = await getShop(me.id)
   if (!vendor) return <EmptyState title="We could not load your shop" />
   const owner = me.staff_role === 'owner'
+  const allCategories = owner ? await listCategories() : []
   const disabled = me.status !== 'approved'
   return (
     <>
@@ -70,6 +73,23 @@ export default async function ShopPage() {
             )}
           </Card>
         </Section>
+        {owner && !disabled && (
+          <Section
+            id="categories"
+            title="What you sell"
+            description="Customers find your shop under each of these categories. The ready-made item lists follow them too."
+          >
+            <Card>
+              <ShopCategoriesForm
+                vendorId={me.id}
+                categories={allCategories}
+                mainId={allCategories.find((c) => c.slug === me.category_slug)?.id ?? null}
+                selectedIds={me.category_ids ?? []}
+                other={me.other_category ?? ''}
+              />
+            </Card>
+          </Section>
+        )}
         <Section
           id="hours"
           title="Opening hours"

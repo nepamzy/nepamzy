@@ -27,6 +27,7 @@ async function clean(c: PoolClient) {
   await c.query(`delete from public.notification_errors`)
   await c.query(`set local session_replication_role = origin`)
 }
+const JOBS = ['expire-orders', 'process-notifications', 'purge-location', 'release-payouts']
 const run = (c: PoolClient, job: string, ok: boolean, ageMin = 0) =>
   c.query(
     `insert into public.job_runs (job, ok, finished_at) values ($1, $2, now() - make_interval(mins => $3))`,
@@ -41,9 +42,9 @@ describe('job health check: a job that stopped, keeps failing or piles up work i
         'expire-orders:never_run',
         'process-notifications:never_run',
         'purge-location:never_run',
+        'release-payouts:never_run',
       ])
-      for (const j of ['expire-orders', 'process-notifications', 'purge-location'])
-        await run(c, j, true)
+      for (const j of JOBS) await run(c, j, true)
       expect(await problems(c)).toEqual([])
       expect((await asService<{ ok: boolean }>(c, `select public.job_health_check() r`)).ok).toBe(
         true,
@@ -54,9 +55,10 @@ describe('job health check: a job that stopped, keeps failing or piles up work i
   it('a job whose last success is older than its window is stale, even though its row exists', async () => {
     await withTx(async (c) => {
       await clean(c)
-      await run(c, 'expire-orders', true, 16) // window 15 minutes
-      await run(c, 'process-notifications', true, 4) // window 5 minutes
-      await run(c, 'purge-location', true, 179) // window 180 minutes
+      await run(c, 'expire-orders', true, 1561) // window 1560 minutes (the scheduler runs once a day)
+      await run(c, 'process-notifications', true, 1559)
+      await run(c, 'purge-location', true, 1559)
+      await run(c, 'release-payouts', true, 1559)
       expect(await problems(c)).toEqual([
         { job: 'expire-orders', kind: 'stale', last_ok_at: expect.any(String) },
       ])
@@ -66,8 +68,7 @@ describe('job health check: a job that stopped, keeps failing or piles up work i
   it('failures are reported: last run failed, and repeated failures; success afterwards clears the first', async () => {
     await withTx(async (c) => {
       await clean(c)
-      for (const j of ['expire-orders', 'process-notifications', 'purge-location'])
-        await run(c, j, true, 20)
+      for (const j of JOBS) await run(c, j, true, 20)
       await run(c, 'purge-location', true, 1)
       await run(c, 'process-notifications', false, 3)
       await run(c, 'process-notifications', false, 2)
@@ -85,8 +86,7 @@ describe('job health check: a job that stopped, keeps failing or piles up work i
   it('dead, stuck and backlogged notifications and write errors are reported', async () => {
     await withTx(async (c) => {
       await clean(c)
-      for (const j of ['expire-orders', 'process-notifications', 'purge-location'])
-        await run(c, j, true)
+      for (const j of JOBS) await run(c, j, true)
       const u = await createUser(c, 'n')
       const mk = async (status: string, age: string, locked: string | null = null) => {
         const n = (
@@ -136,7 +136,7 @@ describe('job health check: a job that stopped, keeps failing or piles up work i
         jobs: { max_age_minutes: number }[]
       }
       expect(h.problems.map((p) => p.kind)).toContain('never_run')
-      expect(h.jobs.map((j) => j.max_age_minutes)).toEqual([15, 5, 180])
+      expect(h.jobs.map((j) => j.max_age_minutes)).toEqual([1560, 1560, 1560, 1560])
       void as
       void svc
     })

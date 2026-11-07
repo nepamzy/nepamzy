@@ -29,6 +29,7 @@ export type AdminAlertEvent =
   | { type: 'support_case'; caseNo: string; kind: string }
   | { type: 'contact_message' }
   | { type: 'delivery_fee'; step: 'reported' | 'confirmed' | 'disputed' }
+  | { type: 'payout_failed'; count: number }
 
 export type AdminAlertConfig = { apiKey: string; to: string; from: string; fromName: string }
 export type AdminAlertResult = 'sent' | 'disabled' | 'capped' | 'failed'
@@ -139,6 +140,14 @@ export function buildAdminAlert(
             : 'A rider says a delivery fee did NOT arrive. It needs your decision.',
       )
       link = '/admin/delivery-fee-payments'
+      break
+    case 'payout_failed':
+      subject = '[AFIT Market] A shop payout did not go through'
+      lines.push(
+        `${Math.max(1, Math.floor(event.count))} payout(s) failed. They will be tried again automatically.`,
+        'If this keeps happening, check the Paystack balance and the shop bank details.',
+      )
+      link = '/admin/payouts'
       break
     case 'support_case':
       subject = '[AFIT Market] New support report'

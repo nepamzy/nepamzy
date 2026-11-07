@@ -31,7 +31,7 @@ Customers pay delivery fees through the app. The delivery fee is not part of the
 
 ## 7. Payout calculation and timing
 
-[OWNER/COUNSEL/PAYSTACK: not defined. Vendor settlement is locked and no payout exists; do not state a timetable.]
+The operator pays the vendor **automatically 24 hours after each order is completed** (owner decision, 2026-11-07; the waiting time is a setting, `payout_hold_hours`). The customer has that time to report a problem and ask for a refund. The amount paid is the product value of the order, less the commission (section 5), less any refund, paid by bank transfer (Paystack) to the vendor's verified payout account. A complaint or refund that is still open holds the payment until it is settled. If a transfer fails, the system tries again (up to five times) and alerts the operator. Delivery fees are not part of this payment. [COUNSEL: whether holding customer money for 24 hours before release needs a licence or a particular structure; treatment of refunds decided after payment (recovery from the vendor); tax. OWNER: Paystack must be switched to a live account with transfers enabled before real money moves; the application is in Paystack test mode today.]
 
 ## 8. Refunds, disputes and incorrect items
 

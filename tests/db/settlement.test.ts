@@ -258,7 +258,7 @@ describe('refunds reverse commission proportionally and exactly once', () => {
 })
 
 describe('who can read settlement data, and what they see', () => {
-  it('a vendor sees only its own shop: finalised, pending estimate, refunds, payable; payouts are reported as not enabled', async () => {
+  it('a vendor sees only its own shop: finalised, pending estimate, refunds, payable; payouts are reported as automatic after 24 hours', async () => {
     await withTx(async (c) => {
       const done = await openOrder(c)
       await complete(c, done.order)
@@ -284,7 +284,8 @@ describe('who can read settlement data, and what they see', () => {
         payable_kobo: 143250,
       })
       expect(s.pending).toMatchObject({ orders: 0, gross_sales_kobo: 0 })
-      expect(s.payout.status).toBe('not_enabled')
+      expect(s.payout.status).toBe('automatic')
+      expect((s.payout as unknown as { hold_hours: number }).hold_hours).toBe(24)
       expect(s.recent[0]!.payable_kobo).toBe(143250)
     })
   })
@@ -323,7 +324,7 @@ describe('who can read settlement data, and what they see', () => {
           note: string
         }
         expect(r.totals.commission_kobo).toBeGreaterThanOrEqual(13500)
-        expect(r.note).toMatch(/nothing has been paid/i)
+        expect(r.note).toMatch(/paid automatically/i)
       }
       for (const who of [AAL2(support), AAL2(o.owner), AAL2(o.cust), AAL1(fin), null]) {
         expect((await callFails(c, who, `select public.admin_settlement_overview() r`)).code).toBe(

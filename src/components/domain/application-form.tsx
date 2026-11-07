@@ -1,5 +1,6 @@
 import { ActionForm } from '@/components/forms/action-form'
-import { Checkbox, Input, Select, Textarea } from '@/components/ui/fields'
+import { Checkbox, Input, Textarea } from '@/components/ui/fields'
+import { VendorChoices, type VendorChoicesState } from '@/components/domain/vendor-choices'
 import { submitApplicationAction } from '@/server/modules/vendors-and-catalogue/actions'
 import type { Category } from '@/server/modules/vendors-and-catalogue/types'
 
@@ -8,12 +9,12 @@ const pct = (bps: number) => `${(bps / 100).toFixed(bps % 100 === 0 ? 0 : 1)}%`
 export function ApplicationForm({
   categories,
   commissionBps,
-  defaultCategory,
+  defaults,
 }: {
   categories: Category[]
   commissionBps: number
-  /** the category chosen at sign-up */
-  defaultCategory?: string
+  /** what the person already chose when signing up */
+  defaults?: Partial<VendorChoicesState>
 }) {
   return (
     <ActionForm
@@ -22,21 +23,7 @@ export function ApplicationForm({
       pendingLabel="Sending…"
     >
       <Input label="Business name" name="businessName" required minLength={2} maxLength={80} />
-      <Select
-        label="Category"
-        name="category"
-        required
-        defaultValue={categories.some((c) => c.id === defaultCategory) ? defaultCategory : ''}
-      >
-        <option value="" disabled>
-          Choose one
-        </option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </Select>
+      <VendorChoices categories={categories} defaults={defaults} showStudentNote />
       <Input
         label="Contact phone"
         name="phone"

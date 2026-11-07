@@ -21,7 +21,10 @@ export default async function NewProduct() {
         subtitle="Name, photo, price and options."
       />
       <Card className="max-w-2xl">
-        <ProductForm vendorId={vendor.id} categorySlug={vendor.category_slug} />
+        <ProductForm
+          vendorId={vendor.id}
+          categorySlugs={vendor.category_slugs ?? vendor.category_slug}
+        />
       </Card>
     </>
   )

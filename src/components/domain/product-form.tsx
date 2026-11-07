@@ -22,13 +22,13 @@ export function ProductForm({
   product,
   disabled,
   hasPhoto,
-  categorySlug,
+  categorySlugs,
 }: {
   vendorId: string
   product?: EditableProduct
   disabled?: boolean
   hasPhoto?: boolean
-  categorySlug?: string | null
+  categorySlugs?: string | string[] | null
 }) {
   const [groups, setGroups] = useState<G[]>(
     product?.groups.map(({ name, min, max, options }) => ({ name, min, max, options })) ?? [],
@@ -49,7 +49,7 @@ export function ProductForm({
       {product && <input type="hidden" name="productId" value={product.id} />}
       <input type="hidden" name="options" value={JSON.stringify(groups)} />
       <fieldset disabled={disabled} className="space-y-4">
-        {!product && <StarterPicker categorySlug={categorySlug} onPick={setStarter} />}
+        {!product && <StarterPicker categorySlugs={categorySlugs} onPick={setStarter} />}
         <h2 className="text-lg font-extrabold text-navy-900">1. About the item</h2>
         <Input
           key={`n-${starter?.slug ?? ''}`}

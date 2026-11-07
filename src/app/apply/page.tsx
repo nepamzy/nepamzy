@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { ApplicationForm } from '@/components/domain/application-form'
+import type { VendorChoicesState } from '@/components/domain/vendor-choices'
 import { Badge } from '@/components/ui/badge'
 import { Card, PageHeader } from '@/components/ui/card'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
@@ -20,8 +21,21 @@ export default async function ApplyPage() {
     sb.rpc('vendor_commission_terms'),
   ])
   const { data: who } = await sb.auth.getUser()
-  const chosen = who.user?.user_metadata?.intended_category
-  const defaultCategory = typeof chosen === 'string' ? chosen : undefined
+  const meta = (who.user?.user_metadata ?? {}) as Record<string, unknown>
+  const chosenIds = Array.isArray(meta.intended_categories)
+    ? meta.intended_categories.filter((x): x is string => typeof x === 'string')
+    : typeof meta.intended_category === 'string'
+      ? [meta.intended_category]
+      : []
+  const vt = meta.vendor_type
+  const defaults = {
+    vendorType: (vt === 'student' || vt === 'afit_shop' || vt === 'other'
+      ? vt
+      : '') as VendorChoicesState['vendorType'],
+    categories: chosenIds.filter((id) => cats.some((c) => c.id === id)),
+    other: typeof meta.intended_other === 'string' ? meta.intended_other : '',
+    place: typeof meta.vendor_place === 'string' ? meta.vendor_place : '',
+  }
   const commissionBps = Number((terms as { commission_bps?: number } | null)?.commission_bps ?? 450)
   const pending = (apps ?? []).find((a) => a.status === 'pending')
   return (
@@ -52,11 +66,7 @@ export default async function ApplyPage() {
         </Card>
       ) : (
         <Card className="max-w-xl">
-          <ApplicationForm
-            categories={cats}
-            commissionBps={commissionBps}
-            defaultCategory={defaultCategory}
-          />
+          <ApplicationForm categories={cats} commissionBps={commissionBps} defaults={defaults} />
         </Card>
       )}
       {(apps ?? []).filter((a) => a.status !== 'pending').length > 0 && (

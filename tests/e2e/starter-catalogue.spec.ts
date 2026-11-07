@@ -106,6 +106,8 @@ test('a vendor adds ready-made items for their category: price now or later, onl
   const shop = await openSession(browser, info, 'quick-clothes', ['vendor_owner'])
   await makeShopWithPoint(shop.user.id, `Clothes shop ${tag()}`)
   await a.from('vendors').update({ category_id: cat!.id }).eq('owner_id', shop.user.id)
+  const { data: sv } = await a.from('vendors').select('id').eq('owner_id', shop.user.id).single()
+  await a.from('vendor_categories').delete().eq('vendor_id', sv!.id).neq('category_id', cat!.id)
   await shop.page.goto('/vendor/catalogue/quick-add')
   await expect(shop.page.getByLabel('Hoodie', { exact: true })).toBeVisible()
   await expect(shop.page.getByLabel('Jollof spaghetti', { exact: true })).toHaveCount(0)
@@ -118,4 +120,34 @@ test('a vendor adds ready-made items for their category: price now or later, onl
     '1 item added to your menu',
   )
   await shop.context.close()
+})
+
+test('a shop owner can change what the shop sells, and the ready-made list follows', async ({
+  browser,
+}, info) => {
+  const a = admin()
+  await a.from('categories').upsert(
+    [
+      { slug: 'clothing', name: 'Clothing' },
+      { slug: 'gadgets', name: 'Gadgets' },
+    ],
+    { onConflict: 'slug' },
+  )
+  const owner = await openSession(browser, info, 'cat-owner', ['vendor_owner'])
+  await makeShopWithPoint(owner.user.id, `Categories shop ${tag()}`)
+  const p = owner.page
+  await p.goto('/vendor/profile')
+  await p.getByLabel('Main category').selectOption({ label: 'Clothing' })
+  await p.getByRole('group', { name: 'Also sells' }).getByLabel('Gadgets', { exact: true }).check()
+  await clickAndWait(p, () => p.getByRole('button', { name: 'Save categories' }).click())
+  await expect(
+    p
+      .getByTestId('profile-categories-status')
+      .or(p.getByRole('status').filter({ hasText: 'Categories saved' })),
+  ).toBeVisible()
+  await p.goto('/vendor/catalogue/quick-add')
+  await expect(p.getByLabel('Hoodie', { exact: true })).toBeVisible()
+  await expect(p.getByLabel('Phone charger', { exact: true })).toBeVisible()
+  await expect(p.getByLabel('Jollof spaghetti', { exact: true })).toHaveCount(0)
+  await owner.context.close()
 })

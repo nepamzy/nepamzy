@@ -138,6 +138,7 @@ describe('catalogue-wide authorisation regression', () => {
           "my_roles",
           "my_vendor",
           "notification_mark_read",
+          "payout_hold_hours",
           "saved_places_list",
           "search_products",
           "vendor_commission_terms",

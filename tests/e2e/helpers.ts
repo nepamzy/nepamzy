@@ -633,8 +633,10 @@ export async function uiSignUpSteps(
     .check()
   if (role === 'Customer') await page.getByRole('radio', { name: 'Other', exact: true }).check()
   if (role === 'Vendor') {
-    // a vendor must say what the shop sells before going on
-    await page.getByLabel('What will your shop sell? (required)').selectOption({ label: 'Food' })
+    // a vendor must say who they are and what the shop sells before going on
+    const choices = page.getByTestId('vendor-choices')
+    await choices.getByRole('radio', { name: /^Other/ }).check()
+    await choices.getByLabel('Food', { exact: true }).check()
   }
   if (role === 'Rider') {
     // new riders give a matric number, a phone number and the front (with its QR code) and back of the new ID card

@@ -19,6 +19,10 @@ import { confirmEmail, resetCodeEmail } from '@/server/modules/engagement/email-
 import { mailConfig, sendMail, sendMailDetailed } from '@/server/modules/engagement/mail'
 import { parseSignature } from '@/server/modules/orders-and-state-machine/signature'
 import { listCategories } from '@/server/modules/vendors-and-catalogue/public'
+import {
+  parseVendorChoices,
+  type VendorChoices,
+} from '@/server/modules/vendors-and-catalogue/vendor-choices'
 import { checkAccess, loadPrincipal } from './guard'
 import {
   PERSON_TYPES,
@@ -101,14 +105,23 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
       }
     rider = { matric, phone, front: front.jpeg, back: back.jpeg }
   }
-  // vendors must say what the shop will sell: it has to be one of the active categories
-  let vendorCategory: string | undefined
+  // vendors say who they are (a student, a shop AFIT already knows, or other) and what the shop sells (one or more categories)
+  let vendorChoices: Extract<VendorChoices, { ok: true }> | undefined
   if (intent === 'vendor') {
-    const raw = String(formData.get('category') ?? '')
-    const known = (await listCategories()).some((c) => c.id === raw)
-    if (!z.uuid().safeParse(raw).success || !known)
-      return { error: 'Choose what your shop will sell.' }
-    vendorCategory = raw
+    const parsed = parseVendorChoices(formData, await listCategories())
+    if (!parsed.ok) return { error: parsed.error }
+    vendorChoices = parsed
+  }
+  const readStudent = (): string | null => {
+    studentId = String(formData.get('studentId') ?? '').trim()
+    if (!validStudentId(studentId)) return 'Enter your matric number.'
+    // the ID card photo is optional; a photo that cannot be used is simply not kept
+    const rawCard = String(formData.get('idCard') ?? '')
+    if (rawCard) {
+      const card = parseIdCard(rawCard)
+      if (card.ok) idCard = card.jpeg
+    }
+    return null
   }
   if (intent === 'customer') {
     const t = String(formData.get('personType') ?? '')
@@ -116,14 +129,16 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
       return { error: 'Choose whether you are a student, military, a lecturer or other.' }
     personType = t as PersonType
     if (personType === 'student') {
-      studentId = String(formData.get('studentId') ?? '').trim()
-      if (!validStudentId(studentId)) return { error: 'Enter your matric number.' }
-      // the ID card photo is optional; a photo that cannot be used is simply not kept
-      const rawCard = String(formData.get('idCard') ?? '')
-      if (rawCard) {
-        const card = parseIdCard(rawCard)
-        if (card.ok) idCard = card.jpeg
-      }
+      const problem = readStudent()
+      if (problem) return { error: problem }
+    }
+  }
+  if (vendorChoices) {
+    // a vendor who is an AFIT student gives a matric number like any student; the others are kept as "other"
+    personType = vendorChoices.type === 'student' ? 'student' : 'other'
+    if (vendorChoices.type === 'student') {
+      const problem = readStudent()
+      if (problem) return { error: problem }
     }
   }
   const ip = await clientIp()
@@ -136,7 +151,15 @@ export async function signUpAction(_prev: FormState, formData: FormData): Promis
   const metadata = {
     adult_declared: true,
     ...(intent === 'customer' ? {} : { intended_role: intent }),
-    ...(vendorCategory ? { intended_category: vendorCategory } : {}),
+    ...(vendorChoices
+      ? {
+          intended_category: vendorChoices.main,
+          intended_categories: [vendorChoices.main, ...vendorChoices.extras],
+          vendor_type: vendorChoices.type,
+          ...(vendorChoices.other ? { intended_other: vendorChoices.other } : {}),
+          ...(vendorChoices.place ? { vendor_place: vendorChoices.place } : {}),
+        }
+      : {}),
   }
   const mail = mailConfig()
   const supabase = await createSupabaseServerClient()

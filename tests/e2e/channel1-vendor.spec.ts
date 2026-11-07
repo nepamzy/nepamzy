@@ -310,10 +310,9 @@ test('earnings page shows the 4.5% commission exactly, once per completed order,
   await b.s.page.goto('/vendor/earnings')
   await expect(b.s.page.getByText('₦3,820')).toHaveCount(0)
   await expect(b.s.page.getByText('₦180')).toHaveCount(0)
-  // the page itself says nothing has been paid out
-  await expect(a.s.page.locator('body')).toContainText(
-    /not (been )?paid|no payout|payouts? (are|is) not/i,
-  )
+  // the page itself says shops are paid automatically after the waiting time, and shows the payment still waiting
+  await expect(a.s.page.locator('body')).toContainText(/paid automatically 24 hours/i)
+  await expect(a.s.page.getByTestId('payout-summary')).toContainText('Waiting: 1')
 })
 
 test('hostile text in vendor-controlled fields is shown as plain text and never runs (product name, description, shop profile)', async ({

@@ -110,3 +110,126 @@ export async function resolveAccountName(number: string, bankCode: string): Prom
   if (!res.ok) throw new Error(`Paystack responded ${res.status}`)
   return resolveResponse.parse(await res.json()).data.account_name.toUpperCase()
 }
+
+// ---------------------------------------------------------------- transfers (paying shops)
+export type TransferState = 'paid' | 'pending' | 'failed' | 'otp'
+export type TransferOutcome =
+  { state: TransferState; code: string | null; message: string | null } | { state: 'duplicate' }
+
+const transferEnvelope = z.object({
+  status: z.boolean(),
+  message: z.string().optional(),
+  data: z
+    .object({
+      status: z.string().optional(),
+      transfer_code: z.string().optional(),
+      recipient_code: z.string().optional(),
+      reference: z.string().optional(),
+    })
+    .partial()
+    .optional(),
+})
+
+/** Paystack's words for a transfer's progress, folded into the four things the payout book cares about. */
+export function transferState(s: string | undefined): TransferState {
+  switch ((s ?? '').toLowerCase()) {
+    case 'success':
+      return 'paid'
+    case 'otp':
+      return 'otp'
+    case 'failed':
+    case 'reversed':
+    case 'rejected':
+    case 'blocked':
+    case 'abandoned':
+      return 'failed'
+    default:
+      return 'pending' // pending, received, processing, queued ...
+  }
+}
+
+async function raw(path: string, method: 'GET' | 'POST', json?: unknown) {
+  const cfg = paystackConfig()
+  if (!cfg) throw new PaymentsUnavailable('Paystack is not configured')
+  const res = await fetch(cfg.baseUrl + path, {
+    method,
+    headers: {
+      Authorization: `Bearer ${cfg.secretKey}`,
+      ...(json ? { 'Content-Type': 'application/json' } : {}),
+    },
+    body: json ? JSON.stringify(json) : undefined,
+    signal: AbortSignal.timeout(15_000),
+    cache: 'no-store',
+  })
+  const body = transferEnvelope.safeParse(await res.json().catch(() => null))
+  return { status: res.status, ok: res.ok, body: body.success ? body.data : null }
+}
+
+/** A saved Paystack "recipient" for a shop's bank account. Created once, then reused. */
+export async function createTransferRecipient(a: {
+  name: string
+  accountNumber: string
+  bankCode: string
+}): Promise<string> {
+  const r = await raw('/transferrecipient', 'POST', {
+    type: 'nuban',
+    name: a.name.slice(0, 100),
+    account_number: a.accountNumber,
+    bank_code: a.bankCode,
+    currency: 'NGN',
+  })
+  const code = r.body?.data?.recipient_code
+  if (!r.ok || !code) throw new Error(`Paystack could not save the recipient (${r.status})`)
+  return code
+}
+
+/** Sends money from the Paystack balance to a recipient. The reference makes a repeat harmless: Paystack refuses a second use. */
+export async function startTransfer(a: {
+  amountKobo: number
+  recipient: string
+  reference: string
+  reason: string
+}): Promise<TransferOutcome> {
+  const r = await raw('/transfer', 'POST', {
+    source: 'balance',
+    amount: a.amountKobo,
+    recipient: a.recipient,
+    reference: a.reference,
+    reason: a.reason.slice(0, 100),
+    currency: 'NGN',
+  })
+  if (r.ok && r.body?.status)
+    return {
+      state: transferState(r.body.data?.status),
+      code: r.body.data?.transfer_code ?? null,
+      message: null,
+    }
+  const msg = (r.body?.message ?? '').slice(0, 200)
+  if (r.status === 400 && /reference/i.test(msg) && /(exist|duplicate|used)/i.test(msg))
+    return { state: 'duplicate' }
+  if (r.status === 429 || r.status >= 500) throw new Error(`Paystack responded ${r.status}`)
+  return { state: 'failed', code: null, message: msg || `Paystack responded ${r.status}` }
+}
+
+/** What Paystack says about a transfer we started earlier, or null when it has no record of that reference. */
+export async function verifyTransfer(reference: string): Promise<TransferOutcome | null> {
+  const r = await raw(`/transfer/verify/${encodeURIComponent(reference)}`, 'GET')
+  if (r.status === 404) return null
+  if (!r.ok || !r.body?.status) throw new Error(`Paystack responded ${r.status}`)
+  return {
+    state: transferState(r.body.data?.status),
+    code: r.body.data?.transfer_code ?? null,
+    message: null,
+  }
+}
+
+/** Test mode only: Paystack asks for a one-time code on a transfer; in test mode the code is always 123456. */
+export async function finalizeTestTransfer(code: string): Promise<TransferOutcome> {
+  const r = await raw('/transfer/finalize_transfer', 'POST', {
+    transfer_code: code,
+    otp: '123456',
+  })
+  if (r.ok && r.body?.status)
+    return { state: transferState(r.body.data?.status), code, message: null }
+  return { state: 'failed', code, message: (r.body?.message ?? 'otp not accepted').slice(0, 200) }
+}

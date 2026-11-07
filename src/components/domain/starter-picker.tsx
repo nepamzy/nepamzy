@@ -5,15 +5,15 @@ import { sectionsOf, startersFor, starterPhotoUrl, type StarterItem } from '@/li
 
 /** "Start from a popular Nigerian dish or drink": picking one fills in the name, description, menu section and photo. All of it can be changed, and the price is always the owner's. */
 export function StarterPicker({
-  categorySlug,
+  categorySlugs,
   onPick,
 }: {
-  categorySlug?: string | null
+  categorySlugs?: string | string[] | null
   onPick: (item: StarterItem) => void
 }) {
   const [open, setOpen] = useState(false)
   const [picked, setPicked] = useState<string | null>(null)
-  const all = startersFor(categorySlug)
+  const all = startersFor(categorySlugs)
   if (all.length === 0) return null
   return (
     <section

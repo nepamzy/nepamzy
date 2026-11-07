@@ -28,6 +28,15 @@ describe('ready-made catalogue', () => {
     }
   })
 
+  it('gives a shop with several categories the lists of all of them', () => {
+    const both = startersFor(['clothing', 'gadgets']).map(categoryOf)
+    expect(new Set(both)).toEqual(new Set(['clothing', 'gadgets']))
+    expect(startersFor(['clothing', 'food']).length).toBe(
+      startersFor('clothing').length + startersFor('food').length,
+    )
+    expect(startersFor(['clothing', 'clothing']).length).toBe(startersFor('clothing').length)
+  })
+
   it('knows a spelling slip in a category name, and gives nothing for an unknown category', () => {
     expect(startersFor('acccessories').length).toBeGreaterThan(0)
     expect(startersFor('farm-animals')).toEqual([])

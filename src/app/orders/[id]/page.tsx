@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card, PageHeader } from '@/components/ui/card'
 import { Money } from '@/components/ui/money'
 import { Timeline } from '@/components/ui/timeline'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { ReviewForm } from '@/components/domain/engagement-forms'
 import { myOrderReview } from '@/server/modules/engagement/queries'
 import { deliveryFeeForOrder } from '@/server/modules/delivery-fee/queries'
@@ -26,6 +27,9 @@ import {
 
 export const metadata: Metadata = { title: 'Order' }
 
+/** True while the moment is still ahead of the server clock. */
+const isInFuture = (d: Date | null) => d !== null && d.getTime() > Date.now()
+
 export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const found = await getOrder((await params).id)
   if (!found) notFound()
@@ -38,6 +42,16 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
     ? await myOrderReview(order.id)
     : null
   const dfp = order.fulfilment === 'delivery' ? await deliveryFeeForOrder(order.id) : null
+  const holdHours = Number(
+    (await (await createSupabaseServerClient()).rpc('payout_hold_hours')).data ?? 24,
+  )
+  const completedAt = history.find((h) => h.to_status === 'COMPLETED')?.created_at ?? null
+  const windowEnds = completedAt
+    ? new Date(new Date(completedAt).getTime() + holdHours * 3_600_000)
+    : null
+  const windowOpen = isInFuture(windowEnds)
+  const beforeCompletion =
+    !completedAt && !['PENDING_PAYMENT', 'CANCELLED', 'REFUNDED'].includes(order.status)
   const hasReceipt = !['PENDING_PAYMENT', 'CANCELLED'].includes(order.status)
   const label = (c: string) => ORDER_STATES.find((s) => s.code === c)?.label ?? c
   const settled = ['COMPLETED', 'CANCELLED', 'REFUNDED', 'PARTIALLY_REFUNDED'].includes(
@@ -60,6 +74,41 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
         {ORDER_STATES.find((s) => s.code === order.status)?.meaning}
       </Alert>
 
+      {(beforeCompletion || windowEnds) && (
+        <div data-testid="payment-window">
+          <Alert
+            plain
+            tone={windowOpen ? 'warning' : 'info'}
+            className="mb-5"
+            title="Your payment is protected for 24 hours"
+          >
+            {beforeCompletion && (
+              <>
+                Your payment is held safely. When your order is completed you have {holdHours} hours
+                to report a problem and ask for your money back. After that, the payment is released
+                to the shop.
+              </>
+            )}
+            {windowEnds && windowOpen && (
+              <>
+                Something wrong with your order? You can report it until{' '}
+                {lagosDateTime(windowEnds.toISOString())}. After that the payment is released to the
+                shop.{' '}
+                <Link className="font-semibold underline" href={`/orders/${order.id}/help`}>
+                  Report a problem
+                </Link>
+              </>
+            )}
+            {windowEnds && !windowOpen && (
+              <>
+                The {holdHours}-hour window to report a problem has ended and the payment has been
+                released to the shop.
+              </>
+            )}
+          </Alert>
+        </div>
+      )}
+
       {unpaid && (
         <Card className="mb-5 space-y-3 border-2 border-gold-400 bg-accent-50/50">
           <h2 className="text-lg font-extrabold text-navy-900">Payment needed</h2>
@@ -68,6 +117,10 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             {order.expires_at && (
               <span className="text-sm text-muted"> · hold ends {lagosTime(order.expires_at)}</span>
             )}
+          </p>
+          <p className="text-sm text-muted">
+            Your payment is held safely. The shop is paid {holdHours} hours after your order is
+            completed, and you can report a problem until then.
           </p>
           <div className="flex flex-wrap gap-3">
             {paystack && (

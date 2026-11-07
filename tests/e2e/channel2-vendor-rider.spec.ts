@@ -62,7 +62,7 @@ test('vendor area: every page renders for the shop owner with real figures, no s
   await p.goto('/vendor/catalogue')
   await expect(p.getByText(/Add a photo to each item/i).first()).toBeVisible()
   await p.goto('/vendor/earnings')
-  await expect(p.getByText('Nothing has been paid out')).toBeVisible()
+  await expect(p.getByText('You are paid automatically', { exact: true })).toBeVisible()
   await owner.context.close()
 })
 

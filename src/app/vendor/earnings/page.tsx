@@ -42,8 +42,18 @@ export default async function Earnings() {
         title="Earnings"
         subtitle="What your completed orders add up to after AFIT Market's commission."
       />
-      <Alert tone="warning" plain title="Nothing has been paid out">
-        {s.payout.note} These are calculated amounts only.
+      <Alert tone="info" plain title="You are paid automatically">
+        {s.payout.note}
+        {s.payout.status === 'automatic' && (
+          <span className="mt-1 block" data-testid="payout-summary">
+            Paid so far: <Money kobo={s.payout.paid_kobo ?? 0} /> ({s.payout.paid_orders ?? 0}{' '}
+            order(s)). Waiting: {s.payout.scheduled_orders ?? 0}. On hold for a complaint:{' '}
+            {s.payout.held_orders ?? 0}.
+            {(s.payout.failed_orders ?? 0) > 0 &&
+              ` ${s.payout.failed_orders} payment(s) did not go through and will be tried again. Check your payout account below.`}
+            {s.payout.next_at ? ` Next payment from ${day(s.payout.next_at)}.` : ''}
+          </span>
+        )}
       </Alert>
 
       <Section title="Payout account" className="mt-4">
@@ -90,7 +100,7 @@ export default async function Earnings() {
           <MetricCard
             label="Calculated amount due"
             value={<Money kobo={f.payable_kobo} />}
-            note="Not a payout. See below."
+            note="Paid out automatically after the waiting time"
             icon="card"
           />
         </MetricGrid>
@@ -155,7 +165,7 @@ export default async function Earnings() {
       {s.recent.length > 0 && (
         <Section
           title="Amount due per completed order"
-          description="The most recent completed orders, oldest to newest. Calculated amounts, not payouts."
+          description="The most recent completed orders, oldest to newest."
           id="chart"
         >
           <Card>
@@ -229,6 +239,23 @@ export default async function Earnings() {
               header: 'Amount due',
               align: 'right',
               cell: (o) => <Money kobo={o.payable_kobo} className="font-bold" />,
+            },
+            {
+              header: 'Payment',
+              cell: (o) =>
+                o.payout_status === 'paid' ? (
+                  <Badge tone="success">Paid {o.payout_at ? day(o.payout_at) : ''}</Badge>
+                ) : o.payout_status === 'held' ? (
+                  <Badge tone="warning">On hold: complaint open</Badge>
+                ) : o.payout_status === 'failed' ? (
+                  <Badge tone="danger">Will be tried again</Badge>
+                ) : o.payout_status === 'skipped' ? (
+                  <Badge tone="neutral">Nothing to pay</Badge>
+                ) : o.payout_status ? (
+                  <Badge tone="neutral">Due {o.payout_at ? day(o.payout_at) : 'soon'}</Badge>
+                ) : (
+                  <span className="text-muted">Before automatic payments</span>
+                ),
             },
           ]}
         />

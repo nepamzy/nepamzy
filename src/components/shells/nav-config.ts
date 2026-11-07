@@ -40,6 +40,7 @@ export const ADMIN_NAV: NavItem[] = [
   { href: '/admin/roles', label: 'Roles', icon: 'key', group: 'People' },
   { href: '/admin/payments', label: 'Payments', icon: 'card', group: 'Money' },
   { href: '/admin/settlements', label: 'Settlements', icon: 'coins', group: 'Money' },
+  { href: '/admin/payouts', label: 'Payouts', icon: 'coins', group: 'Money' },
   { href: '/admin/delivery-fee-payments', label: 'Delivery fees', icon: 'truck', group: 'Money' },
   { href: '/admin/refunds', label: 'Refunds', icon: 'refund', group: 'Money' },
   { href: '/admin/cases', label: 'Disputes and reports', icon: 'help', group: 'Support' },

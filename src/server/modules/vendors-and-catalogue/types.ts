@@ -58,4 +58,7 @@ export type MyVendor = {
   status: 'pending' | 'approved' | 'suspended'
   staff_role: 'owner' | 'staff'
   category_slug?: string | null
+  category_slugs?: string[]
+  category_ids?: string[]
+  other_category?: string | null
 }

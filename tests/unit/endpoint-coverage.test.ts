@@ -19,6 +19,8 @@ describe('every API route authenticates its caller', () => {
     'src/app/api/health/route.ts',
     'src/app/api/products/[id]/image/route.ts',
   ]
+  const helper = readFileSync(join(root, 'src/server/jobs/auth.ts'), 'utf8')
+  const jobHelperOk = /JOBS_SECRET/.test(helper) && /timingSafeEqual/.test(helper)
   for (const file of routes) {
     it(file.replace(root + '/', ''), () => {
       const src = readFileSync(file, 'utf8')
@@ -29,6 +31,7 @@ describe('every API route authenticates its caller', () => {
       }
       const ok =
         (/JOBS_SECRET/.test(src) && /timingSafeEqual/.test(src)) || // scheduler endpoints: constant-time secret compare
+        (/jobAuthorized\(/.test(src) && jobHelperOk) || // scheduler endpoints that use the shared check (secret, or the hosting scheduler's GET)
         /verifySignature\(/.test(src) || // provider webhook: HMAC over the raw body
         /checkAccess\(/.test(src) || // user endpoints: central access decision
         /auth\.getUser\(\)/.test(src) // user endpoints: session check

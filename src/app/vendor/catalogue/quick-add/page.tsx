@@ -15,19 +15,25 @@ export default async function QuickAddPage() {
   const vendor = await getMyVendor()
   if (!vendor || vendor.status !== 'approved')
     return <EmptyState title="You cannot add items right now" />
-  const items = startersFor(vendor.category_slug)
+  const items = startersFor(
+    vendor.category_slugs?.length ? vendor.category_slugs : vendor.category_slug,
+  )
   const sb = await createSupabaseServerClient()
   const [{ data: picks }, products, { data: cats }] = await Promise.all([
     sb.rpc('vendor_picks_list', { p_vendor: vendor.id }),
     listProducts(vendor.id),
     sb
       .from('categories')
-      .select('slug,name')
-      .eq('slug', vendor.category_slug ?? '')
-      .maybeSingle(),
+      .select('slug,name,sort_order')
+      .in(
+        'slug',
+        vendor.category_slugs?.length ? vendor.category_slugs : [vendor.category_slug ?? ''],
+      )
+      .order('sort_order'),
   ])
   const waiting = ((picks as string[] | null) ?? []).filter((s) => items.some((i) => i.slug === s))
-  const categoryName = (cats as { name?: string } | null)?.name ?? 'your category'
+  const names = ((cats ?? []) as { name: string }[]).map((c) => c.name)
+  const categoryName = names.length ? names.join(', ') : 'your category'
   return (
     <>
       <PageHeader
